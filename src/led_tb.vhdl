@@ -22,7 +22,6 @@ architecture behavior of led_tb is
 
 begin
   uut: led port map (
-
     switch0 => switch0,
     switch1 => switch1,
     led0 => led0,
