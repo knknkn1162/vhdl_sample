@@ -7,7 +7,7 @@ entity full_adder is
     b : in std_logic;
     ci : in std_logic;
     s : out std_logic;
-    co : out std_logic;
+    co : out std_logic
        );
 end;
 
