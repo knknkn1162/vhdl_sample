@@ -6,7 +6,7 @@ clean:
 open:
 	open out.vcd
 r:
-	ghdl -r ${F} --vcd=out.vcd
+	ghdl -r ${F}_tb --vcd=out.vcd
 a:
 	make clean
 	ghdl -a ${F}.${VHDL}
