@@ -32,6 +32,11 @@ begin
     a <= "10000001"; b <= "00000111"; wait for 10 ns; assert output = "010001000";
     cin <= "1";
     a <= "10000001"; b <= "00000111"; wait for 10 ns; assert output = "010001001";
+
+    cin <= "0";
+    a <= "11111111"; b <= "11111111"; wait for 10 ns; assert output = "111111110";
+    cin <= "1";
+    a <= "11111111"; b <= "11111111"; wait for 10 ns; assert output = "111111111";
     -- success message
     assert false report "end of test" severity note;
     wait;
