@@ -12,5 +12,5 @@ end entity;
 
 architecture behavior of mux2 is
 begin
-  y <= d0 when s='1' else d0;
+  y <= d1 when s='1' else d0;
 end architecture;
