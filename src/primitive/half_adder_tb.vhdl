@@ -27,6 +27,7 @@ begin
     a <= '0'; b <= '1'; wait for 10 ns; assert output = "01";
     a <= '1'; b <= '0'; wait for 10 ns; assert output = "01";
     a <= '1'; b <= '1'; wait for 10 ns; assert output = "10";
+    assert false report "end of test" severity note;
     wait;
   end process;
 end architecture;
