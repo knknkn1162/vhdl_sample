@@ -15,3 +15,5 @@ all:
 	ghdl -a ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
+half_adder:
+	make all F=half_adder
