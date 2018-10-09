@@ -1,4 +1,6 @@
 *
 !*.*
+*.o
+work-obj93.cf
 !*.vhdl
 !Makefile
