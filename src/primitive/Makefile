@@ -27,5 +27,11 @@ full_adder:
 	make all F=full_adder
 full_adder_using_ha:
 	make clean
-	ghdl -a half_adder.vhdl full_adder.vhdl full_adder_using_ha_tb.vhdl
+	ghdl -a half_adder.vhdl full_adder_using_ha.vhdl full_adder_tb.vhdl
 	make er F=full_adder
+adder:
+	make all F=adder
+ripple_carry_adder:
+	make clean
+	ghdl -a full_adder.vhdl adder.vhdl adder_tb.vhdl
+	make er F=adder
