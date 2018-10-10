@@ -15,7 +15,7 @@ begin
   -- generate
   g <= a and b;
   -- propagate
-  p <= a or b;
+  p <= a xor b;
 end architecture;
 
 library IEEE;
