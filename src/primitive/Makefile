@@ -35,3 +35,7 @@ ripple_carry_adder:
 	make clean
 	ghdl -a full_adder.vhdl adder.vhdl adder_tb.vhdl
 	make er F=adder
+cla_block:
+	make clean
+	ghdl -a carry_lookahead_adder.vhdl cla_block_tb.vhdl
+	make er F=cla_block
