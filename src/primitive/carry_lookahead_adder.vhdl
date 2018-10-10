@@ -6,7 +6,7 @@ entity and_or is
     a : in std_logic;
     b : in std_logic;
     g : out std_logic;
-    p : out std_logic;
+    p : out std_logic
        );
 end entity;
 
@@ -15,7 +15,7 @@ begin
   -- generate
   g <= a and b;
   -- propagate
-  p <= a or b
+  p <= a or b;
 end architecture;
 
 
@@ -33,12 +33,12 @@ entity cla_block is
 end entity;
 
 architecture behavior of cla_block is
-  component and_or
+  component and_xor
     port (
       a : in std_logic;
       b : in std_logic;
       g : out std_logic;
-      p : out std_logic;
+      p : out std_logic
         );
   end component;
   component full_adder
@@ -48,17 +48,37 @@ architecture behavior of cla_block is
         );
   end component;
 
-  constant N : integer := 4;
   signal g : std_logic_vector(N-1 downto 0);
   signal p : std_logic_vector(N-1 downto 0);
   -- c(i) = (a(i) and b(i)) or (a(i) or b(i)) and c(i-1);
 begin
+  -- The 32-bit CLA composes of eight 4 blocks.
+  -- each block is as follows. See detail at full_adder implementation:
+  -- s(0) = a(0) xor b(0) xor cin;
+  -- c(0) = (a(0) and b(0)) or (a(0) xor b(0)) and cin
+  -- And
+  -- s(i) = a(i) xor b(i) xor c(i);
+  -- c(i) = (a(i) and b(i)) or (a(i) xor b(i)) and c(i-1)
   generator : for i in 0 to N-1 generate
-    and_or : and_or port map (
-      a(i), b(i), g(i), p(i);
+    and_xor0 : and_xor port map (
+      a(i), b(i), g(i), p(i)
     );
   end generate;
 
+
+  s(0) <= p(0) xor cin;
+  process(a, b) 
+    variable c : std_logic;
+    variable ss : std_logic_vector(N-1 downto 0);
+  begin
+    c := g(0) or (p(0) and cin);
+    for i in 1 to N-1 loop
+      ss(i) := p(i) xor c;
+      c := g(i) or (p(i) and c);
+    end loop;
+    cout <= c;
+    s <= ss;
+  end process;
 end architecture;
 
 
