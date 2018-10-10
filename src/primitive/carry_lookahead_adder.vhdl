@@ -50,26 +50,35 @@ architecture behavior of cla_block is
   signal g : std_logic_vector(N-1 downto 0);
   signal p : std_logic_vector(N-1 downto 0);
   -- c(i) = (a(i) and b(i)) or (a(i) or b(i)) and c(i-1);
+
+  function gen_gs(p : in std_logic_vector; g : in std_logic_vector; N : in integer) return std_logic is
+    variable res_v : std_logic := g(0);  -- Null slv vector will also return '1'
+  begin
+    for i in 1 to N-1 loop
+      res_v := g(i) or (p(i) and res_v);
+    end loop;
+    return res_v;
+  end function;
+
+  function and_reduct(slv : in std_logic_vector) return std_logic is
+    variable res_v : std_logic := '1';  -- Null slv vector will also return '1'
+  begin
+    for i in slv'range loop
+      res_v := res_v and slv(i);
+    end loop;
+    return res_v;
+  end function;
+
 begin
   -- The 32-bit CLA composes of eight 4 blocks.
   -- First, calc c(4i-1) from the block
-  -- c(0) = (a(0) and b(0)) or ((a(0) xor b(0)) and cin)
-  -- c(i) = (a(i) and b(i)) or (a(i) xor b(i)) and c(i-1)
   generator : for i in 0 to N-1 generate
     and_xor0 : and_xor port map (
       a(i), b(i), g(i), p(i)
     );
   end generate;
 
-  process 
-    variable c : std_logic;
-  begin
-    c := cin;
-    for i in 0 to N-1 loop
-      c := g(i) or (p(i) and c);
-    end loop;
-    cout <= c;
-  end process;
+  cout <= (cin and and_reduct(p)) or gen_gs(p, g, N);
 end architecture;
 
 

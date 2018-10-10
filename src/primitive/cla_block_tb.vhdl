@@ -29,17 +29,13 @@ begin
   begin
     wait for 10 ns;
     cin <= '0';
-    a <= "0010"; b <= "0110"; wait for 10 ns; assert cout = '0';
+    a <= "0001"; b <= "0110"; wait for 10 ns; assert cout = '0';
     a <= "0111"; b <= "0001"; wait for 10 ns; assert cout = '1';
     cin <= '1';
-    a <= "0100"; b <= "0001"; wait for 10 ns; assert cout = '0';
+    a <= "0100"; b <= "0010"; wait for 10 ns; assert cout = '0';
     a <= "0110"; b <= "0001"; wait for 10 ns; assert cout = '1';
     -- success message
     assert false report "end of test" severity note;
     wait;
   end process;
-
-
-
-
 end architecture;
