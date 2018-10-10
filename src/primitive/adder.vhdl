@@ -17,7 +17,7 @@ architecture behavior of adder is
   signal ccin : std_logic_vector(0 downto 0);
 begin
   ccin(0) <= cin;
-  result <= std_logic_vector(unsigned("0" & a) + unsigned("0" & b) + unsigned("0" & ccin));
+  result <= std_logic_vector(unsigned("0" & a) + unsigned("0" & b) + unsigned(ccin));
   s <= result(N-1 downto 0);
   cout <= result(N);
 end architecture;
