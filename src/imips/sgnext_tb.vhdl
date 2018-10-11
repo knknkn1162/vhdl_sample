@@ -2,11 +2,11 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity signext_tb is
+entity sgnext_tb is
 end entity;
 
-architecture behavior of signext_tb is
-  component signext
+architecture behavior of sgnext_tb is
+  component sgnext
     port (
       a : in std_logic_vector(15 downto 0);
       y : out std_logic_vector(31 downto 0)
@@ -15,7 +15,7 @@ architecture behavior of signext_tb is
   signal a : std_logic_vector(15 downto 0);
   signal y : std_logic_vector(31 downto 0);
 begin
-  uut : signext port map (
+  uut : sgnext port map (
     a, y
   );
 
