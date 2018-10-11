@@ -6,14 +6,14 @@ entity regfile is
   port (
     clk : in std_logic;
     -- 25:21(read)
-    addr1 : in std_logic_vector(4 downto 0);
+    a1 : in std_logic_vector(4 downto 0);
     rd1 : out std_logic_vector(31 downto 0);
     -- 20:16(read)
     -- a2 : in std_logic_vector(4 downto 0);
     -- rd2 : out std_logic_vector(31 downto 0);
 
     -- 20:16(write)
-    addr3 : in std_logic_vector(4 downto 0);
+    a3 : in std_logic_vector(4 downto 0);
     wd3 : in std_logic_vector(31 downto 0);
     we3 : in std_logic
   );
@@ -29,18 +29,18 @@ begin
       -- if write enables
       if we3='1' then
         -- avoid $zero register
-        if addr3/="00000" then
-          if not is_X(addr3) then
-            mem(to_integer(unsigned(addr3))) <= wd3;
+        if a3/="00000" then
+          if not is_X(a3) then
+            mem(to_integer(unsigned(a3))) <= wd3;
           end if;
         end if;
       end if;
     end if;
   end process;
 
-  process(addr1) begin
-    if not is_X(addr1) then
-      rd1 <= mem(to_integer(unsigned(addr1)));
+  process(a1) begin
+    if not is_X(a1) then
+      rd1 <= mem(to_integer(unsigned(a1)));
     end if;
   end process;
 end architecture;
