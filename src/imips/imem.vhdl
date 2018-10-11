@@ -14,7 +14,7 @@ architecture behavior of imem is
   signal mem : ramtype;
 begin
   process(addr) begin
-    -- initialization
+    -- initialization (write instruction into mem)
     for i in 0 to 63 loop
       mem(i) <= (others => '0');
     end loop;
@@ -26,7 +26,11 @@ begin
 
     -- read memory
     loop
-      rd <= mem(to_integer(unsigned(addr)));
+      if Is_X(addr) then
+        rd <= (others => '0');
+      else
+        rd <= mem(to_integer(unsigned(addr)));
+      end if;
     end loop;
   end process;
 end architecture;
