@@ -6,6 +6,7 @@ entity imips is
   port (
     clk, reset : in std_logic;
     addr : in std_logic_vector(31 downto 0);
+    -- for testbench
     pc : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
     rt : out std_logic_vector(31 downto 0);

@@ -10,7 +10,8 @@ entity imem is
 end entity;
 
 architecture behavior of imem is
-  type ramtype is array (63 downto 0) of std_logic_vector(31 downto 0);
+  constant N : integer := 8;
+  type ramtype is array (2**N-1 downto 0) of std_logic_vector(31 downto 0);
   signal mem : ramtype;
   signal is_init : std_logic := '1';
 begin
