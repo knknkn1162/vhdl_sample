@@ -69,31 +69,31 @@ begin
   pcreg: flopr port map(clk, reset, pcnext, pc0);
   pc <= std_logic_vector(unsigned(pc0) + 4);
 
-  imem0: imem port map (
-    addr => pc0(7 downto 0),
-    rd => instr
-  );
+  -- imem0: imem port map (
+  --   addr => pc0(7 downto 0),
+  --   rd => instr
+  -- );
 
-  reg0 : regfile port map (
-    clk => clk,
-    a1 => instr(25 downto 21),
-    rd1 => rt,
-    a3 => instr(20 downto 16),
-    wd3 => res,
-    we3 => '1'
-  );
+  -- reg0 : regfile port map (
+  --   clk => clk,
+  --   a1 => instr(25 downto 21),
+  --   rd1 => rt,
+  --   a3 => instr(20 downto 16),
+  --   wd3 => res,
+  --   we3 => '1'
+  -- );
 
-  sgnext0 : sgnext port map (
-    a => instr(15 downto 0),
-    y => immext
-  );
+  -- sgnext0 : sgnext port map (
+  --   a => instr(15 downto 0),
+  --   y => immext
+  -- );
 
-  alu0: alu port map (
-    a => rt,
-    b => immext,
-    f => "010",
-    y => res -- zero port is ignored
-  );
-  aluout <= res;
+  -- alu0: alu port map (
+  --   a => rt,
+  --   b => immext,
+  --   f => "010",
+  --   y => res -- zero port is ignored
+  -- );
+  -- aluout <= res;
 
 end architecture;
