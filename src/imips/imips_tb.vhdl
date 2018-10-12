@@ -49,7 +49,6 @@ begin
     assert false report "end of test" severity note;
     stop <= TRUE;
     wait;
-
   end process;
   
 
