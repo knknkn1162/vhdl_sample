@@ -41,14 +41,21 @@ begin
 
   stim_proc: process
   begin
+    -- wait until rising_edge
     wait for clk_period/2;
-    reset <= '1'; wait for 1 ns; reset <= '0';
-    addr <= X"00000000";
+    reset <= '1'; wait for 1 ns;
+    addr <= X"00000000"; reset <= '0';
     wait for clk_period/2; 
     assert pc = X"00000000";
     assert instr = X"20100005";
     assert rt = X"00000000";
     assert aluout = X"00000005";
+    wait for clk_period;
+    assert pc = X"00000004";
+    assert instr = X"2211000a";
+    assert rt = X"00000005";
+    assert aluout = X"0000000f";
+
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;

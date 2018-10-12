@@ -25,7 +25,7 @@ architecture behavior of imips is
 
   component imem
     port (
-      addr : in std_logic_vector(7 downto 0);
+      idx : in std_logic_vector(5 downto 0);
       rd : out std_logic_vector(31 downto 0)
     );
   end component;
@@ -74,7 +74,8 @@ begin
   pc <= pc0;
 
   imem0: imem port map (
-    addr => pc0(7 downto 0),
+    -- Each size of the instruction is 4 byte.
+    idx => pc0(7 downto 2),
     rd => instr0
   );
   instr <= instr0;
