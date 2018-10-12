@@ -11,19 +11,21 @@ architecture behavior of imips_tb is
       clk, reset : in std_logic;
       addr : in std_logic_vector(31 downto 0);
       pc : out std_logic_vector(31 downto 0);
+      instr : out std_logic_vector(31 downto 0);
       aluout : out std_logic_vector(31 downto 0)
         );
   end component;
   signal clk, reset : std_logic;
   signal addr : std_logic_vector(31 downto 0);
   signal pc : std_logic_vector(31 downto 0);
+  signal instr : std_logic_vector(31 downto 0);
   signal aluout : std_logic_vector(31 downto 0);
   signal clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
   uut: imips port map (
-    clk, reset, addr, pc, aluout
+    clk, reset, addr, pc, instr, aluout
   );
 
   clk_process: process
@@ -41,6 +43,7 @@ begin
     addr <= X"00000000";
     wait for clk_period/2; 
     assert pc = X"00000004";
+    assert instr = X"20100005";
     --assert aluout = X"00000005";
     -- success message
     assert false report "end of test" severity note;

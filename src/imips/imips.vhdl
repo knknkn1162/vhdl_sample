@@ -7,6 +7,7 @@ entity imips is
     clk, reset : in std_logic;
     addr : in std_logic_vector(31 downto 0);
     pc : out std_logic_vector(31 downto 0);
+    instr : out std_logic_vector(31 downto 0);
     aluout : out std_logic_vector(31 downto 0)
        );
 end entity;
@@ -59,7 +60,7 @@ architecture behavior of imips is
       zero : out std_logic
         );
   end component;
-  signal instr, rs, rt, immext : std_logic_vector(31 downto 0);
+  signal instr0, rs, rt, immext : std_logic_vector(31 downto 0);
   signal res : std_logic_vector(31 downto 0);
   signal pc0 : std_logic_vector(31 downto 0); -- buffer
   signal pcnext : std_logic_vector(31 downto 0);
@@ -69,10 +70,11 @@ begin
   pcreg: flopr port map(clk, reset, pcnext, pc0);
   pc <= std_logic_vector(unsigned(pc0) + 4);
 
-  -- imem0: imem port map (
-  --   addr => pc0(7 downto 0),
-  --   rd => instr
-  -- );
+  imem0: imem port map (
+    addr => pc0(7 downto 0),
+    rd => instr0
+  );
+  instr <= instr0;
 
   -- reg0 : regfile port map (
   --   clk => clk,
