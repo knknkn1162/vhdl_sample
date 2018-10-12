@@ -8,6 +8,7 @@ entity imips is
     addr : in std_logic_vector(31 downto 0);
     pc : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
+    rt : out std_logic_vector(31 downto 0);
     aluout : out std_logic_vector(31 downto 0)
        );
 end entity;
@@ -60,7 +61,7 @@ architecture behavior of imips is
       zero : out std_logic
         );
   end component;
-  signal instr0, rs, rt, immext : std_logic_vector(31 downto 0);
+  signal instr0, rs, rt0, immext : std_logic_vector(31 downto 0);
   signal res : std_logic_vector(31 downto 0);
   signal pc0 : std_logic_vector(31 downto 0); -- buffer
   signal pcnext : std_logic_vector(31 downto 0);
@@ -68,7 +69,8 @@ architecture behavior of imips is
 begin
   -- TODO: impl program counter
   pcreg: flopr port map(clk, reset, pcnext, pc0);
-  pc <= std_logic_vector(unsigned(pc0) + 4);
+  pcnext <= std_logic_vector(unsigned(pc0) + 4);
+  pc <= pc0;
 
   imem0: imem port map (
     addr => pc0(7 downto 0),
@@ -76,26 +78,27 @@ begin
   );
   instr <= instr0;
 
-  -- reg0 : regfile port map (
-  --   clk => clk,
-  --   a1 => instr(25 downto 21),
-  --   rd1 => rt,
-  --   a3 => instr(20 downto 16),
-  --   wd3 => res,
-  --   we3 => '1'
-  -- );
+  reg0 : regfile port map (
+    clk => clk,
+    a1 => instr0(25 downto 21),
+    rd1 => rt0, -- out
+    a3 => instr0(20 downto 16),
+    wd3 => res,
+    we3 => '1'
+  );
+  rt <= rt0;
 
-  -- sgnext0 : sgnext port map (
-  --   a => instr(15 downto 0),
-  --   y => immext
-  -- );
+  sgnext0 : sgnext port map (
+    a => instr0(15 downto 0),
+    y => immext
+  );
 
-  -- alu0: alu port map (
-  --   a => rt,
-  --   b => immext,
-  --   f => "010",
-  --   y => res -- zero port is ignored
-  -- );
-  -- aluout <= res;
+  alu0: alu port map (
+    a => rt0,
+    b => immext,
+    f => "010",
+    y => res -- zero port is ignored
+  );
+  aluout <= res;
 
 end architecture;
