@@ -22,5 +22,5 @@ all:
 	ghdl -r ${F}_tb --vcd=out.vcd
 imips:
 	make clean
-	ghdl -a alu.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl imips.vhdl imips_tb.vhdl
+	ghdl -a alu.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl dmem.vhdl imips.vhdl imips_tb.vhdl
 	make er F=imips
