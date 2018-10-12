@@ -5,12 +5,21 @@ use IEEE.NUMERIC_STD.ALL;
 entity imips is
   port (
     clk, reset : in std_logic;
-    addr : in std_logic_vector(7 downto 0);
-    pc : out std_logic_vector(31 downto 0)
+    addr : in std_logic_vector(31 downto 0);
+    pc : out std_logic_vector(31 downto 0);
+    aluout : out std_logic_vector(31 downto 0)
        );
 end entity;
 
 architecture behavior of imips is
+  component flopr
+    port (
+      clk, reset: in std_logic;
+      a : in std_logic_vector(31 downto 0);
+      y : out std_logic_vector(31 downto 0)
+        );
+  end component;
+
   component imem
     port (
       addr : in std_logic_vector(7 downto 0);
@@ -51,25 +60,20 @@ architecture behavior of imips is
         );
   end component;
   signal instr, rs, rt, immext : std_logic_vector(31 downto 0);
-  signal imm : std_logic_vector(15 downto 0);
   signal res : std_logic_vector(31 downto 0);
-  signal oldpc : std_logic_vector(31 downto 0);
+  signal pc0 : std_logic_vector(31 downto 0); -- buffer
+  signal pcnext : std_logic_vector(31 downto 0);
 
 begin
   -- TODO: impl program counter
-  process(reset, clk) begin
-    pc <= oldpc;
-    if reset='1' then
-      pc <= (others => '0');
-    elsif rising_edge(clk) then
-      pc <= std_logic_vector(unsigned(oldpc) + 4);
-    end if;
-  end process;
+  pcreg: flopr port map(clk, reset, pcnext, pc0);
+  pc <= std_logic_vector(unsigned(pc0) + 4);
 
   imem0: imem port map (
-    addr => addr,
+    addr => pc0(7 downto 0),
     rd => instr
   );
+
   reg0 : regfile port map (
     clk => clk,
     a1 => instr(25 downto 21),
@@ -80,7 +84,7 @@ begin
   );
 
   sgnext0 : sgnext port map (
-    a => imm,
+    a => instr(15 downto 0),
     y => immext
   );
 
@@ -90,5 +94,6 @@ begin
     f => "010",
     y => res -- zero port is ignored
   );
+  aluout <= res;
 
 end architecture;
