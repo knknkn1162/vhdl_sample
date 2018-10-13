@@ -37,13 +37,13 @@ begin
     end if;
   end process;
 
-  process(a1) begin
+  process(a1, we3) begin
     if not is_X(a1) then
       rd1 <= mem(to_integer(unsigned(a1)));
     end if;
   end process;
 
-  process(a2) begin
+  process(a2, we3) begin
     if not is_X(a2) then
       rd2 <= mem(to_integer(unsigned(a2)));
     end if;
