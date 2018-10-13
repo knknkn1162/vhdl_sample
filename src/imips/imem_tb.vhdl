@@ -21,8 +21,8 @@ begin
   stim_proc : process
   begin
     wait for 20 ns;
-    idx <= "000000"; wait for 10 ns; assert rd = X"20100005";
-    idx <= "000001"; wait for 10 ns; assert rd = X"2211000a";
+    idx <= "000000"; wait for 10 ns; assert rd = X"8c100040";
+    idx <= "000001"; wait for 10 ns; assert rd = X"ac10003c";
     idx <= "000010"; wait for 10 ns; assert rd = X"00000000";
     -- success message
     assert false report "end of test" severity note;
