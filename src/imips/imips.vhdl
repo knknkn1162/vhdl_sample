@@ -59,7 +59,7 @@ architecture behavior of imips is
       a, b : in std_logic_vector(31 downto 0);
       f : in std_logic_vector(2 downto 0);
       y : out std_logic_vector(31 downto 0);
-      zero : out std_logic
+      sgn : out std_logic
         );
   end component;
 
