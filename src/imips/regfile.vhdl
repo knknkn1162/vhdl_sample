@@ -5,10 +5,10 @@ use IEEE.NUMERIC_STD.ALL;
 entity regfile is
   port (
     clk : in std_logic;
-    -- 25:21(read)
+    -- 25:21(read) .. rs
     a1 : in std_logic_vector(4 downto 0);
     rd1 : out std_logic_vector(31 downto 0);
-    -- 20:16(read)
+    -- 20:16(read) .. rt
     a2 : in std_logic_vector(4 downto 0);
     rd2 : out std_logic_vector(31 downto 0);
     -- 20:16(write)
