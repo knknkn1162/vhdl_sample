@@ -36,12 +36,14 @@ begin
     wait for clk_period;
     we <= '1';
     -- write data
-    addr <= X"000000" & B"00000110"; wd <= X"10000000";
+    -- addr is 4 byte align because of MIPS instruction size
+    addr <= X"000000" & B"00001100"; wd <= X"10000000";
     wait for clk_period;
 
     -- read data
-    we <= '0'; wait for clk_period/2+1 ns;
-    addr <= X"000000" & B"00000110"; assert rd = X"10000000";
+    we <= '0';
+    addr <= X"000000" & B"00001100";
+    wait for 1 ns; assert rd = X"10000000";
 
     -- success message
     assert false report "end of test" severity note;

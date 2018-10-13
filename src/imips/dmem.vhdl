@@ -31,23 +31,19 @@ begin
     end if;
   end process;
 
-  process(clk) 
-  begin
+  process(clk) begin
     if rising_edge(clk) then
       if we='1' then mem(to_integer(unsigned(addr(7 downto 2)))) <= wd;
       end if;
     end if;
   end process;
 
-  -- execute anytime `we` variable changes
-  process(we)
-  begin
-    if we = '0' then
-      if Is_X(addr) then
-        rd <= (others => 'Z');
-      else
-        rd <= mem(to_integer(unsigned(addr(7 downto 2))));
-      end if;
+  -- when we change `we`, always read latest data from memory.
+  process(addr, we) begin
+    if Is_X(addr) then
+      rd <= (others => 'Z');
+    else
+      rd <= mem(to_integer(unsigned(addr(7 downto 2))));
     end if;
   end process;
 end architecture;
