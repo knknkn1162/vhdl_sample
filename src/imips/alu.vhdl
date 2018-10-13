@@ -8,7 +8,7 @@ entity alu is
     f : in std_logic_vector(2 downto 0);
     y : out std_logic_vector(31 downto 0);
     -- if negative or not
-    sgn : out std_logic;
+    sgn : out std_logic
        );
 end entity;
 
