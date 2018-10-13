@@ -40,7 +40,7 @@ begin
   process(idx) begin
     -- read memory
     if Is_X(idx) then
-      rd <= (others => '0');
+      rd <= (others => 'Z');
     else
       rd <= mem(to_integer(unsigned(idx)));
     end if;
