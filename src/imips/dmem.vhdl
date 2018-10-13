@@ -18,17 +18,36 @@ end entity;
 architecture behavior of dmem is
   constant N: integer := 64;
   type ramtype is array(N-1 downto 0) of std_logic_vector(31 downto 0);
+  signal is_init : std_logic := '1';
+  signal mem : ramtype;
 begin
-  process(clk, addr) 
-    variable mem : ramtype;
+
+  -- initialization (write instruction into mem)
+  process(is_init)
+  begin
+    if is_init='1' then
+      mem(16) <= X"000000ff";
+      is_init <= '0';
+    end if;
+  end process;
+
+  process(clk) 
   begin
     if rising_edge(clk) then
-      if we='1' then mem(to_integer(unsigned(addr(7 downto 2)))) := wd;
+      if we='1' then mem(to_integer(unsigned(addr(7 downto 2)))) <= wd;
       end if;
     end if;
-    -- TODO: check whether the range of `to_integer(unsigned(addr(7 downto 2))` is valid or not
+  end process;
+
+  -- execute anytime `we` variable changes
+  process(we)
+  begin
     if we = '0' then
-      rd <= mem(to_integer(unsigned(addr(7 downto 2))));
+      if Is_X(addr) then
+        rd <= (others => 'Z');
+      else
+        rd <= mem(to_integer(unsigned(addr(7 downto 2))));
+      end if;
     end if;
   end process;
 end architecture;

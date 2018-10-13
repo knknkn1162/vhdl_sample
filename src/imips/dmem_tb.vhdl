@@ -36,12 +36,12 @@ begin
     wait for clk_period;
     we <= '1';
     -- write data
-    addr <= X"000000" & B"01000000"; wd <= X"10000000";
+    addr <= X"000000" & B"00000110"; wd <= X"10000000";
     wait for clk_period;
 
     -- read data
     we <= '0'; wait for clk_period/2+1 ns;
-    addr <= X"000000" & B"01000000"; assert rd = X"10000000";
+    addr <= X"000000" & B"00000110"; assert rd = X"10000000";
 
     -- success message
     assert false report "end of test" severity note;
