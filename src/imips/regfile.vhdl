@@ -9,9 +9,8 @@ entity regfile is
     a1 : in std_logic_vector(4 downto 0);
     rd1 : out std_logic_vector(31 downto 0);
     -- 20:16(read)
-    -- a2 : in std_logic_vector(4 downto 0);
-    -- rd2 : out std_logic_vector(31 downto 0);
-
+    a2 : in std_logic_vector(4 downto 0);
+    rd2 : out std_logic_vector(31 downto 0);
     -- 20:16(write)
     a3 : in std_logic_vector(4 downto 0);
     wd3 : in std_logic_vector(31 downto 0);
@@ -41,6 +40,12 @@ begin
   process(a1) begin
     if not is_X(a1) then
       rd1 <= mem(to_integer(unsigned(a1)));
+    end if;
+  end process;
+
+  process(a2) begin
+    if not is_X(a2) then
+      rd2 <= mem(to_integer(unsigned(a2)));
     end if;
   end process;
 end architecture;
