@@ -21,17 +21,14 @@ architecture behavior of dmem is
   signal is_init : std_logic := '1';
   signal mem : ramtype;
 begin
-
-  -- initialization (write instruction into mem)
-  process(is_init)
-  begin
+  process(clk) begin
+    -- initialization (write instruction into mem)
+    -- TODO: how to write initialization? Is it right??
     if is_init='1' then
       mem(16) <= X"000000ff";
       is_init <= '0';
     end if;
-  end process;
 
-  process(clk) begin
     if rising_edge(clk) then
       if we='1' then mem(to_integer(unsigned(addr(7 downto 2)))) <= wd;
       end if;

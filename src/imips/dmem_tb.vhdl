@@ -44,6 +44,8 @@ begin
     we <= '0';
     addr <= X"000000" & B"00001100";
     wait for 1 ns; assert rd = X"10000000";
+    addr <= X"000000" & B"01000000";
+    wait for 1 ns; assert rd = X"000000FF";
 
     -- success message
     assert false report "end of test" severity note;
