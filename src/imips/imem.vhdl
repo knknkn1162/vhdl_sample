@@ -16,7 +16,7 @@ architecture behavior of imem is
   signal mem : ramtype;
   signal is_init : std_logic := '1';
 begin
-  process(idx) begin
+  process(is_init) begin
     if is_init='1' then
       -- initialization (write instruction into mem)
       for i in 0 to 63 loop
@@ -33,8 +33,11 @@ begin
       -- 1010/11 00/000 1/0000/ 0000/0000/0011/1100
       -- "ac10003c"
       mem(1) <= X"ac10003c";
+      is_init <= '0';
     end if;
-    is_init <= '0';
+  end process;
+
+  process(idx) begin
     -- read memory
     if Is_X(idx) then
       rd <= (others => '0');
