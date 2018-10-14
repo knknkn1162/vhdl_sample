@@ -9,8 +9,9 @@ entity imips is
     -- for testbench
     pc : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
-    rs : out std_logic_vector(31 downto 0);
-    aluout : out std_logic_vector(31 downto 0)
+    rs, rt : out std_logic_vector(31 downto 0);
+    aluout : out std_logic_vector(31 downto 0);
+    wdata : out std_logic_vector(31 downto 0)
        );
 end entity;
 
@@ -37,8 +38,8 @@ architecture behavior of imips is
       a1 : in std_logic_vector(4 downto 0);
       rd1 : out std_logic_vector(31 downto 0);
       -- 20:16(read)
-      -- a2 : in std_logic_vector(4 downto 0);
-      -- rd2 : out std_logic_vector(31 downto 0);
+      a2 : in std_logic_vector(4 downto 0);
+      rd2 : out std_logic_vector(31 downto 0);
 
       -- 20:16(write)
       a3 : in std_logic_vector(4 downto 0);
@@ -47,10 +48,13 @@ architecture behavior of imips is
     );
   end component;
 
-  component sgnext
+  component mux2
+    generic (N: integer);
     port (
-      a : in std_logic_vector(15 downto 0);
-      y : out std_logic_vector(31 downto 0)
+      d0 : in std_logic_vector(N-1 downto 0);
+      d1 : in std_logic_vector(N-1 downto 0);
+      s : in std_logic;
+      y : out std_logic_vector(N-1 downto 0)
         );
   end component;
 
@@ -62,10 +66,24 @@ architecture behavior of imips is
       zero : out std_logic
         );
   end component;
-  signal instr0, rs0, immext : std_logic_vector(31 downto 0);
-  signal res : std_logic_vector(31 downto 0);
+
+  component sltn
+    port (
+      a : in std_logic_vector(31 downto 0);
+      -- shamt
+      n : in std_logic_vector(4 downto 0);
+      y : out std_logic_vector(31 downto 0)
+        );
+  end component;
+
+  signal instr0, rs0, rt0, wdata0, aluout0 : std_logic_vector(31 downto 0);
+  signal immext : std_logic_vector(31 downto 0);
+  signal rt_rd : std_logic_vector(4 downto 0);
   signal pc0 : std_logic_vector(31 downto 0); -- buffer
   signal pcnext : std_logic_vector(31 downto 0);
+  signal shamt : std_logic_vector(31 downto 0);
+  signal alu_func : std_logic_vector(2 downto 0);
+  signal is_alu_slt : std_logic := '0';
 
 begin
   -- TODO: impl program counter
@@ -74,7 +92,6 @@ begin
   pc <= pc0;
 
   imem0: imem port map (
-    -- Each size of the instruction is 4 byte.
     idx => pc0(7 downto 2),
     rd => instr0
   );
@@ -84,23 +101,62 @@ begin
     clk => clk,
     a1 => instr0(25 downto 21),
     rd1 => rs0, -- out
-    a3 => instr0(20 downto 16),
-    wd3 => res,
+    a2 => instr0(20 downto 16),
+    rd2 => rt0,
+    a3 => rt_rd,
+    wd3 => wdata0,
     we3 => '1'
   );
   rs <= rs0;
+  rt <= rt0;
 
-  sgnext0 : sgnext port map (
-    a => instr0(15 downto 0),
-    y => immext
+  mux_r : mux2 generic map (N => 5)
+    port map (
+    d0 => instr0(20 downto 16),
+    d1 => instr0(15 downto 11),
+    s => '1',
+    y => rt_rd
   );
+
+  -- funct
+  process(instr0) is
+  begin
+    case instr0(5 downto 0) is
+      -- sll
+      when "000000" => is_alu_slt <= '1';
+      -- add
+      when "100000" => alu_func <= "010";
+      -- and
+      when "100100" => alu_func <= "000";
+      -- sub
+      when "100010" => alu_func <= "110";
+      -- or
+      when "100101" => alu_func <= "001";
+      when others => alu_func <= (others => '-');
+    end case;
+  end process;
 
   alu0: alu port map (
     a => rs0,
-    b => immext,
-    f => "010",
-    y => res -- zero port is ignored
+    b => rt0,
+    f => alu_func,
+    y => aluout0 -- zero port is ignored
   );
-  aluout <= res;
+  aluout <= aluout0; -- out
+
+  slt_rd2 : sltn port map (
+    a => rt0,
+    n => instr0(10 downto 6),
+    y => shamt
+  );
+
+  mux_alu_slt: mux2 generic map (N => 32)
+    port map (
+    d0 => aluout0,
+    d1 => shamt,
+    s => is_alu_slt,
+    y => wdata0
+  );
+  wdata <= wdata0;
 
 end architecture;

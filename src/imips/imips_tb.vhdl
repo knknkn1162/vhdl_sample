@@ -10,18 +10,21 @@ architecture behavior of imips_tb is
     port (
       clk, reset : in std_logic;
       addr : in std_logic_vector(31 downto 0);
+      -- for testbench
       pc : out std_logic_vector(31 downto 0);
       instr : out std_logic_vector(31 downto 0);
-      rs : out std_logic_vector(31 downto 0);
-      aluout : out std_logic_vector(31 downto 0)
+      rs, rt : out std_logic_vector(31 downto 0);
+      aluout : out std_logic_vector(31 downto 0);
+      wdata : out std_logic_vector(31 downto 0)
         );
   end component;
   signal clk, reset : std_logic;
   signal addr : std_logic_vector(31 downto 0);
   signal pc : std_logic_vector(31 downto 0);
   signal instr : std_logic_vector(31 downto 0);
-  signal rs : std_logic_vector(31 downto 0);
+  signal rs, rt : std_logic_vector(31 downto 0);
   signal aluout : std_logic_vector(31 downto 0);
+  signal wdata : std_logic_vector(31 downto 0);
   signal clk_period : time := 10 ns;
   signal stop : boolean;
 
