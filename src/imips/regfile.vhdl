@@ -22,8 +22,16 @@ architecture behavior of regfile is
   -- $0($zero) ~ $31($ra)
   type ramtype is array (31 downto 0) of std_logic_vector(31 downto 0);
   signal mem : ramtype := (others => (others => '0'));
+  signal is_init : std_logic := '1';
 begin
   process(clk) begin
+    -- initialization
+    if is_init = '1' then
+      mem(16) <= X"00000001";
+      mem(17) <= X"00000002";
+    end if;
+    is_init <= '0';
+
     if rising_edge(clk) then
       -- if write enables
       if we3='1' then
