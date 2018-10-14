@@ -2,11 +2,12 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity mux2 is
+  generic(N : integer);
   port (
-    d0 : in std_logic_vector(31 downto 0);
-    d1 : in std_logic_vector(31 downto 0);
+    d0 : in std_logic_vector(N-1 downto 0);
+    d1 : in std_logic_vector(N-1 downto 0);
     s : in std_logic;
-    y : out std_logic_vector(31 downto 0)
+    y : out std_logic_vector(N-1 downto 0)
        );
 end entity;
 

@@ -6,21 +6,24 @@ end entity;
 
 architecture testbench of mux2_tb is
   component mux2
+    generic (N: integer);
     port (
-      d0 : in std_logic_vector(31 downto 0);
-      d1 : in std_logic_vector(31 downto 0);
+      d0 : in std_logic_vector(N-1 downto 0);
+      d1 : in std_logic_vector(N-1 downto 0);
       s : in std_logic;
-      y : out std_logic_vector(31 downto 0)
+      y : out std_logic_vector(N-1 downto 0)
         );
   end component;
 
-  signal d0 : std_logic_vector(31 downto 0) := X"00000001";
-  signal d1 : std_logic_vector(31 downto 0) := X"00000010";
+  constant N : integer := 32;
+  signal d0 : std_logic_vector(N-1 downto 0) := X"00000001";
+  signal d1 : std_logic_vector(N-1 downto 0) := X"00000010";
   signal s : std_logic;
-  signal y : std_logic_vector(31 downto 0);
+  signal y : std_logic_vector(N-1 downto 0);
 
 begin
-  uut : mux2 port map (
+  uut : mux2 generic map (N => N)
+    port map (
     d0, d1, s, y
   );
 
