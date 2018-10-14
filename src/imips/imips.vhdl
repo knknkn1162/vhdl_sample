@@ -9,7 +9,7 @@ entity imips is
     -- for testbench
     pc : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
-    rt : out std_logic_vector(31 downto 0);
+    rs : out std_logic_vector(31 downto 0);
     aluout : out std_logic_vector(31 downto 0)
        );
 end entity;
@@ -62,7 +62,7 @@ architecture behavior of imips is
       sgn : out std_logic
         );
   end component;
-  signal instr0, rs, rt0, immext : std_logic_vector(31 downto 0);
+  signal instr0, rs0, immext : std_logic_vector(31 downto 0);
   signal res : std_logic_vector(31 downto 0);
   signal pc0 : std_logic_vector(31 downto 0); -- buffer
   signal pcnext : std_logic_vector(31 downto 0);
@@ -83,12 +83,12 @@ begin
   reg0 : regfile port map (
     clk => clk,
     a1 => instr0(25 downto 21),
-    rd1 => rt0, -- out
-    a3 => instr0(20 downto 16),
+    rd1 => rs0, -- out
+    a3 => instr0(20 downto 16), -- rt
     wd3 => res,
     we3 => '1'
   );
-  rt <= rt0;
+  rs <= rs0;
 
   sgnext0 : sgnext port map (
     a => instr0(15 downto 0),
@@ -96,7 +96,7 @@ begin
   );
 
   alu0: alu port map (
-    a => rt0,
+    a => rs0,
     b => immext,
     f => "010",
     y => res -- zero port is ignored

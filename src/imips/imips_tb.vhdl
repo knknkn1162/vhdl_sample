@@ -12,7 +12,7 @@ architecture behavior of imips_tb is
       addr : in std_logic_vector(31 downto 0);
       pc : out std_logic_vector(31 downto 0);
       instr : out std_logic_vector(31 downto 0);
-      rt : out std_logic_vector(31 downto 0);
+      rs : out std_logic_vector(31 downto 0);
       aluout : out std_logic_vector(31 downto 0)
         );
   end component;
@@ -20,14 +20,14 @@ architecture behavior of imips_tb is
   signal addr : std_logic_vector(31 downto 0);
   signal pc : std_logic_vector(31 downto 0);
   signal instr : std_logic_vector(31 downto 0);
-  signal rt : std_logic_vector(31 downto 0);
+  signal rs : std_logic_vector(31 downto 0);
   signal aluout : std_logic_vector(31 downto 0);
   signal clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
   uut: imips port map (
-    clk, reset, addr, pc, instr, rt, aluout
+    clk, reset, addr, pc, instr, rs, aluout
   );
 
   clk_process: process
@@ -48,12 +48,12 @@ begin
     wait for clk_period/2; 
     assert pc = X"00000000";
     assert instr = X"20100005";
-    assert rt = X"00000000";
+    assert rs = X"00000000";
     assert aluout = X"00000005";
     wait for clk_period;
     assert pc = X"00000004";
     assert instr = X"2211000a";
-    assert rt = X"00000005";
+    assert rs = X"00000005";
     assert aluout = X"0000000f";
 
     -- success message
