@@ -2,11 +2,11 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity imips_tb is
+entity mips_tb is
 end entity;
 
-architecture behavior of imips_tb is
-  component imips
+architecture behavior of mips_tb is
+  component mips
     port (
       clk, reset : in std_logic;
       addr : in std_logic_vector(31 downto 0);
@@ -26,7 +26,7 @@ architecture behavior of imips_tb is
   signal stop : boolean;
 
 begin
-  uut: imips port map (
+  uut: mips port map (
     clk, reset, addr, pc, instr, rs, aluout
   );
 

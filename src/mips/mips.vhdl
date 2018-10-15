@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity imips is
+entity mips is
   port (
     clk, reset : in std_logic;
     addr : in std_logic_vector(31 downto 0);
@@ -14,7 +14,7 @@ entity imips is
        );
 end entity;
 
-architecture behavior of imips is
+architecture behavior of mips is
   component flopr
     port (
       clk, reset: in std_logic;

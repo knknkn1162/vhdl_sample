@@ -20,7 +20,7 @@ all:
 	ghdl -a ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-imips:
+mips:
 	make clean
-	ghdl -a alu.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl dmem.vhdl imips.vhdl imips_tb.vhdl
-	make er F=imips
+	ghdl -a alu.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl dmem.vhdl mips.vhdl mips_tb.vhdl
+	make er F=mips
