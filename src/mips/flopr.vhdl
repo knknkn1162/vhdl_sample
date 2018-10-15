@@ -2,20 +2,21 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity flopr is
-  generic(width: integer);
-  port(
+  port (
     clk, reset: in std_logic;
-    d : in std_logic_vector(width-1 downto 0);
-    q : out std_logic_vector(width-1 downto 0)
-      );
+    a : in std_logic_vector(31 downto 0);
+    y : out std_logic_vector(31 downto 0)
+       );
 end entity;
+
 
 architecture behavior of flopr is
 begin
   process(clk, reset) begin
-    if reset='1' then q <= (others => '0');
+    if reset='1' then
+      y <= (others => '0');
     elsif rising_edge(clk) then
-      q <= d;
+      y <= a;
     end if;
   end process;
 end architecture;

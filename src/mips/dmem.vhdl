@@ -1,28 +1,34 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use STD.TEXTIO.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity dmem is
   port (
-    clk, we : in std_logic;
-    a, wd: in std_logic_vector(31 downto 0);
+    clk : in std_logic;
+    -- write enable
+    we : in std_logic;
+    -- write data
+    wd : in std_logic_vector(31 downto 0);
+    addr: in std_logic_vector(31 downto 0);
+    -- read data
     rd : out std_logic_vector(31 downto 0)
-       );
-end;
+  );
+end entity;
 
 architecture behavior of dmem is
+  constant N: integer := 64;
+  type ramtype is array(N-1 downto 0) of std_logic_vector(31 downto 0);
 begin
-  process(clk, a)
-    type ramtype is array (63 downto 0) of std_logic_vector(31 downto 0);
-    variable mem: ramtype;
+  process(clk, addr) 
+    variable mem : ramtype;
   begin
-    loop
-      if rising_edge(clk) then
-        if we='1' then mem(to_integer(unsigned(a(7 downto 2)))) := wd;
-        end if;
+    if rising_edge(clk) then
+      if we='1' then mem(to_integer(unsigned(addr(7 downto 2)))) := wd;
       end if;
-      rd <= mem(to_integer(unsigned(a(7 downto 2))));
-    end loop;
+    end if;
+    -- TODO: check whether the range of `to_integer(unsigned(addr(7 downto 2))` is valid or not
+    if we = '0' then
+      rd <= mem(to_integer(unsigned(addr(7 downto 2))));
+    end if;
   end process;
 end architecture;
