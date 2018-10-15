@@ -12,6 +12,7 @@ entity imips is
     rs, rt : out std_logic_vector(31 downto 0);
     addr_rt_rd : out std_logic_vector(4 downto 0);
     aluout : out std_logic_vector(31 downto 0);
+    shamt : out std_logic_vector(31 downto 0);
     wdata : out std_logic_vector(31 downto 0)
        );
 end entity;
@@ -83,7 +84,7 @@ architecture behavior of imips is
   signal addr_rt_rd0 : std_logic_vector(4 downto 0);
   signal pc0 : std_logic_vector(31 downto 0); -- buffer
   signal pcnext : std_logic_vector(31 downto 0);
-  signal shamt : std_logic_vector(31 downto 0);
+  signal shamt0 : std_logic_vector(31 downto 0);
   signal alu_func : std_logic_vector(2 downto 0);
   signal is_alu_slt : std_logic;
 
@@ -161,13 +162,14 @@ begin
   slt_rd2 : sltn port map (
     a => rt0,
     n => instr0(10 downto 6),
-    y => shamt
+    y => shamt0
   );
+  shamt <= shamt0;
 
   mux_alu_slt: mux2 generic map (N => 32)
     port map (
     d0 => aluout0,
-    d1 => shamt,
+    d1 => shamt0,
     s => is_alu_slt,
     y => wdata0
   );
