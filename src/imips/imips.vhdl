@@ -10,6 +10,7 @@ entity imips is
     pc : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
     rs, rt : out std_logic_vector(31 downto 0);
+    addr_rt_rd : out std_logic_vector(4 downto 0);
     aluout : out std_logic_vector(31 downto 0);
     wdata : out std_logic_vector(31 downto 0)
        );
@@ -63,6 +64,7 @@ architecture behavior of imips is
       a, b : in std_logic_vector(31 downto 0);
       f : in std_logic_vector(2 downto 0);
       y : out std_logic_vector(31 downto 0);
+      sgn : out std_logic;
       zero : out std_logic
         );
   end component;
@@ -78,7 +80,7 @@ architecture behavior of imips is
 
   signal instr0, rs0, rt0, wdata0, aluout0 : std_logic_vector(31 downto 0);
   signal immext : std_logic_vector(31 downto 0);
-  signal rt_rd : std_logic_vector(4 downto 0);
+  signal addr_rt_rd0 : std_logic_vector(4 downto 0);
   signal pc0 : std_logic_vector(31 downto 0); -- buffer
   signal pcnext : std_logic_vector(31 downto 0);
   signal shamt : std_logic_vector(31 downto 0);
@@ -103,7 +105,7 @@ begin
     rd1 => rs0, -- out
     a2 => instr0(20 downto 16),
     rd2 => rt0,
-    a3 => rt_rd,
+    a3 => addr_rt_rd0,
     wd3 => wdata0,
     we3 => '1'
   );
@@ -115,7 +117,7 @@ begin
     d0 => instr0(20 downto 16),
     d1 => instr0(15 downto 11),
     s => '1',
-    y => rt_rd
+    y => addr_rt_rd0
   );
 
   -- funct
