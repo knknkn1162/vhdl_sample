@@ -85,7 +85,7 @@ architecture behavior of imips is
   signal pcnext : std_logic_vector(31 downto 0);
   signal shamt : std_logic_vector(31 downto 0);
   signal alu_func : std_logic_vector(2 downto 0);
-  signal is_alu_slt : std_logic := '0';
+  signal is_alu_slt : std_logic;
 
 begin
   -- TODO: impl program counter
@@ -125,16 +125,28 @@ begin
   begin
     case instr0(5 downto 0) is
       -- sll
-      when "000000" => is_alu_slt <= '1';
+      when "000000" =>
+        is_alu_slt <= '1';
+        alu_func <= (others => '-');
       -- add
-      when "100000" => alu_func <= "010";
+      when "100000" =>
+        alu_func <= "010";
+        is_alu_slt <= '0';
       -- and
-      when "100100" => alu_func <= "000";
+      when "100100" =>
+        alu_func <= "000";
+        is_alu_slt <= '0';
       -- sub
-      when "100010" => alu_func <= "110";
+      when "100010" =>
+        alu_func <= "110";
+        is_alu_slt <= '0';
       -- or
-      when "100101" => alu_func <= "001";
-      when others => alu_func <= (others => '-');
+      when "100101" =>
+        alu_func <= "001";
+        is_alu_slt <= '0';
+      when others =>
+        alu_func <= (others => '-');
+        is_alu_slt <= '0';
     end case;
   end process;
 
