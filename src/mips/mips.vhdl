@@ -167,7 +167,59 @@ begin
   -- );
   -- jmp_addr <= pcn4(31 downto 28) & jmp4(27 downto 0);
 
-  -- -- TODO: logic reg_we3
+  -- -- TODO: impl controllers
+  -- impl : reg_we3(sw, beq or not)
+  -- rt_rd_s(I-type or R-type)
+  -- rt_imm_s(lw, sw or others)
+  -- dmem_we(sw or not)
+  -- alu_func(when R-type, other instruction is +)
+  -- calc_rdata_s(lw or others)
+  case instr0(31 downto 26) is
+    -- R-type
+    when "000000" =>
+      -- funct
+      case instr0(5 downto 0) is
+        -- sll(0x00)
+        when "000000" =>
+        -- srl(0x02)
+        when "000010" =>
+        -- sra(0x03)
+        when "000011" =>
+        -- sub(0x22)
+        when "100010" =>
+        -- or(0x25)
+        when "100101" =>
+        -- slt(0x2A)
+        when "101010" =>
+        when others => 
+      end case;
+    -- j(0x02)
+    when "000010" =>
+    -- jal(0x03)
+    -- when "000011" =>
+    -- I-type
+    -- branch
+    -- beq(0x04)
+    when "000100" =>
+    -- bne(0x05)
+    when "000101" =>
+    -- blez(0x06)
+    when "000110" =>
+    -- addi(0x08)
+    when "001000" =>
+    -- slti(0x0A)
+    when "001010" =>
+    -- andi(0x0C)
+    when "001100" =>
+    -- ori(0x0D)
+    when "001101" =>
+    -- lw(0x23)
+    when "100011" =>
+    -- sw(0x2B)
+    when "101011" =>
+    when "" =>
+    when others => 
+  end case;
 
   reg0 : regfile port map (
     clk => clk,
