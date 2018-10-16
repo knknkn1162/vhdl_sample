@@ -64,8 +64,9 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period/2;
-    reset <= '1'; wait for 1 ns;
-    addr <= X"00000000"; reset <= '0';
+    reset <= '1';
+    addr <= X"00000000";
+    wait for 1 ns; reset <= '0';
 
     -- main:   addi $2, $0, 5      # initialize $2 = 5  0       20020005
     wait for clk_period/2;
@@ -80,9 +81,9 @@ begin
     -- addi $3, $0, 12     # initialize $3 = 12 4       2003000c
     wait for clk_period;
     assert pc = X"00000004";
-    assert instr = X"2030000c";
+    assert instr = X"2003000c";
     assert rs = X"00000000";
-    assert rt_imm = X"000000c";
+    assert rt_imm = X"0000000c";
     assert aluout = X"0000000c";
     assert a3 = "00011";
     assert wdata = X"0000000c";

@@ -20,7 +20,7 @@ entity mips is
 end entity;
 
 architecture behavior of mips is
-  component mux
+  component mux2
     generic(N : integer);
     port (
       d0 : in std_logic_vector(N-1 downto 0);
@@ -113,6 +113,7 @@ architecture behavior of mips is
   -- alu, dmem
   signal aluout0, calc0, rdata0 : std_logic_vector(31 downto 0);
   signal immext : std_logic_vector(31 downto 0);
+  signal is_branch : std_logic;
 
 
   -- selector
@@ -129,9 +130,8 @@ architecture behavior of mips is
   signal calc_rdata_s : std_logic;
 
 begin
-  -- TODO: pcn4_br_s
-
-  -- branch_mux : mux port map (
+  -- pc4_br_s <= zero and beq;
+  -- branch_mux2 : mux2 port map (
   --   d0 : pcn4,
   --   d1 : br_addr,
   --   s : pcn4_br_s,
@@ -140,12 +140,13 @@ begin
 
   -- -- TODO: pcn_jmp_s
 
-  -- jump_mux : mux port map (
+  -- jump_mux2 : mux2 port map (
   --   d0 : pcn,
   --   d1 : jmp_addr,
   --   s : pcn_jmp_s,
   --   y : pcnext0
   -- );
+  pcnext0 <= pcn4;
   pcnext <= pcnext0;
 
   pcreg: flopr port map(clk, reset, pcnext0, pc0);
@@ -168,58 +169,92 @@ begin
   -- jmp_addr <= pcn4(31 downto 28) & jmp4(27 downto 0);
 
   -- -- TODO: impl controllers
-  -- impl : reg_we3(sw, beq or not)
+  -- reg_we3(sw, beq or not)
   -- rt_rd_s(I-type or R-type)
   -- rt_imm_s(lw, sw or others)
   -- dmem_we(sw or not)
   -- alu_func(when R-type, other instruction is +)
   -- calc_rdata_s(lw or others)
-  case instr0(31 downto 26) is
-    -- R-type
-    when "000000" =>
-      -- funct
-      case instr0(5 downto 0) is
-        -- sll(0x00)
-        when "000000" =>
-        -- srl(0x02)
-        when "000010" =>
-        -- sra(0x03)
-        when "000011" =>
-        -- sub(0x22)
-        when "100010" =>
-        -- or(0x25)
-        when "100101" =>
-        -- slt(0x2A)
-        when "101010" =>
-        when others => 
-      end case;
-    -- j(0x02)
-    when "000010" =>
-    -- jal(0x03)
-    -- when "000011" =>
-    -- I-type
-    -- branch
-    -- beq(0x04)
-    when "000100" =>
-    -- bne(0x05)
-    when "000101" =>
-    -- blez(0x06)
-    when "000110" =>
-    -- addi(0x08)
-    when "001000" =>
-    -- slti(0x0A)
-    when "001010" =>
-    -- andi(0x0C)
-    when "001100" =>
-    -- ori(0x0D)
-    when "001101" =>
-    -- lw(0x23)
-    when "100011" =>
-    -- sw(0x2B)
-    when "101011" =>
-    when "" =>
-    when others => 
-  end case;
+  process(instr0) begin
+    case instr0(31 downto 26) is
+      -- R-type
+      when "000000" =>
+        reg_we3 <= '1';
+        rt_rd_s <= '1';
+        rt_imm_s <= '0';
+        dmem_we <= '0';
+        -- funct
+        case instr0(5 downto 0) is
+          -- sll(0x00)
+          -- when "000000" =>
+          -- srl(0x02)
+          -- when "000010" =>
+          -- sra(0x03)
+          -- when "000011" =>
+          -- add(0x20)
+          when "100000" =>
+            alu_func <= "010";
+          -- and(0x24)
+          when "100100" =>
+            alu_func <= "000";
+          -- sub(0x22)
+          when "100010" =>
+            alu_func <= "110";
+          -- or(0x25)
+          when "100101" =>
+            alu_func <= "001";
+          -- slt(0x2A)
+          -- when "101010" =>
+          when others =>
+        end case;
+      -- j(0x02)
+      when "000010" =>
+      -- jal(0x03)
+      -- when "000011" =>
+      -- I-type
+      -- branch
+      -- beq(0x04)
+      when "000100" =>
+        reg_we3 <= '0';
+        rt_rd_s <= '0';
+        rt_imm_s <= '1';
+        dmem_we <= '1';
+        -- alu_func <= "---";
+        -- calc_rdata_s <= '-';
+        is_branch <= '1';
+      -- bne(0x05)
+      when "000101" =>
+        reg_we3 <= '0';
+        rt_rd_s <= '0';
+        rt_imm_s <= '1';
+        dmem_we <= '1';
+        -- alu_func <= "---";
+        -- calc_rdata_s <= '-';
+        is_branch <= '1';
+      -- blez(0x06)
+      when "000110" =>
+      -- addi(0x08)
+      when "001000" =>
+        reg_we3 <= '1';
+        rt_rd_s <= '0';
+        rt_imm_s <= '1';
+        dmem_we <= '0';
+        alu_func <= "010";
+        -- calc_rdata_s <= '-';
+        is_branch <= '1';
+      -- slti(0x0A)
+      when "001010" =>
+      -- andi(0x0C)
+      when "001100" =>
+      -- ori(0x0D)
+      when "001101" =>
+      -- lw(0x23)
+      when "100011" =>
+      -- sw(0x2B)
+      when "101011" =>
+      when others =>
+    end case;
+  end process;
 
   reg0 : regfile port map (
     clk => clk,
@@ -236,9 +271,7 @@ begin
   a3 <= a30;
   wdata <= wdata0;
 
-  -- TODO logic rt_rd_s
-
-  rt_rd_mux: mux generic map (N => 5)
+  rt_rd_mux2 : mux2 generic map (N => 5)
     port map (
       d0 => instr0(20 downto 16),
       d1 => instr0(15 downto 11),
@@ -264,9 +297,7 @@ begin
   -- );
   -- br_addr <= std_logic_vector(unsigned(br4) + unsigned(pcn4));
 
-  -- TODO: logic rt_imm_s
-
-  rt_imm_mux : mux generic map (N => 32)
+  rt_imm_mux2 : mux2 generic map (N => 32)
     port map (
       d0 => rt0,
       d1 => immext,
@@ -274,8 +305,6 @@ begin
       y => rt_imm0
   );
   rt_imm <= rt_imm0;
-
-  -- TODO logic alu_func
 
   alu0: alu port map (
     a => rs0,
@@ -289,8 +318,6 @@ begin
   );
   aluout <= aluout0;
 
-  -- TODO: logic dmem_we
-
   -- for lw, sw instruction
   dmem0 : dmem port map (
     clk => clk,
@@ -298,7 +325,7 @@ begin
     we => dmem_we,
     -- write data
     wd => rt0,
-    addr => calc0, --aluout0,
+    addr => aluout0,
     -- read data
     rd => rdata0
   );
@@ -306,7 +333,7 @@ begin
 
   -- TODO: aluout_shamt_s
 
-  -- aluout_sltn_mux : mux port map (
+  -- aluout_sltn_mux2 : mux2 port map (
   --   d0 : aluout0,
   --   d1 : shamt,
   --   s : aluout_shamt_s,
@@ -314,11 +341,9 @@ begin
   -- );
   -- calc <= calc0;
 
-  -- TODO: logic calc_rdata_s
-
-  calc_rdata_mux : mux generic map (N => 32) 
+  calc_rdata_mux2 : mux2 generic map (N => 32)
     port map (
-      d0 => calc0,
+      d0 => aluout0,
       d1 => rdata0,
       s => calc_rdata_s,
       y => wdata0
