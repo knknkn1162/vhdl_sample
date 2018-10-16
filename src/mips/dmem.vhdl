@@ -26,8 +26,10 @@ begin
       if we='1' then mem(to_integer(unsigned(addr(7 downto 2)))) := wd;
       end if;
     end if;
-    -- TODO: check whether the range of `to_integer(unsigned(addr(7 downto 2))` is valid or not
-    if we = '0' then
+    -- to avoid metastable input
+    if is_X(addr) then
+      rd <= (others => '-');
+    else
       rd <= mem(to_integer(unsigned(addr(7 downto 2))));
     end if;
   end process;
