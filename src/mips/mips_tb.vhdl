@@ -10,24 +10,41 @@ architecture behavior of mips_tb is
     port (
       clk, reset : in std_logic;
       addr : in std_logic_vector(31 downto 0);
+      -- for testbench
       pc : out std_logic_vector(31 downto 0);
+      pcnext : out std_logic_vector(31 downto 0);
       instr : out std_logic_vector(31 downto 0);
-      rs : out std_logic_vector(31 downto 0);
-      aluout : out std_logic_vector(31 downto 0)
+      wdata : out std_logic_vector(31 downto 0);
+      rs, rt : out std_logic_vector(31 downto 0);
+      rt_imm : out std_logic_vector(31 downto 0);
+      aluout : out std_logic_vector(31 downto 0);
+      rdata : out std_logic_vector(31 downto 0)
         );
   end component;
   signal clk, reset : std_logic;
   signal addr : std_logic_vector(31 downto 0);
-  signal pc : std_logic_vector(31 downto 0);
+  signal pc, pcnext : std_logic_vector(31 downto 0);
   signal instr : std_logic_vector(31 downto 0);
-  signal rs : std_logic_vector(31 downto 0);
+  signal wdata : std_logic_vector(31 downto 0);
+  signal rs, rt, rt_imm : std_logic_vector(31 downto 0);
   signal aluout : std_logic_vector(31 downto 0);
-  signal clk_period : time := 10 ns;
+  signal rdata : std_logic_vector(31 downto 0);
+
+  constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
   uut: mips port map (
-    clk, reset, addr, pc, instr, rs, aluout
+    clk => clk, reset => reset,
+    addr => addr,
+    pc => pc,
+    pcnext => pcnext,
+    instr => instr,
+    wdata => wdata,
+    rs => rs, rt => rt,
+    rt_imm => rt_imm,
+    aluout => aluout,
+    rdata => rdata
   );
 
   clk_process: process

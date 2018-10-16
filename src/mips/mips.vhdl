@@ -10,6 +10,7 @@ entity mips is
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
+    a3 : out std_logic_vector(4 downto 0);
     wdata : out std_logic_vector(31 downto 0);
     rs, rt : out std_logic_vector(31 downto 0);
     rt_imm : out std_logic_vector(31 downto 0);
@@ -106,7 +107,7 @@ architecture behavior of mips is
   signal pcnext0, pc0 : std_logic_vector(31 downto 0);
 
   -- imem, regfile
-  signal rt_rd_addr : std_logic_vector(31 downto 0);
+  signal a30 : std_logic_vector(4 downto 0);
   signal instr0, rs0, rt0, wdata0, rt_imm0 : std_logic_vector(31 downto 0);
 
   -- alu, dmem
@@ -174,12 +175,13 @@ begin
     rd1 => rs0, -- out
     a2 => instr0(20 downto 16),
     rd2 => rt0,
-    a3 => instr0(20 downto 16),
+    a3 => a30,
     wd3 => wdata0,
     we3 => reg_we3
   );
   rs <= rs0;
   rt <= rt0;
+  a3 <= a30;
   wdata <= wdata0;
 
   -- TODO logic rt_rd_s
@@ -189,7 +191,7 @@ begin
       d0 => instr0(20 downto 16),
       d1 => instr0(15 downto 11),
       s => rt_rd_s,
-      y => rt_rd_addr
+      y => a30 
   );
 
   -- sltn0: sltn port map (
