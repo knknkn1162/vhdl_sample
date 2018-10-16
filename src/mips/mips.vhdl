@@ -8,9 +8,13 @@ entity mips is
     addr : in std_logic_vector(31 downto 0);
     -- for testbench
     pc : out std_logic_vector(31 downto 0);
+    pcnext : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
-    rs : out std_logic_vector(31 downto 0);
-    aluout : out std_logic_vector(31 downto 0)
+    wdata : out std_logic_vector(31 downto 0);
+    rs, rt : out std_logic_vector(31 downto 0);
+    rt_imm : out std_logic_vector(31 downto 0);
+    aluout : out std_logic_vector(31 downto 0);
+    rdata : out std_logic_vector(31 downto 0)
        );
 end entity;
 
@@ -78,6 +82,8 @@ architecture behavior of mips is
       a, b : in std_logic_vector(31 downto 0);
       f : in std_logic_vector(2 downto 0);
       y : out std_logic_vector(31 downto 0);
+      -- if negative or not
+      sgn : out std_logic;
       zero : out std_logic
         );
   end component;
@@ -96,31 +102,30 @@ architecture behavior of mips is
   end component;
 
   -- jump, branch, pc
-  signal pcn4, pcn, br_addr, jmp_addr : std_logic_vector(31 downto 0);
+  signal jmp4, pcn4, pcn, br_addr, jmp_addr : std_logic_vector(31 downto 0);
   signal pcnext0, pc0 : std_logic_vector(31 downto 0);
 
   -- imem, regfile
-  signal jmp4 : std_logic_vector(31 downto 0);
-  signal instr0, rs0, rt0, wdata0 : std_logic_vector(31 downto 0);
+  signal rt_rd_addr : std_logic_vector(31 downto 0);
+  signal instr0, rs0, rt0, wdata0, rt_imm0 : std_logic_vector(31 downto 0);
 
-  signal aluout0, rt_imm0 : std_logic_vector(31 downto 0);
+  -- alu, dmem
+  signal aluout0, calc0, rdata0 : std_logic_vector(31 downto 0);
   signal immext : std_logic_vector(31 downto 0);
-  signal res : std_logic_vector(31 downto 0);
-  signal pc0 : std_logic_vector(31 downto 0); -- buffer
-  signal pcn4 : std_logic_vector(31 downto 0);
-  signal reg_we3 : std_logic;
-  signal addr_rt_rd : std_logic_vector(4 downto 0);
-  signal shamt : std_logic_vector(31 downto 0);
-  -- selector
-  signal pcn4_br_s, pcn_jmp_s, rt_rd_s, rt_imm_s : std_logic;
-  signal alu_func : std_logic_vector(2 downto 0);
-  signal alu_sgn, alu_zero : std_logic;
 
+
+  -- selector
   -- from controller
   -- -- jump, branch, pc
   signal pcn4_br_s, pcn_jmp_s : std_logic;
   -- -- imem, regfile
   signal reg_we3 : std_logic;
+  signal rt_rd_s, rt_imm_s : std_logic;
+  -- -- alu, dmem
+  signal alu_func : std_logic_vector(2 downto 0);
+  signal alu_sgn, alu_zero : std_logic;
+  signal dmem_we : std_logic;
+  signal calc_rdata_s : std_logic;
 
 begin
   -- TODO: pcn4_br_s
@@ -179,11 +184,12 @@ begin
 
   -- TODO logic rt_rd_s
 
-  rt_rd_mux: mux port map (
-    d0 => instr0(20 downto 16),
-    d1 => instr0(15 downto 11),
-    s => rt_rd_s,
-    y => rt_rd_addr
+  rt_rd_mux: mux generic map (N => 5)
+    port map (
+      d0 => instr0(20 downto 16),
+      d1 => instr0(15 downto 11),
+      s => rt_rd_s,
+      y => rt_rd_addr
   );
 
   -- sltn0: sltn port map (
@@ -206,11 +212,12 @@ begin
 
   -- TODO: logic rt_imm_s
 
-  rt_imm_mux : mux port map (
-    d0 => rt0,
-    d1 => immext,
-    s => rt_imm_s,
-    y => rt_imm0
+  rt_imm_mux : mux generic map (N => 32)
+    port map (
+      d0 => rt0,
+      d1 => immext,
+      s => rt_imm_s,
+      y => rt_imm0
   );
   rt_imm <= rt_imm0;
 
@@ -237,7 +244,7 @@ begin
     we => dmem_we,
     -- write data
     wd => rt0,
-    addr => aluout0,
+    addr => calc0, --aluout0,
     -- read data
     rd => rdata0
   );
@@ -251,15 +258,16 @@ begin
   --   s : aluout_shamt_s,
   --   y : calc_data0
   -- );
-  -- calc_data <= calc_data0;
+  -- calc <= calc0;
 
-  -- TODO: logic calc_r_s
+  -- TODO: logic calc_rdata_s
 
-  mux port map (
-    d0 => aluout0, --calc_data0,
-    d1 => rdata0,
-    s => calc_r_s,
-    y => wdata0
+  calc_rdata_mux : mux generic map (N => 32) 
+    port map (
+      d0 => calc0,
+      d1 => rdata0,
+      s => calc_rdata_s,
+      y => wdata0
   );
   wdata <= wdata0;
 
