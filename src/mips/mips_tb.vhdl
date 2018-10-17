@@ -88,6 +88,15 @@ begin
     assert a3 = "00011";
     assert wdata = X"0000000c";
 
+    -- addi $7, $3, -9     # initialize $7 = 3  8       2067fff7
+    wait for clk_period;
+    assert pc = X"00000008";
+    assert instr = X"2067fff7";
+    assert rs = X"0000000c";
+    assert rt_imm = X"FFFFFFF7";
+    assert aluout = X"00000003";
+    assert a3 = "00111";
+    assert wdata = X"00000003";
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;
