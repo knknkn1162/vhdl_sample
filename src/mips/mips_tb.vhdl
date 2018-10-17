@@ -97,6 +97,37 @@ begin
     assert aluout = X"00000003";
     assert a3 = "00111";
     assert wdata = X"00000003";
+
+    -- or   $4, $7, $2     # $4 <= 3 or 5 = 7   c       00e22025
+    wait for clk_period;
+    assert pc = X"0000000c";
+    assert instr = X"00e22025";
+    assert rs = X"00000003"; -- $7
+    assert rt_imm = X"00000005"; -- $2
+    assert aluout = X"00000007";
+    assert a3 = "00100"; -- $4
+    assert wdata = X"00000007";
+
+    -- and $5,  $3, $4     # $5 <= 12 and 7 = 4 10      00642824
+    wait for clk_period;
+    assert pc = X"00000010";
+    assert instr = X"00642824";
+    assert rs = X"0000000c"; -- $3
+    assert rt_imm = X"00000007"; -- $4
+    assert aluout = X"00000004";
+    assert a3 = "00101"; -- $5
+    assert wdata = X"00000004";
+
+    -- add $5,  $5, $4     # $5 = 4 + 7 = 11    14      00a42820
+    wait for clk_period;
+    assert pc = X"00000014";
+    assert instr = X"00a42820";
+    assert rs = X"00000004"; -- $5
+    assert rt_imm = X"00000007"; -- $4
+    assert aluout = X"0000000b";
+    assert a3 = "00101"; -- $5
+    assert wdata = X"0000000b";
+
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;
