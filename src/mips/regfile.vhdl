@@ -37,13 +37,14 @@ begin
     end if;
   end process;
 
-  process(a1) begin
+  -- if a1 is constant while writing the content of a1, we need `clk` in the sensitivity list.
+  process(clk, a1) begin
     if not is_X(a1) then
       rd1 <= mem(to_integer(unsigned(a1)));
     end if;
   end process;
 
-  process(a2) begin
+  process(clk, a2) begin
     if not is_X(a2) then
       rd2 <= mem(to_integer(unsigned(a2)));
     end if;
