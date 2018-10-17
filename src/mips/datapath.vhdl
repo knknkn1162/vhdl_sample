@@ -116,8 +116,9 @@ architecture behavior of datapath is
   end component;
 
   -- jump, branch, pc
-  signal jmp4, pcn4, pcn, br_addr, jmp_addr : std_logic_vector(31 downto 0);
+  signal br4, jmp4, pcn4, pcn, br_addr, jmp_addr : std_logic_vector(31 downto 0);
   signal pcnext0, pc0 : std_logic_vector(31 downto 0);
+  signal pcn4_br_s : std_logic;
 
   -- imem, regfile
   signal a30 : std_logic_vector(4 downto 0);
@@ -131,23 +132,26 @@ architecture behavior of datapath is
   signal alu_sgn, alu_zero : std_logic;
 
 begin
-  -- pc4_br_s <= zero and beq;
-  -- branch_mux2 : mux2 port map (
-  --   d0 : pcn4,
-  --   d1 : br_addr,
-  --   s : pcn4_br_s,
-  --   y : pcn
-  -- );
+  -- choose dynamically
+  pcn4_br_s <= alu_zero and is_branch;
+
+  branch_mux2 : mux2 generic map (N => 32)
+    port map (
+      d0 => pcn4,
+      d1 => br_addr,
+      s => pcn4_br_s,
+      y => pcn
+  );
 
   -- -- TODO: pcn_jmp_s
 
   -- jump_mux2 : mux2 port map (
-  --   d0 : pcn,
-  --   d1 : jmp_addr,
-  --   s : pcn_jmp_s,
-  --   y : pcnext0
+  --   d0 => pcn,
+  --   d1 => jmp_addr,
+  --   s => pcn_jmp_s,
+  --   y => pcnext0
   -- );
-  pcnext0 <= pcn4;
+  pcnext0 <= pcn;
   pcnext <= pcnext0;
 
   pcreg: flopr port map(clk, reset, pcnext0, pc0);
@@ -205,12 +209,12 @@ begin
     y => immext
   );
 
-  -- sigext_slt2 : sltn port map (
-  --   a : immext,
-  --   n : "000010",
-  --   y : br4,
-  -- );
-  -- br_addr <= std_logic_vector(unsigned(br4) + unsigned(pcn4));
+  sigext_slt2 : sltn port map (
+    a => immext,
+    n => "00010",
+    y => br4
+  );
+  br_addr <= std_logic_vector(unsigned(br4) + unsigned(pcn4));
 
   rt_imm_mux2 : mux2 generic map (N => 32)
     port map (

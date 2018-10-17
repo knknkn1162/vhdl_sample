@@ -22,5 +22,5 @@ all:
 	ghdl -r ${F}_tb --vcd=out.vcd
 mips:
 	make clean
-	ghdl -a alu.vhdl mux2.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl dmem.vhdl datapath.vhdl controller.vhdl mips.vhdl mips_tb.vhdl
+	ghdl -a alu.vhdl mux2.vhdl sltn.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl dmem.vhdl datapath.vhdl controller.vhdl mips.vhdl mips_tb.vhdl
 	make er F=mips

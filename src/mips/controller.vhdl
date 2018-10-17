@@ -13,8 +13,8 @@ entity controller is
     alu_func : out std_logic_vector(2 downto 0);
     -- branch
     is_branch, is_jmp : out std_logic
-    -- jump, branch, pc
-    -- pcn4_br_s, pcn_jmp_s : out std_logic;
+    -- jump, branch
+    -- pcn4_br_s, pcn_jmp_s : in std_logic;
   );
 end entity;
 
@@ -73,11 +73,7 @@ begin
       -- branch
       -- beq(0x04)
       when "000100" =>
-        reg_we3 <= '0';
-        rt_rd_s <= '0';
-        rt_imm_s <= '1';
-        dmem_we <= '1';
-        -- alu_func <= "---";
+        rt_imm_s <= '0';
         is_branch_v := '1';
       -- bne(0x05)
       -- when "000101" =>
