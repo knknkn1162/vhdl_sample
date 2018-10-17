@@ -29,7 +29,7 @@ begin
   -- calc_rdata_s(lw or others)
   process(opcode, funct)
     -- default
-    variable calc_rdata_s_v : std_logic := '1';
+    variable calc_rdata_s_v : std_logic := '0';
     variable is_branch_v : std_logic := '0';
     variable is_jmp_v : std_logic := '0';
   begin
@@ -78,7 +78,6 @@ begin
         rt_imm_s <= '1';
         dmem_we <= '1';
         -- alu_func <= "---";
-        -- calc_rdata_s <= '-';
         is_branch_v := '1';
       -- bne(0x05)
       -- when "000101" =>
@@ -114,7 +113,7 @@ begin
         alu_func <= "001";
       -- lw(0x23)
       when "100011" =>
-        calc_rdata_s_v := '0';
+        calc_rdata_s_v := '1';
       -- sw(0x2B)
       when "101011" =>
       when others =>

@@ -1,6 +1,5 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
 
 entity mips is
   port (
@@ -16,338 +15,94 @@ entity mips is
     rt_imm : out std_logic_vector(31 downto 0);
     aluout : out std_logic_vector(31 downto 0);
     rdata : out std_logic_vector(31 downto 0)
-       );
+      );
 end entity;
 
 architecture behavior of mips is
-  component mux2
-    generic(N : integer);
+  component datapath
     port (
-      d0 : in std_logic_vector(N-1 downto 0);
-      d1 : in std_logic_vector(N-1 downto 0);
-      s : in std_logic;
-      y : out std_logic_vector(N-1 downto 0)
-        );
-  end component;
+      clk, reset : in std_logic;
+      addr : in std_logic_vector(31 downto 0);
 
-  component flopr
-    port (
-      clk, reset: in std_logic;
-      a : in std_logic_vector(31 downto 0);
-      y : out std_logic_vector(31 downto 0)
-        );
-  end component;
-
-  component imem
-    port (
-      idx : in std_logic_vector(5 downto 0);
-      rd : out std_logic_vector(31 downto 0)
-    );
-  end component;
-
-  component regfile
-    port (
-      clk : in std_logic;
-      -- 25:21(read)
-      a1 : in std_logic_vector(4 downto 0);
-      rd1 : out std_logic_vector(31 downto 0);
-      -- 20:16(read)
-      a2 : in std_logic_vector(4 downto 0);
-      rd2 : out std_logic_vector(31 downto 0);
-
-      -- 20:16(write)
-      a3 : in std_logic_vector(4 downto 0);
-      wd3 : in std_logic_vector(31 downto 0);
-      we3 : in std_logic
-    );
-  end component;
-
-  component sgnext
-    port (
-      a : in std_logic_vector(15 downto 0);
-      y : out std_logic_vector(31 downto 0)
-        );
-  end component;
-
-  component sltn
-    port (
-      a : in std_logic_vector(31 downto 0);
-      -- shamt
-      n : in std_logic_vector(4 downto 0);
-      y : out std_logic_vector(31 downto 0)
-        );
-  end component;
-
-  component alu
-    port (
-      a, b : in std_logic_vector(31 downto 0);
-      f : in std_logic_vector(2 downto 0);
-      y : out std_logic_vector(31 downto 0);
-      -- if negative or not
-      sgn : out std_logic;
-      zero : out std_logic
-        );
-  end component;
-
-  component dmem
-    port (
-      clk : in std_logic;
+      -- from controller
       -- write enable
-      we : in std_logic;
-      -- write data
-      wd : in std_logic_vector(31 downto 0);
-      addr: in std_logic_vector(31 downto 0);
-      -- read data
-      rd : out std_logic_vector(31 downto 0)
+      reg_we3, dmem_we : in std_logic;
+      -- multiplex selector
+      rt_rd_s, rt_imm_s, calc_rdata_s : in std_logic;
+      -- alu
+      alu_func : in std_logic_vector(2 downto 0);
+      -- branch
+      is_branch, is_jmp : in std_logic;
+      -- jump, branch, pc
+      -- pcn4_br_s, pcn_jmp_s : in std_logic;
+
+      -- for testbench
+      pc : out std_logic_vector(31 downto 0);
+      pcnext : out std_logic_vector(31 downto 0);
+      instr : out std_logic_vector(31 downto 0);
+      a3 : out std_logic_vector(4 downto 0);
+      wdata : out std_logic_vector(31 downto 0);
+      rs, rt : out std_logic_vector(31 downto 0);
+      rt_imm : out std_logic_vector(31 downto 0);
+      aluout : out std_logic_vector(31 downto 0);
+      rdata : out std_logic_vector(31 downto 0)
+        );
+  end component;
+
+  component controller
+    port (
+      opcode : in std_logic_vector(5 downto 0);
+      funct : in std_logic_vector(5 downto 0);
+      -- write enable
+      reg_we3, dmem_we : out std_logic;
+      -- multiplex selector
+      rt_rd_s, rt_imm_s, calc_rdata_s : out std_logic;
+      -- alu
+      alu_func : out std_logic_vector(2 downto 0);
+      -- branch
+      is_branch, is_jmp : out std_logic
+      -- jump, branch, pc
+      -- pcn4_br_s, pcn_jmp_s : in std_logic;
     );
   end component;
 
-  -- jump, branch, pc
-  signal jmp4, pcn4, pcn, br_addr, jmp_addr : std_logic_vector(31 downto 0);
-  signal pcnext0, pc0 : std_logic_vector(31 downto 0);
+  signal instr0 : std_logic_vector(31 downto 0);
 
-  -- imem, regfile
-  signal a30 : std_logic_vector(4 downto 0);
-  signal instr0, rs0, rt0, wdata0, rt_imm0 : std_logic_vector(31 downto 0);
-
-  -- alu, dmem
-  signal aluout0, calc0, rdata0 : std_logic_vector(31 downto 0);
-  signal immext : std_logic_vector(31 downto 0);
-  signal is_branch : std_logic;
-
-
-  -- selector
-  -- from controller
-  -- -- jump, branch, pc
-  signal pcn4_br_s, pcn_jmp_s : std_logic;
-  -- -- imem, regfile
-  signal reg_we3 : std_logic;
-  signal rt_rd_s, rt_imm_s : std_logic;
-  -- -- alu, dmem
+  signal reg_we3, dmem_we : std_logic;
+  signal rt_rd_s ,rt_imm_s, calc_rdata_s : std_logic;
   signal alu_func : std_logic_vector(2 downto 0);
-  signal alu_sgn, alu_zero : std_logic;
-  signal dmem_we : std_logic;
-  signal calc_rdata_s : std_logic;
+  signal is_branch, is_jmp : std_logic;
 
 begin
-  -- pc4_br_s <= zero and beq;
-  -- branch_mux2 : mux2 port map (
-  --   d0 : pcn4,
-  --   d1 : br_addr,
-  --   s : pcn4_br_s,
-  --   y : pcn
-  -- );
-
-  -- -- TODO: pcn_jmp_s
-
-  -- jump_mux2 : mux2 port map (
-  --   d0 : pcn,
-  --   d1 : jmp_addr,
-  --   s : pcn_jmp_s,
-  --   y : pcnext0
-  -- );
-  pcnext0 <= pcn4;
-  pcnext <= pcnext0;
-
-  pcreg: flopr port map(clk, reset, pcnext0, pc0);
-  pc <= pc0;
-
-  pcn4 <= std_logic_vector(unsigned(pc0) + 4);
-
-  imem0: imem port map (
-    -- every instruction is 4 byte size
-    idx => pc0(7 downto 2),
-    rd => instr0
+  datapath0 : datapath port map (
+    clk => clk, reset => reset,
+    addr => addr,
+    -- from controller
+    reg_we3 => reg_we3, dmem_we => dmem_we,
+    rt_rd_s => rt_rd_s, rt_imm_s => rt_imm_s, calc_rdata_s => calc_rdata_s,
+    alu_func => alu_func,
+    is_branch => is_branch, is_jmp => is_jmp,
+    -- pcn4_br_s, => pcn4_br_s, pcn_jmp_s => pcn_jmp_s
+    pc => pc,
+    pcnext => pcnext,
+    instr => instr0,
+    a3 => a3,
+    wdata => wdata,
+    rs => rs, rt => rt,
+    rt_imm => rt_imm,
+    aluout => aluout,
+    rdata => rdata
   );
+
+  controller0 : controller port map (
+    opcode => instr0(31 downto 26),
+    funct => instr0(5 downto 0),
+    -- decode
+    reg_we3 => reg_we3, dmem_we => dmem_we,
+    rt_rd_s => rt_rd_s, rt_imm_s => rt_imm_s, calc_rdata_s => calc_rdata_s,
+    alu_func => alu_func,
+    is_branch => is_branch, is_jmp => is_jmp
+  );
+
   instr <= instr0;
-
-  -- jmp_slt2 : sltn port map (
-  --   a : "000000" & instr(25 downto 0),
-  --   n : "00010",
-  --   y : jmp4
-  -- );
-  -- jmp_addr <= pcn4(31 downto 28) & jmp4(27 downto 0);
-
-  -- -- TODO: impl controllers
-  -- reg_we3(sw, beq or not)
-  -- rt_rd_s(I-type or R-type)
-  -- rt_imm_s(lw, sw or others)
-  -- dmem_we(sw or not)
-  -- alu_func(when R-type, other instruction is +)
-  -- calc_rdata_s(lw or others)
-  process(instr0) begin
-    case instr0(31 downto 26) is
-      -- R-type
-      when "000000" =>
-        reg_we3 <= '1';
-        rt_rd_s <= '1';
-        rt_imm_s <= '0';
-        dmem_we <= '0';
-        -- funct
-        case instr0(5 downto 0) is
-          -- sll(0x00)
-          -- when "000000" =>
-          -- srl(0x02)
-          -- when "000010" =>
-          -- sra(0x03)
-          -- when "000011" =>
-          -- add(0x20)
-          when "100000" =>
-            alu_func <= "010";
-          -- and(0x24)
-          when "100100" =>
-            alu_func <= "000";
-          -- sub(0x22)
-          when "100010" =>
-            alu_func <= "110";
-          -- or(0x25)
-          when "100101" =>
-            alu_func <= "001";
-          -- slt(0x2A)
-          -- when "101010" =>
-          when others =>
-        end case;
-      -- j(0x02)
-      when "000010" =>
-      -- jal(0x03)
-      -- when "000011" =>
-      -- I-type
-      -- branch
-      -- beq(0x04)
-      when "000100" =>
-        reg_we3 <= '0';
-        rt_rd_s <= '0';
-        rt_imm_s <= '1';
-        dmem_we <= '1';
-        -- alu_func <= "---";
-        -- calc_rdata_s <= '-';
-        is_branch <= '1';
-      -- bne(0x05)
-      when "000101" =>
-        reg_we3 <= '0';
-        rt_rd_s <= '0';
-        rt_imm_s <= '1';
-        dmem_we <= '1';
-        -- alu_func <= "---";
-        -- calc_rdata_s <= '-';
-        is_branch <= '1';
-      -- blez(0x06)
-      when "000110" =>
-      -- addi(0x08)
-      when "001000" =>
-        reg_we3 <= '1';
-        rt_rd_s <= '0';
-        rt_imm_s <= '1';
-        dmem_we <= '0';
-        alu_func <= "010";
-        -- calc_rdata_s <= '-';
-        is_branch <= '1';
-      -- slti(0x0A)
-      when "001010" =>
-      -- andi(0x0C)
-      when "001100" =>
-      -- ori(0x0D)
-      when "001101" =>
-      -- lw(0x23)
-      when "100011" =>
-      -- sw(0x2B)
-      when "101011" =>
-      when others =>
-    end case;
-  end process;
-
-  reg0 : regfile port map (
-    clk => clk,
-    a1 => instr0(25 downto 21),
-    rd1 => rs0, -- out
-    a2 => instr0(20 downto 16),
-    rd2 => rt0,
-    a3 => a30,
-    wd3 => wdata0,
-    we3 => reg_we3
-  );
-  rs <= rs0;
-  rt <= rt0;
-  a3 <= a30;
-  wdata <= wdata0;
-
-  rt_rd_mux2 : mux2 generic map (N => 5)
-    port map (
-      d0 => instr0(20 downto 16),
-      d1 => instr0(15 downto 11),
-      s => rt_rd_s,
-      y => a30 
-  );
-
-  -- sltn0: sltn port map (
-  --   a : rt0,
-  --   n : instr0(10 downto 6),
-  --   y : shamt
-  -- );
-
-  sgnext0 : sgnext port map (
-    a => instr0(15 downto 0),
-    y => immext
-  );
-
-  -- sigext_slt2 : sltn port map (
-  --   a : immext,
-  --   n : "000010",
-  --   y : br4,
-  -- );
-  -- br_addr <= std_logic_vector(unsigned(br4) + unsigned(pcn4));
-
-  rt_imm_mux2 : mux2 generic map (N => 32)
-    port map (
-      d0 => rt0,
-      d1 => immext,
-      s => rt_imm_s,
-      y => rt_imm0
-  );
-  rt_imm <= rt_imm0;
-
-  alu0: alu port map (
-    a => rs0,
-    b => rt_imm0,
-    f => alu_func,
-    y => aluout0, -- zero port is ignored
-    -- if negative or not
-    sgn => alu_sgn,
-    -- if a === b
-    zero => alu_zero
-  );
-  aluout <= aluout0;
-
-  -- for lw, sw instruction
-  dmem0 : dmem port map (
-    clk => clk,
-    -- write enable
-    we => dmem_we,
-    -- write data
-    wd => rt0,
-    addr => aluout0,
-    -- read data
-    rd => rdata0
-  );
-  rdata <= rdata0;
-
-  -- TODO: aluout_shamt_s
-
-  -- aluout_sltn_mux2 : mux2 port map (
-  --   d0 : aluout0,
-  --   d1 : shamt,
-  --   s : aluout_shamt_s,
-  --   y : calc_data0
-  -- );
-  -- calc <= calc0;
-
-  calc_rdata_mux2 : mux2 generic map (N => 32)
-    port map (
-      d0 => aluout0,
-      d1 => rdata0,
-      s => calc_rdata_s,
-      y => wdata0
-  );
-  wdata <= wdata0;
-
 end architecture;

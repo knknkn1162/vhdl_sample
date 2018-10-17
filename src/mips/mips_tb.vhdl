@@ -22,6 +22,7 @@ architecture behavior of mips_tb is
       rdata : out std_logic_vector(31 downto 0)
         );
   end component;
+
   signal clk, reset : std_logic;
   signal addr : std_logic_vector(31 downto 0);
   signal pc, pcnext : std_logic_vector(31 downto 0);
