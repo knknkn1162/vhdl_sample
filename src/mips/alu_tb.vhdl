@@ -10,8 +10,6 @@ architecture testbench of alu_tb is
       a, b : in std_logic_vector(31 downto 0);
       f : in std_logic_vector(2 downto 0);
       y : out std_logic_vector(31 downto 0);
-      -- if negative or not
-      sgn : out std_logic;
       -- if a === b
       zero : out std_logic
         );
@@ -19,7 +17,6 @@ architecture testbench of alu_tb is
 
   signal a, b, y : std_logic_vector(31 downto 0);
   signal f : std_logic_vector(2 downto 0);
-  signal sgn : std_logic;
   signal zero : std_logic;
 
 begin
@@ -27,7 +24,6 @@ begin
     a => a, b => b,
     y => y,
     f => f,
-    sgn => sgn,
     zero => zero
   );
 
@@ -39,9 +35,9 @@ begin
     a <= X"00000001"; b <= X"00000000"; wait for 10 ns; assert zero = '0';
 
     -- test sgn
-    a <= X"00000001"; b <= X"00000000"; f <= "111"; wait for 10 ns; assert sgn = '0';
-    a <= X"00000001"; b <= X"00000001"; f <= "111"; wait for 10 ns; assert sgn = '0';
-    a <= X"00000001"; b <= X"00000010"; f <= "111"; wait for 10 ns; assert sgn = '1';
+    a <= X"00000001"; b <= X"00000000"; f <= "111"; wait for 10 ns; assert y(0) = '0';
+    a <= X"00000001"; b <= X"00000001"; f <= "111"; wait for 10 ns; assert y(0) = '0';
+    a <= X"00000001"; b <= X"00000002"; f <= "111"; wait for 10 ns; assert y(0) = '1';
 
     -- success message
     assert false report "end of test" severity note;

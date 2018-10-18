@@ -7,8 +7,6 @@ entity alu is
     a, b : in std_logic_vector(31 downto 0);
     f : in std_logic_vector(2 downto 0);
     y : out std_logic_vector(31 downto 0);
-    -- if negative or not
-    sgn : out std_logic;
     -- if a === b
     zero : out std_logic
        );
@@ -29,8 +27,7 @@ begin
       when "111" =>
         -- when concurrent assignment(<=), error
         tmp := std_logic_vector(signed(a) - signed(b)); 
-        sgn <= tmp(31);
-        y <= tmp;
+        y <= X"0000000" & b"000" & tmp(31);
       when others => y <= (others => '-');
     end case;
     if a = b then
