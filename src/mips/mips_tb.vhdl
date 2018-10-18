@@ -69,6 +69,7 @@ begin
     addr <= X"00000000";
     wait for 1 ns; reset <= '0';
 
+    -- addi $rt, $rs, imm
     -- main:   addi $2, $0, 5      # initialize $2 = 5  0       20020005
     wait for clk_period/2;
     assert pc = X"00000000";
@@ -79,6 +80,7 @@ begin
     assert a3 = "00010";
     assert wdata = X"00000005";
 
+    -- addi $rt, $rs, imm
     -- addi $3, $0, 12     # initialize $3 = 12 4       2003000c
     wait for clk_period;
     assert pc = X"00000004";
@@ -89,6 +91,7 @@ begin
     assert a3 = "00011";
     assert wdata = X"0000000c";
 
+    --addi $rt, $rs, imm
     -- addi $7, $3, -9     # initialize $7 = 3  8       2067fff7
     wait for clk_period;
     assert pc = X"00000008";
@@ -99,6 +102,7 @@ begin
     assert a3 = "00111";
     assert wdata = X"00000003";
 
+    -- or $rd, $rs, $rt
     -- or   $4, $7, $2     # $4 <= 3 or 5 = 7   c       00e22025
     wait for clk_period;
     assert pc = X"0000000c";
@@ -109,6 +113,7 @@ begin
     assert a3 = "00100"; -- $4
     assert wdata = X"00000007";
 
+    -- and $rd, $rs, $rt
     -- and $5,  $3, $4     # $5 <= 12 and 7 = 4 10      00642824
     wait for clk_period;
     assert pc = X"00000010";
@@ -119,6 +124,7 @@ begin
     assert a3 = "00101"; -- $5
     assert wdata = X"00000004";
 
+    -- add $rd, $rs, $rt
     -- add $5,  $5, $4     # $5 = 4 + 7 = 11    14      00a42820
     wait for clk_period;
     assert pc = X"00000014";
@@ -129,6 +135,7 @@ begin
     assert a3 = "00101"; -- $5
     assert wdata = X"0000000b";
 
+    -- beq $rs, $rt, imm
     -- beq $5,  $7, end    # shouldnt be taken 18      10a7000a
     wait for clk_period;
     assert pc = X"00000018";
@@ -137,6 +144,7 @@ begin
     assert rt_imm = X"00000003"; -- $7
     assert pcnext = X"0000001c";
 
+    -- slt $rd, $rs, $rt
     -- slt $4,  $3, $4     # $4 = 12 < 7 = 0    1c      0064202a
     wait for clk_period;
     assert pc = X"0000001c";
@@ -147,6 +155,7 @@ begin
     assert a3 = "00100"; -- $4
     assert wdata = X"00000000";
 
+    -- beq $rs, $rt, imm
     -- beq $4,  $0, around # should be taken    20      10800001
     wait for clk_period;
     assert pc = X"00000020";
