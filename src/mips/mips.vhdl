@@ -32,9 +32,9 @@ architecture behavior of mips is
       -- alu
       alu_func : in std_logic_vector(2 downto 0);
       -- branch
-      is_branch, is_jmp : in std_logic;
+      is_branch : in std_logic;
       -- jump, branch, pc
-      -- pcn4_br_s, pcn_jmp_s : in std_logic;
+      pcn_jmp_s : in std_logic;
 
       -- for testbench
       pc : out std_logic_vector(31 downto 0);
@@ -60,9 +60,9 @@ architecture behavior of mips is
       -- alu
       alu_func : out std_logic_vector(2 downto 0);
       -- branch
-      is_branch, is_jmp : out std_logic
+      is_branch : out std_logic;
       -- jump, branch, pc
-      -- pcn4_br_s, pcn_jmp_s : in std_logic;
+      pcn_jmp_s : out std_logic
     );
   end component;
 
@@ -71,7 +71,8 @@ architecture behavior of mips is
   signal reg_we3, dmem_we : std_logic;
   signal rt_rd_s ,rt_imm_s, calc_rdata_s : std_logic;
   signal alu_func : std_logic_vector(2 downto 0);
-  signal is_branch, is_jmp : std_logic;
+  signal is_branch : std_logic;
+  signal pcn_jmp_s : std_logic;
 
 begin
   datapath0 : datapath port map (
@@ -81,8 +82,9 @@ begin
     reg_we3 => reg_we3, dmem_we => dmem_we,
     rt_rd_s => rt_rd_s, rt_imm_s => rt_imm_s, calc_rdata_s => calc_rdata_s,
     alu_func => alu_func,
-    is_branch => is_branch, is_jmp => is_jmp,
-    -- pcn4_br_s, => pcn4_br_s, pcn_jmp_s => pcn_jmp_s
+    is_branch => is_branch,
+    pcn_jmp_s => pcn_jmp_s,
+
     pc => pc,
     pcnext => pcnext,
     instr => instr0,
@@ -101,7 +103,8 @@ begin
     reg_we3 => reg_we3, dmem_we => dmem_we,
     rt_rd_s => rt_rd_s, rt_imm_s => rt_imm_s, calc_rdata_s => calc_rdata_s,
     alu_func => alu_func,
-    is_branch => is_branch, is_jmp => is_jmp
+    is_branch => is_branch,
+    pcn_jmp_s => pcn_jmp_s
   );
 
   instr <= instr0;

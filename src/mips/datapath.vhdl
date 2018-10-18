@@ -15,9 +15,9 @@ entity datapath is
     -- alu
     alu_func : in std_logic_vector(2 downto 0);
     -- branch
-    is_branch, is_jmp : in std_logic;
+    is_branch : in std_logic;
     -- jump, branch, pc
-    -- pcn4_br_s, pcn_jmp_s : in std_logic;
+    pcn_jmp_s : in std_logic;
 
     -- for testbench
     pc : out std_logic_vector(31 downto 0);
@@ -117,6 +117,7 @@ architecture behavior of datapath is
   signal br4, jmp4, pcn4, pcn, br_addr, jmp_addr : std_logic_vector(31 downto 0);
   signal pcnext0, pc0 : std_logic_vector(31 downto 0);
   signal pcn4_br_s : std_logic;
+  signal target : std_logic_vector(31 downto 0);
 
   -- imem, regfile
   signal a30 : std_logic_vector(4 downto 0);
@@ -141,15 +142,14 @@ begin
       y => pcn
   );
 
-  -- -- TODO: pcn_jmp_s
+  jump_mux2 : mux2 generic map (N => 32)
+    port map (
+      d0 => pcn,
+      d1 => jmp_addr,
+      s => pcn_jmp_s,
+      y => pcnext0
+  );
 
-  -- jump_mux2 : mux2 port map (
-  --   d0 => pcn,
-  --   d1 => jmp_addr,
-  --   s => pcn_jmp_s,
-  --   y => pcnext0
-  -- );
-  pcnext0 <= pcn;
   pcnext <= pcnext0;
 
   pcreg: flopr port map(clk, reset, pcnext0, pc0);
@@ -163,15 +163,14 @@ begin
     rd => instr0
   );
   instr <= instr0;
+  target <= "000000" & instr0(25 downto 0);
 
-  -- jmp_slt2 : sltn port map (
-  --   a : "000000" & instr(25 downto 0),
-  --   n : "00010",
-  --   y : jmp4
-  -- );
-  -- jmp_addr <= pcn4(31 downto 28) & jmp4(27 downto 0);
-
-
+  jmp_slt2 : sltn port map (
+    a => target,
+    n => "00010",
+    y => jmp4
+  );
+  jmp_addr <= pcn4(31 downto 28) & jmp4(27 downto 0);
 
   reg0 : regfile port map (
     clk => clk,

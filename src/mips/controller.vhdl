@@ -12,9 +12,9 @@ entity controller is
     -- alu
     alu_func : out std_logic_vector(2 downto 0);
     -- branch
-    is_branch, is_jmp : out std_logic
+    is_branch : out std_logic;
     -- jump, branch
-    -- pcn4_br_s, pcn_jmp_s : in std_logic;
+    pcn_jmp_s : out std_logic
   );
 end entity;
 
@@ -32,7 +32,7 @@ begin
     variable rt_rd_s_v : std_logic;
     variable calc_rdata_s_v : std_logic;
     variable is_branch_v : std_logic;
-    variable is_jmp_v : std_logic;
+    variable pcn_jmp_s_v : std_logic;
     variable dmem_we_v : std_logic;
   begin
     case opcode is
@@ -68,7 +68,7 @@ begin
         end case;
       -- j(0x02)
       when "000010" =>
-        is_jmp_v := '1';
+        pcn_jmp_s_v := '1';
       -- jal(0x03)
       -- when "000011" =>
       -- I-type
@@ -116,10 +116,10 @@ begin
       when others =>
     end case;
 
+    pcn_jmp_s <= pcn_jmp_s_v;
     dmem_we <= dmem_we_v;
     rt_rd_s <= rt_rd_s_v;
     calc_rdata_s <= calc_rdata_s_v;
     is_branch <= is_branch_v;
-    is_jmp <= is_jmp_v;
   end process;
 end architecture;

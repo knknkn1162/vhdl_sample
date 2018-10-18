@@ -220,6 +220,13 @@ begin
     assert a3 = "00010"; -- $2
     assert reg_wd = X"00000007";
 
+    -- j    end            # should be taken    3c      08000011
+    wait for clk_period;
+    assert pc = X"0000003c";
+    assert pcnext =X"00000044";
+
+    -- end:    sw   $2, 84($0)     # write adr 84 = 7   44      ac020054
+
     -- clk, reset : in std_logic;
     -- addr : in std_logic_vector(31 downto 0);
     -- -- for testbench
