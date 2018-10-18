@@ -137,6 +137,16 @@ begin
     assert rt_imm = X"00000003"; -- $7
     assert pcnext = X"0000001c";
 
+    -- slt $4,  $3, $4     # $4 = 12 < 7 = 0    1c      0064202a
+    wait for clk_period;
+    assert pc = X"0000001c";
+    assert instr = X"0064202a";
+    assert rs = X"0000000c"; -- $3
+    assert rt_imm = X"00000007"; -- $4
+    assert aluout = X"00000000";
+    assert a3 = "00100"; -- $4
+    assert wdata = X"00000000";
+
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;

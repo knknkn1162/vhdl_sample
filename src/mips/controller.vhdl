@@ -61,7 +61,8 @@ begin
           when "100101" =>
             alu_func <= "001";
           -- slt(0x2A)
-          -- when "101010" =>
+          when "101010" =>
+            alu_func <= "111";
           when others =>
         end case;
       -- j(0x02)

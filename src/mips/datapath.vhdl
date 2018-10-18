@@ -96,8 +96,6 @@ architecture behavior of datapath is
       a, b : in std_logic_vector(31 downto 0);
       f : in std_logic_vector(2 downto 0);
       y : out std_logic_vector(31 downto 0);
-      -- if negative or not
-      sgn : out std_logic;
       zero : out std_logic
         );
   end component;
@@ -230,8 +228,6 @@ begin
     b => rt_imm0,
     f => alu_func,
     y => aluout0, -- zero port is ignored
-    -- if negative or not
-    sgn => alu_sgn,
     -- if a === b
     zero => alu_zero
   );
