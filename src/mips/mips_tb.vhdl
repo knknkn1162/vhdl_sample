@@ -164,6 +164,39 @@ begin
     assert rt_imm = X"00000000"; -- $0
     assert pcnext = X"00000028"; -- pc + 4 + (imm<<2)
 
+    -- slt $rd, $rs, $rt
+    -- around: slt $4,  $7, $2     # $4 = 3 < 5 = 1     28      00e2202a
+    wait for clk_period;
+    assert pc = X"00000028";
+    assert instr = X"00e2202a";
+    assert rs = X"00000003"; -- $4
+    assert rt_imm = X"00000005"; -- $7
+    assert aluout = X"00000001";
+    assert a3 = "00100"; -- $4
+    assert wdata = X"00000001";
+
+    -- add $rd, $rs, $rt
+    -- add $7,  $4, $5     # $7 = 1 + 11 = 12   2c      00853820
+    wait for clk_period;
+    assert pc = X"0000002c";
+    assert instr = X"00853820";
+    assert rs = X"00000001"; -- $4
+    assert rt_imm = X"0000000b"; -- $5
+    assert aluout = X"0000000c";
+    assert a3 = "00111"; -- $7
+    assert wdata = X"0000000c";
+
+    -- sub $rd, $rs, $rt
+    -- sub $7,  $7, $2     # $7 = 12 - 5 = 7    30      00e23822
+    wait for clk_period;
+    assert pc = X"00000030";
+    assert instr = X"00e23822";
+    assert rs = X"0000000c"; -- $7
+    assert rt_imm = X"00000005"; -- $2
+    assert aluout = X"00000007";
+    assert a3 = "00111"; -- $7
+    assert wdata = X"00000007";
+
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;
