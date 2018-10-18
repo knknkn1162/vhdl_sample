@@ -37,12 +37,13 @@ begin
   stim_proc : process
   begin
     wait for clk_period*2 + clk_period/2;
-    load <= (X"00000001", X"00000002");
-    rst <= '1'; wait for 1 ns; rst <= '0'; 
-    wait for clk_period; assert ans = X"00000001";
+    load <= (X"00000001", X"00000002", X"00000003", X"00000004");
+    wait for 1 ns;
+    rst <= '1'; wait for 1 ns; rst <= '0'; assert ans = X"00000001";
     wait for clk_period; assert ans = X"00000002";
+    wait for clk_period; assert ans = X"00000003";
+    wait for clk_period; assert ans = X"00000004";
     wait for clk_period; assert ans = X"00000001";
-    wait for clk_period; assert ans = X"00000002";
     stop <= TRUE;
     -- success message
     assert false report "end of test" severity note;
