@@ -185,7 +185,6 @@ begin
   );
   rs <= rs0;
   rt <= rt0;
-  a3 <= a30;
   wdata <= wdata0;
 
   rt_rd_mux2 : mux2 generic map (N => 5)
@@ -195,6 +194,7 @@ begin
       s => rt_rd_s,
       y => a30 
   );
+  a3 <= a30;
 
   -- sltn0: sltn port map (
   --   a : rt0,

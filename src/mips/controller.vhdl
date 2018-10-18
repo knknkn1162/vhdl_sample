@@ -29,11 +29,11 @@ begin
   -- calc_rdata_s(lw or others)
   process(opcode, funct)
     -- default
-    variable rt_rd_s_v : std_logic := '0';
-    variable calc_rdata_s_v : std_logic := '0';
-    variable is_branch_v : std_logic := '0';
-    variable is_jmp_v : std_logic := '0';
-    variable dmem_we_v : std_logic := '0';
+    variable rt_rd_s_v : std_logic;
+    variable calc_rdata_s_v : std_logic;
+    variable is_branch_v : std_logic;
+    variable is_jmp_v : std_logic;
+    variable dmem_we_v : std_logic;
   begin
     case opcode is
       -- R-type
@@ -102,7 +102,11 @@ begin
         alu_func <= "001";
       -- lw(0x23)
       when "100011" =>
+        reg_we3 <= '1';
         calc_rdata_s_v := '1';
+        -- why?
+        rt_rd_s_v := '0';
+        alu_func <= "010";
       -- sw(0x2B)
       when "101011" =>
         reg_we3 <= '0';
@@ -111,8 +115,9 @@ begin
         alu_func <= "010";
       when others =>
     end case;
-    rt_rd_s <= rt_rd_s_v;
+
     dmem_we <= dmem_we_v;
+    rt_rd_s <= rt_rd_s_v;
     calc_rdata_s <= calc_rdata_s_v;
     is_branch <= is_branch_v;
     is_jmp <= is_jmp_v;

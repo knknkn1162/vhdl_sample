@@ -207,6 +207,30 @@ begin
     assert rt_imm = X"00000044"; -- 68
     assert aluout = X"00000050"; -- rs+imm
 
+    -- lw $rt, imm($rs)
+    -- lw   $2, 80($0)     # $2 = [80] = 7      38      8c020050
+    wait for clk_period;
+    assert pc = X"00000038";
+    assert instr = X"8c020050";
+    assert rs = X"00000000"; -- $0
+    assert rt_imm = X"00000050"; -- 80
+    assert aluout = X"00000050"; -- rs+imm
+    assert rdata = X"00000007"; -- [0x50] = 7
+    assert a3 = "00010"; -- $2
+    assert wdata = X"00000007";
+
+    -- clk, reset : in std_logic;
+    -- addr : in std_logic_vector(31 downto 0);
+    -- -- for testbench
+    -- pc : out std_logic_vector(31 downto 0);
+    -- pcnext : out std_logic_vector(31 downto 0);
+    -- instr : out std_logic_vector(31 downto 0);
+    -- a3 : out std_logic_vector(4 downto 0);
+    -- wdata : out std_logic_vector(31 downto 0);
+    -- rs, rt : out std_logic_vector(31 downto 0);
+    -- rt_imm : out std_logic_vector(31 downto 0);
+    -- aluout : out std_logic_vector(31 downto 0);
+    -- rdata : out std_logic_vector(31 downto 0)
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;
