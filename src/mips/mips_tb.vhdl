@@ -147,6 +147,14 @@ begin
     assert a3 = "00100"; -- $4
     assert wdata = X"00000000";
 
+    -- beq $4,  $0, around # should be taken    20      10800001
+    wait for clk_period;
+    assert pc = X"00000020";
+    assert instr = X"10800001";
+    assert rs = X"00000000"; -- $4
+    assert rt_imm = X"00000000"; -- $0
+    assert pcnext = X"00000028"; -- pc + 4 + (imm<<2)
+
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;
