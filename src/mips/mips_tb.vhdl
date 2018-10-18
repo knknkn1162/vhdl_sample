@@ -197,6 +197,16 @@ begin
     assert a3 = "00111"; -- $7
     assert wdata = X"00000007";
 
+    -- sw $rt, imm($rs)
+    -- sw   $7, 68($3)     # [80] = 7           34      ac670044
+    wait for clk_period;
+    assert pc = X"00000034";
+    assert instr = X"ac670044";
+    assert rs = X"0000000c"; -- $3
+    assert rt = X"00000007"; -- $7
+    assert rt_imm = X"00000044"; -- 68
+    assert aluout = X"00000050"; -- rs+imm
+
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;

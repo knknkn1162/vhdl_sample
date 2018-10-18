@@ -113,6 +113,11 @@ begin
         calc_rdata_s_v := '1';
       -- sw(0x2B)
       when "101011" =>
+        reg_we3 <= '0';
+        rt_rd_s <= '0';
+        rt_imm_s <= '1';
+        dmem_we <= '1';
+        alu_func <= "010";
       when others =>
     end case;
     calc_rdata_s <= calc_rdata_s_v;
