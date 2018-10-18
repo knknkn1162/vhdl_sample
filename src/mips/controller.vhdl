@@ -29,17 +29,18 @@ begin
   -- calc_rdata_s(lw or others)
   process(opcode, funct)
     -- default
+    variable rt_rd_s_v : std_logic := '0';
     variable calc_rdata_s_v : std_logic := '0';
     variable is_branch_v : std_logic := '0';
     variable is_jmp_v : std_logic := '0';
+    variable dmem_we_v : std_logic := '0';
   begin
     case opcode is
       -- R-type
       when "000000" =>
         reg_we3 <= '1';
-        rt_rd_s <= '1';
+        rt_rd_s_v := '1';
         rt_imm_s <= '0';
-        dmem_we <= '0';
         -- funct
         case funct is
           -- sll(0x00)
@@ -78,35 +79,26 @@ begin
         is_branch_v := '1';
       -- bne(0x05)
       -- when "000101" =>
-      --   reg_we3 <= '0';
-      --   rt_rd_s <= '0';
-      --   rt_imm_s <= '1';
-      --   dmem_we <= '1';
+      --   rt_imm_s <= '0';
       --   is_branch_v := '1';
       -- blez(0x06)
       -- when "000110" =>
       -- addi(0x08)
       when "001000" =>
         reg_we3 <= '1';
-        rt_rd_s <= '0';
         rt_imm_s <= '1';
-        dmem_we <= '0';
         alu_func <= "010";
       -- slti(0x0A)
       -- when "001010" =>
       -- andi(0x0C)
       when "001100" =>
         reg_we3 <= '1';
-        rt_rd_s <= '0';
         rt_imm_s <= '1';
-        dmem_we <= '0';
         alu_func <= "000";
       -- ori(0x0D)
       when "001101" =>
         reg_we3 <= '1';
-        rt_rd_s <= '0';
         rt_imm_s <= '1';
-        dmem_we <= '0';
         alu_func <= "001";
       -- lw(0x23)
       when "100011" =>
@@ -114,12 +106,13 @@ begin
       -- sw(0x2B)
       when "101011" =>
         reg_we3 <= '0';
-        rt_rd_s <= '0';
         rt_imm_s <= '1';
-        dmem_we <= '1';
+        dmem_we_v := '1';
         alu_func <= "010";
       when others =>
     end case;
+    rt_rd_s <= rt_rd_s_v;
+    dmem_we <= dmem_we_v;
     calc_rdata_s <= calc_rdata_s_v;
     is_branch <= is_branch_v;
     is_jmp <= is_jmp_v;
