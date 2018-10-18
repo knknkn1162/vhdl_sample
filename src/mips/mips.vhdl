@@ -10,7 +10,7 @@ entity mips is
     pcnext : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
     a3 : out std_logic_vector(4 downto 0);
-    wdata : out std_logic_vector(31 downto 0);
+    dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
     rs, rt : out std_logic_vector(31 downto 0);
     rt_imm : out std_logic_vector(31 downto 0);
     aluout : out std_logic_vector(31 downto 0);
@@ -41,7 +41,7 @@ architecture behavior of mips is
       pcnext : out std_logic_vector(31 downto 0);
       instr : out std_logic_vector(31 downto 0);
       a3 : out std_logic_vector(4 downto 0);
-      wdata : out std_logic_vector(31 downto 0);
+      dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
       rs, rt : out std_logic_vector(31 downto 0);
       rt_imm : out std_logic_vector(31 downto 0);
       aluout : out std_logic_vector(31 downto 0);
@@ -87,7 +87,7 @@ begin
     pcnext => pcnext,
     instr => instr0,
     a3 => a3,
-    wdata => wdata,
+    dmem_wd => dmem_wd, reg_wd => reg_wd,
     rs => rs, rt => rt,
     rt_imm => rt_imm,
     aluout => aluout,

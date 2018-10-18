@@ -24,7 +24,7 @@ entity datapath is
     pcnext : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
     a3 : out std_logic_vector(4 downto 0);
-    wdata : out std_logic_vector(31 downto 0);
+    dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
     rs, rt : out std_logic_vector(31 downto 0);
     rt_imm : out std_logic_vector(31 downto 0);
     aluout : out std_logic_vector(31 downto 0);
@@ -120,7 +120,7 @@ architecture behavior of datapath is
 
   -- imem, regfile
   signal a30 : std_logic_vector(4 downto 0);
-  signal instr0, rs0, rt0, wdata0, rt_imm0 : std_logic_vector(31 downto 0);
+  signal instr0, rs0, rt0, dmem_wd0, reg_wd0, rt_imm0 : std_logic_vector(31 downto 0);
 
   -- alu, dmem
   signal aluout0, calc0, rdata0 : std_logic_vector(31 downto 0);
@@ -180,12 +180,12 @@ begin
     a2 => instr0(20 downto 16),
     rd2 => rt0,
     a3 => a30,
-    wd3 => wdata0,
+    wd3 => reg_wd0,
     we3 => reg_we3
   );
   rs <= rs0;
   rt <= rt0;
-  wdata <= wdata0;
+  reg_wd <= reg_wd0;
 
   rt_rd_mux2 : mux2 generic map (N => 5)
     port map (
@@ -232,6 +232,7 @@ begin
     zero => alu_zero
   );
   aluout <= aluout0;
+  dmem_wd0 <= rt0;
 
   -- for lw, sw instruction
   dmem0 : dmem port map (
@@ -239,11 +240,13 @@ begin
     -- write enable
     we => dmem_we,
     -- write data
-    wd => rt0,
+    wd => dmem_wd0,
     addr => aluout0,
     -- read data
     rd => rdata0
   );
+
+  dmem_wd <= dmem_wd0;
   rdata <= rdata0;
 
   -- TODO: aluout_shamt_s
@@ -261,8 +264,8 @@ begin
       d0 => aluout0,
       d1 => rdata0,
       s => calc_rdata_s,
-      y => wdata0
+      y => reg_wd0
   );
-  wdata <= wdata0;
+  reg_wd <= reg_wd0;
 
 end architecture;

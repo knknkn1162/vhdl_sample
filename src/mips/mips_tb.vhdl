@@ -15,7 +15,7 @@ architecture behavior of mips_tb is
       pcnext : out std_logic_vector(31 downto 0);
       instr : out std_logic_vector(31 downto 0);
       a3 : out std_logic_vector(4 downto 0);
-      wdata : out std_logic_vector(31 downto 0);
+      dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
       rs, rt : out std_logic_vector(31 downto 0);
       rt_imm : out std_logic_vector(31 downto 0);
       aluout : out std_logic_vector(31 downto 0);
@@ -28,7 +28,7 @@ architecture behavior of mips_tb is
   signal pc, pcnext : std_logic_vector(31 downto 0);
   signal a3 : std_logic_vector(4 downto 0);
   signal instr : std_logic_vector(31 downto 0);
-  signal wdata : std_logic_vector(31 downto 0);
+  signal dmem_wd, reg_wd : std_logic_vector(31 downto 0);
   signal rs, rt, rt_imm : std_logic_vector(31 downto 0);
   signal aluout : std_logic_vector(31 downto 0);
   signal rdata : std_logic_vector(31 downto 0);
@@ -45,7 +45,7 @@ begin
     pcnext => pcnext,
     instr => instr,
     a3 => a3,
-    wdata => wdata,
+    dmem_wd => dmem_wd, reg_wd => reg_wd,
     rs => rs, rt => rt,
     rt_imm => rt_imm,
     aluout => aluout,
@@ -78,7 +78,7 @@ begin
     assert rt_imm = X"00000005";
     assert aluout = X"00000005";
     assert a3 = "00010";
-    assert wdata = X"00000005";
+    assert reg_wd = X"00000005";
 
     -- addi $rt, $rs, imm
     -- addi $3, $0, 12     # initialize $3 = 12 4       2003000c
@@ -89,7 +89,7 @@ begin
     assert rt_imm = X"0000000c";
     assert aluout = X"0000000c";
     assert a3 = "00011";
-    assert wdata = X"0000000c";
+    assert reg_wd = X"0000000c";
 
     --addi $rt, $rs, imm
     -- addi $7, $3, -9     # initialize $7 = 3  8       2067fff7
@@ -100,7 +100,7 @@ begin
     assert rt_imm = X"FFFFFFF7";
     assert aluout = X"00000003";
     assert a3 = "00111";
-    assert wdata = X"00000003";
+    assert reg_wd = X"00000003";
 
     -- or $rd, $rs, $rt
     -- or   $4, $7, $2     # $4 <= 3 or 5 = 7   c       00e22025
@@ -111,7 +111,7 @@ begin
     assert rt_imm = X"00000005"; -- $2
     assert aluout = X"00000007";
     assert a3 = "00100"; -- $4
-    assert wdata = X"00000007";
+    assert reg_wd = X"00000007";
 
     -- and $rd, $rs, $rt
     -- and $5,  $3, $4     # $5 <= 12 and 7 = 4 10      00642824
@@ -122,7 +122,7 @@ begin
     assert rt_imm = X"00000007"; -- $4
     assert aluout = X"00000004";
     assert a3 = "00101"; -- $5
-    assert wdata = X"00000004";
+    assert reg_wd = X"00000004";
 
     -- add $rd, $rs, $rt
     -- add $5,  $5, $4     # $5 = 4 + 7 = 11    14      00a42820
@@ -133,7 +133,7 @@ begin
     assert rt_imm = X"00000007"; -- $4
     assert aluout = X"0000000b";
     assert a3 = "00101"; -- $5
-    assert wdata = X"0000000b";
+    assert reg_wd = X"0000000b";
 
     -- beq $rs, $rt, imm
     -- beq $5,  $7, end    # shouldnt be taken 18      10a7000a
@@ -153,7 +153,7 @@ begin
     assert rt_imm = X"00000007"; -- $4
     assert aluout = X"00000000";
     assert a3 = "00100"; -- $4
-    assert wdata = X"00000000";
+    assert reg_wd = X"00000000";
 
     -- beq $rs, $rt, imm
     -- beq $4,  $0, around # should be taken    20      10800001
@@ -173,7 +173,7 @@ begin
     assert rt_imm = X"00000005"; -- $7
     assert aluout = X"00000001";
     assert a3 = "00100"; -- $4
-    assert wdata = X"00000001";
+    assert reg_wd = X"00000001";
 
     -- add $rd, $rs, $rt
     -- add $7,  $4, $5     # $7 = 1 + 11 = 12   2c      00853820
@@ -184,7 +184,7 @@ begin
     assert rt_imm = X"0000000b"; -- $5
     assert aluout = X"0000000c";
     assert a3 = "00111"; -- $7
-    assert wdata = X"0000000c";
+    assert reg_wd = X"0000000c";
 
     -- sub $rd, $rs, $rt
     -- sub $7,  $7, $2     # $7 = 12 - 5 = 7    30      00e23822
@@ -195,7 +195,7 @@ begin
     assert rt_imm = X"00000005"; -- $2
     assert aluout = X"00000007";
     assert a3 = "00111"; -- $7
-    assert wdata = X"00000007";
+    assert reg_wd = X"00000007";
 
     -- sw $rt, imm($rs)
     -- sw   $7, 68($3)     # [80] = 7           34      ac670044
@@ -206,6 +206,7 @@ begin
     assert rt = X"00000007"; -- $7
     assert rt_imm = X"00000044"; -- 68
     assert aluout = X"00000050"; -- rs+imm
+    assert dmem_wd = X"00000007";
 
     -- lw $rt, imm($rs)
     -- lw   $2, 80($0)     # $2 = [80] = 7      38      8c020050
@@ -217,7 +218,7 @@ begin
     assert aluout = X"00000050"; -- rs+imm
     assert rdata = X"00000007"; -- [0x50] = 7
     assert a3 = "00010"; -- $2
-    assert wdata = X"00000007";
+    assert reg_wd = X"00000007";
 
     -- clk, reset : in std_logic;
     -- addr : in std_logic_vector(31 downto 0);
@@ -226,7 +227,7 @@ begin
     -- pcnext : out std_logic_vector(31 downto 0);
     -- instr : out std_logic_vector(31 downto 0);
     -- a3 : out std_logic_vector(4 downto 0);
-    -- wdata : out std_logic_vector(31 downto 0);
+    -- reg_wd : out std_logic_vector(31 downto 0);
     -- rs, rt : out std_logic_vector(31 downto 0);
     -- rt_imm : out std_logic_vector(31 downto 0);
     -- aluout : out std_logic_vector(31 downto 0);
