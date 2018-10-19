@@ -14,7 +14,7 @@ end entity;
 architecture behavior of flopr is
 begin
   process(clk, rst) begin
-    if reset='1' then
+    if rst='1' then
       y <= (others => '0');
     elsif rising_edge(clk) then
       y <= a;
