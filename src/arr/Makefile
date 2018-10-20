@@ -36,3 +36,7 @@ relu:
 	make clean
 	ghdl -a weight_pkg.vhdl relu.vhdl relu_tb.vhdl
 	make er F=relu
+nn1:
+	make clean
+	ghdl -a weight_pkg.vhdl relu.vhdl weight.vhdl nn1.vhdl nn1_tb.vhdl
+	make er F=nn
