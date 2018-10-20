@@ -3,11 +3,11 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.perceptron_type.ALL;
 
-entity perceptron_tb is
+entity perceptron_and_tb is
 end entity;
 
-architecture testbench of perceptron_tb is
-  component perceptron
+architecture testbench of perceptron_and_tb is
+  component perceptron_and
     generic(N : integer := N);
     port (
       x : in arrN_type;
@@ -18,7 +18,7 @@ architecture testbench of perceptron_tb is
   signal x : arrN_type;
   signal y : std_logic;
 begin
-  uut: perceptron port map (
+  uut: perceptron_and port map (
     x, y
   );
 

@@ -1,21 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
-package perceptron_type is
-  constant N : integer := 2;
-  constant DIM : integer := 16;
-  subtype short_type is integer range -(2**(DIM-1)) to 2**(DIM-1)-1;
-  type arrN_type is array(0 to N-1) of std_logic;
-  type weight_type is array(0 to N-1) of short_type;
-end package;
-
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.perceptron_type.ALL;
 
-entity perceptron is
+entity perceptron_and is
   generic(N : integer := N);
   port (
     x : in arrN_type;
@@ -23,7 +11,7 @@ entity perceptron is
   );
 end entity;
 
-architecture behavior of perceptron is
+architecture behavior of perceptron_and is
   constant w : weight_type := (5, 5);
   constant theta : short_type := 7;
 begin
@@ -36,7 +24,7 @@ begin
         sum := sum + w(i);
       end if;
     end loop;
-    if sum > theta then
+    if sum - theta > 0 then
       y <= '1';
     else
       y <= '0';
