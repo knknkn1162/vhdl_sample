@@ -6,9 +6,9 @@ use work.weight_pkg.ALL;
 entity weight is
   generic(M: integer; N : integer);
   port (
-    x : in arr_type(0 to N-1);
+    x : in arr_type(0 to M-1);
     w : in mat_type(0 to N*M-1);
-    a : out arr_type(0 to M-1)
+    a : out arr_type(0 to N-1)
   );
 end entity;
 
@@ -21,10 +21,10 @@ begin
     if is_X(x(0)) then
       a <= (others => (others => '-'));
     else
-      for i in 0 to M-1 loop
+      for i in 0 to N-1 loop
         sum := 0;
-        for j in 0 to N-1 loop
-          sum := sum + to_integer(signed(indexat(w, i, j, N)) * signed(x(j)));
+        for j in 0 to M-1 loop
+          sum := sum + to_integer(signed(indexat(w, i, j, M)) * signed(x(j)));
         end loop;
         a(i) <= std_logic_vector(to_signed(sum, x(0)'length));
       end loop;
