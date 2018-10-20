@@ -12,6 +12,7 @@ architecture behavior of weight_tb is
     generic(M: integer; N : integer);
     port (
       x : in arr_type(0 to N-1);
+      w : in mat_type(0 to N*M-1);
       a : out arr_type(0 to M-1)
     );
   end component;
@@ -19,12 +20,13 @@ architecture behavior of weight_tb is
   constant M : integer := 3;
   constant N : integer := 2;
   signal x : arr_type(0 to N-1);
+  constant w : mat_type(0 to M*N-1) := (X"00000001", X"00000002", X"00000003", X"00000004", X"00000005", X"00000006");
   signal a : arr_type(0 to M-1);
 
 begin
   uut : weight generic map (M=>M, N=>N) 
     port map (
-      x => x, a => a
+      x => x, w => w, a => a
   );
 
   stim_proc: process
