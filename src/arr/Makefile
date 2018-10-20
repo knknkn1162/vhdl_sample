@@ -28,3 +28,7 @@ pc_nor:
 	make clean
 	ghdl -a perceptron_type.vhdl perceptron_nor.vhdl perceptron_nor_tb.vhdl
 	make er F=perceptron_nor
+weight:
+	make clean
+	ghdl -a weight_pkg.vhdl weight_const_pkg.vhdl weight.vhdl weight_tb.vhdl
+	make er F=weight
