@@ -32,3 +32,7 @@ weight:
 	make clean
 	ghdl -a weight_pkg.vhdl weight_const_pkg.vhdl weight.vhdl weight_tb.vhdl
 	make er F=weight
+relu:
+	make clean
+	ghdl -a weight_pkg.vhdl weight_const_pkg.vhdl relu.vhdl relu_tb.vhdl
+	make er F=relu
