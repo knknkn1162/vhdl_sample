@@ -16,7 +16,15 @@ all:
 	make a
 	ghdl -a ${F}_tb.$(VHDL)
 	ghdl -r ${F}_tb --vcd=out.vcd
-pc_add:
+pc_and:
 	make clean
 	ghdl -a perceptron_type.vhdl perceptron_and.vhdl perceptron_and_tb.vhdl
 	make er F=perceptron_and
+pc_nand:
+	make clean
+	ghdl -a perceptron_type.vhdl perceptron_nand.vhdl perceptron_nand_tb.vhdl
+	make er F=perceptron_and
+pc_nor:
+	make clean
+	ghdl -a perceptron_type.vhdl perceptron_nor.vhdl perceptron_nor_tb.vhdl
+	make er F=perceptron_nor
