@@ -7,6 +7,7 @@ entity weight is
   generic(M: integer; N : integer);
   port (
     x : in arr_type(0 to M-1);
+    b : in arr_type(0 to N-1);
     w : in mat_type(0 to N*M-1);
     a : out arr_type(0 to N-1)
   );
@@ -22,7 +23,7 @@ begin
       a <= (others => (others => '-'));
     else
       for i in 0 to N-1 loop
-        sum := 0;
+        sum := to_integer(signed(b(i)));
         for j in 0 to M-1 loop
           sum := sum + to_integer(signed(indexat(w, i, j, M)) * signed(x(j)));
         end loop;
