@@ -42,5 +42,5 @@ relu_n:
 	make er F=relu_n
 nn3:
 	make clean
-	ghdl -a weight_pkg.vhdl relu.vhdl weight.vhdl nn3.vhdl nn3_tb.vhdl
+	ghdl -a weight_pkg.vhdl relu.vhdl relu_n.vhdl weight.vhdl nn3.vhdl nn3_tb.vhdl
 	make er F=nn3
