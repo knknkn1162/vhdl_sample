@@ -32,7 +32,10 @@ begin
     wait for 20 ns;
     a <= "000010"; b <= "000010"; wait for 10 ns; c <= "000000000100";
     a <= "001000"; b <= "001000"; wait for 10 ns; c <= "000001000000";
-    a <= "100000"; b <= "100000"; wait for 10 ns; c <= "010000000000";
+    -- 16*(-32)
+    a <= "010000"; b <= "100000"; wait for 10 ns; c <= X"FE0";
+    -- (-1)*(-1)
+    a <= "111111"; b <= "111111"; wait for 10 ns; c <= "000000000001";
     -- success message
     assert false report "end of test" severity note;
     wait;
