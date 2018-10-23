@@ -4,14 +4,14 @@ use IEEE.NUMERIC_STD.ALL;
 use work.nn_pkg.ALL;
 use work.nn_const_pkg.ALL;
 
-entity nn_ex is
+entity nn is
   port (
     x : in arr_type(M-1 downto 0);
     y : out std_logic_vector(N-1 downto 0)
   );
 end entity;
 
-architecture behavior of nn_ex is
+architecture behavior of nn is
   component weightmult is
     generic(N: natural);
     port (
@@ -29,9 +29,6 @@ architecture behavior of nn_ex is
   end component;
 
   signal a1 : darr_type(0 to N1-1);
-  signal z1 : arr_type(0 to N1-1);
-  signal a2 : darr_type(0 to N2-1);
-  signal z2 : arr_type(0 to N2-1);
 
 begin
   gen_mult : for i in 0 to N1-1 generate
@@ -46,7 +43,7 @@ begin
   gen_sigm : for i in 0 to N1-1 generate
     sigmoidal0 : sigmoidal port map (
       a => a1(i),
-      z => z1(i)
+      z => z(i)
     );
   end generate;
 end architecture;
