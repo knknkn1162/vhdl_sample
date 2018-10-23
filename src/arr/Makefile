@@ -28,22 +28,6 @@ pc_nor:
 	make clean
 	ghdl -a perceptron_type.vhdl perceptron_nor.vhdl perceptron_nor_tb.vhdl
 	make er F=perceptron_nor
-weight:
-	make clean
-	ghdl -a weight_pkg.vhdl weight.vhdl weight_tb.vhdl
-	make er F=weight
-relu:
-	make clean
-	ghdl -a relu.vhdl relu_tb.vhdl
-	make er F=relu
-relu_n:
-	make clean
-	ghdl -a weight_pkg.vhdl relu.vhdl relu_n.vhdl relu_n_tb.vhdl
-	make er F=relu_n
-nn3:
-	make clean
-	ghdl -a weight_pkg.vhdl relu.vhdl relu_n.vhdl weight.vhdl nn3.vhdl nn3_tb.vhdl
-	make er F=nn3
 sigmoidal:
 	make clean
 	ghdl -a nn_pkg.vhdl sigmoidal.vhdl sigmoidal_tb.vhdl
@@ -52,8 +36,8 @@ dot:
 	make clean
 	ghdl -a nn_pkg.vhdl dot.vhdl dot_tb.vhdl
 	make er F=dot
-nn_ex:
+nn:
 	make clean
-	ghdl -a nn_pkg.vhdl nn_const_pkg.vhdl weightmult.vhdl sigmoidal.vhdl nn_ex.vhdl
-	make er F=nn_ex
+	ghdl -a nn_pkg.vhdl dot.vhdl sigmoidal.vhdl nn.vhdl
+	make er F=nn
 
