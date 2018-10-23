@@ -1,9 +1,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.weight16_pkg.ALL;
+use work.nn_pkg.ALL;
 
-entity weight16 is
+entity weightmult is
   generic(N: natural);
   port (
     x : in arr_type(0 to N-1);
@@ -12,7 +12,7 @@ entity weight16 is
   );
 end entity;
 
-architecture behavior of weight16 is
+architecture behavior of weightmult is
 begin
   process(x, w)
     variable sum : integer;

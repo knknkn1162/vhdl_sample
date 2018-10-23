@@ -44,3 +44,7 @@ nn3:
 	make clean
 	ghdl -a weight_pkg.vhdl relu.vhdl relu_n.vhdl weight.vhdl nn3.vhdl nn3_tb.vhdl
 	make er F=nn3
+sigmoidal:
+	make clean
+	ghdl -a nn_pkg.vhdl sigmoidal.vhdl sigmoidal_tb.vhdl
+	make er F=sigmoidal

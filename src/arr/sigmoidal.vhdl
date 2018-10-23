@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.weight16_pkg.ALL;
+use work.nn_pkg.ALL;
 
 entity sigmoidal is
   port (
@@ -13,7 +13,7 @@ end entity;
 architecture behavior of sigmoidal is
   function conv(inp : std_logic_vector) return integer is
     variable a : integer range 0 to 2**(DSIZE-1)-1;
-    variable b : integer range 0 to 2**SIZE-1;
+    variable b : integer range -(2**(SIZE-1)) to 2**(SIZE-1)-1;
   begin
     a := to_integer(abs(signed(inp)));
     if(a=0) then b := 0;
@@ -33,5 +33,11 @@ architecture behavior of sigmoidal is
     end if;
   end function;
 begin
-  z <= std_logic_vector(to_unsigned(conv(input), SIZE));
+  process(input) begin
+    if is_X(input) then
+      z <= (others => '-');
+    else
+      z <= std_logic_vector(to_signed(conv(input), SIZE));
+    end if;
+  end process;
 end architecture;
