@@ -48,3 +48,12 @@ sigmoidal:
 	make clean
 	ghdl -a nn_pkg.vhdl sigmoidal.vhdl sigmoidal_tb.vhdl
 	make er F=sigmoidal
+dot:
+	make clean
+	ghdl -a nn_pkg.vhdl dot.vhdl dot_tb.vhdl
+	make er F=dot
+nn_ex:
+	make clean
+	ghdl -a nn_pkg.vhdl nn_const_pkg.vhdl weightmult.vhdl sigmoidal.vhdl nn_ex.vhdl
+	make er F=nn_ex
+
