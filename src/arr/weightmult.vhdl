@@ -17,10 +17,14 @@ begin
   process(x, w)
     variable sum : integer;
   begin
-    sum := 0;
-    for i in 0 to N-1 loop
-      sum := sum + to_integer(signed(x(i)) * signed(w(i)));
-    end loop;
-    a <= std_logic_vector(to_signed(sum, a'length));
+    if is_X(x(0)) or is_X(w(0)) then
+      a <= (others => '-');
+    else
+      sum := 0;
+      for i in 0 to N-1 loop
+        sum := sum + to_integer(signed(x(i)) * signed(w(i)));
+      end loop;
+      a <= std_logic_vector(to_signed(sum, a'length));
+    end if;
   end process;
 end architecture;
