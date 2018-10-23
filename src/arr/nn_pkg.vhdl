@@ -5,14 +5,14 @@ package nn_pkg is
   constant SIZE : integer := 6;
   constant DSIZE : integer := 12;
   type arr_type is array(natural range<>) of std_logic_vector(SIZE-1 downto 0);
-  type weight_type is array(natural range<>) of std_logic_vector(SIZE-1 downto 0);
-  function indexat(mat: mat_type; row: natural; col: natural; Nsize : natural) return std_logic_vector;
+  type darr_type is array(natural range<>) of std_logic_vector(DSIZE-1 downto 0);
+  function extract_row(mat: arr_type; row: natural; Msize : natural; Nsize : natural) return arr_type;
 end package;
 
-package body weight_pkg is
+package body nn_pkg is
 
-  function indexat(mat: mat_type; row: natural; col: natural; Nsize : natural) return std_logic_vector is
+  function extract_row(mat: arr_type; row: natural; Msize: natural; Nsize : natural) return arr_type is
   begin
-    return mat(row*Nsize + col);
+    return mat(row*Nsize to row*Nsize+Msize-1);
   end function;
 end package body;

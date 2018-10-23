@@ -7,7 +7,7 @@ entity weightmult is
   generic(N: natural);
   port (
     x : in arr_type(0 to N-1);
-    w : in weight_type(0 to N-1);
+    w : in arr_type(0 to N-1);
     a : out std_logic_vector(DSIZE-1 downto 0)
   );
 end entity;
