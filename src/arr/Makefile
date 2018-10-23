@@ -38,6 +38,6 @@ dot:
 	make er F=dot
 nn:
 	make clean
-	ghdl -a nn_pkg.vhdl dot.vhdl sigmoidal.vhdl nn.vhdl
+	ghdl -a nn_pkg.vhdl dot.vhdl sigmoidal.vhdl nn.vhdl nn_tb.vhdl
 	make er F=nn
 
