@@ -5,39 +5,39 @@ use work.nn_pkg.ALL;
 
 entity sigmoidal is
   port (
-    input : in std_logic_vector(DSIZE-1 downto 0);
+    a : in std_logic_vector(DSIZE-1 downto 0);
     z : out std_logic_vector(SIZE-1 downto 0)
   );
 end entity;
 
 architecture behavior of sigmoidal is
-  function conv(inp : std_logic_vector) return integer is
-    variable a : integer range 0 to 2**(DSIZE-1)-1;
+  function conv(a : std_logic_vector) return integer is
+    variable input : integer range 0 to 2**(DSIZE-1)-1;
     variable b : integer range -(2**(SIZE-1)) to 2**(SIZE-1)-1;
   begin
-    a := to_integer(abs(signed(inp)));
-    if(a=0) then b := 0;
-    elsif (a>0 and a<97) then b := 2;
-    elsif (a>=97 and a < 198) then b := 6;
-    elsif (a>=198 and a < 305) then b := 10;
-    elsif (a>=305 and a < 425) then b := 14;
-    elsif (a>=425 and a < 567) then b := 18;
-    elsif (a>=567 and a < 753) then b := 22;
-    elsif (a>=753 and a < 1047) then b := 26;
+    input := to_integer(abs(signed(a)));
+    if(input=0) then b := 0;
+    elsif (input>0 and input<97) then b := 2;
+    elsif (input>=97 and input < 198) then b := 6;
+    elsif (input>=198 and input < 305) then b := 10;
+    elsif (input>=305 and input < 425) then b := 14;
+    elsif (input>=425 and input < 567) then b := 18;
+    elsif (input>=567 and input < 753) then b := 22;
+    elsif (input>=753 and input < 1047) then b := 26;
     else b := 30;
     end if;
-    if inp(inp'length-1)='1' then
+    if a(a'length-1)='1' then
       return -b;
     else
       return b;
     end if;
   end function;
 begin
-  process(input) begin
-    if is_X(input) then
+  process(a) begin
+    if is_X(a) then
       z <= (others => '-');
     else
-      z <= std_logic_vector(to_signed(conv(input), SIZE));
+      z <= std_logic_vector(to_signed(conv(a), SIZE));
     end if;
   end process;
 end architecture;
