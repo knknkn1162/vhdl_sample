@@ -1,0 +1,6 @@
+!*.*
+*.vcd
+*.o
+work-obj93.cf
+*.out
+Quartus*
