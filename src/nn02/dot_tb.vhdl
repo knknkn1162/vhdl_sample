@@ -8,7 +8,7 @@ end entity;
 architecture testbench of dot_tb is
   component dot is
     -- N < 8
-    generic(N: natural);
+    generic(N: natural range 1 to 8);
     port (
       x : in arr_type(0 to N-1);
       w : in warr_type(0 to N-1);
@@ -30,10 +30,10 @@ begin
   stim_proc : process
   begin
     wait for 20 ns;
-    x <= ("00000001", "00000010", "00111110", "00111111", X"00", X"00", X"00", X"00"); w <= ("00010", "11110", "00001", "11111", "00000", "00000", "00000", "00000");
+    x <= ("00000001", "00000010", "00111110", "11111111", X"00", X"00", X"00", X"00"); w <= ("000010", "111110", "000001", "111111", "000000", "000000", "000000", "000000");
     wait for 10 ns;
-    -- 2 + 2*30 + 62*1+63*31
-    assert a = X"081D";
+    -- 1*2+2*(-2)+62*1+(-1)*(-1)+0..
+    assert a = X"003D";
     -- success message
     assert false report "end of test" severity note;
     wait;

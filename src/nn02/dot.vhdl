@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 use work.nn_pkg.ALL;
 
 entity dot is
-  generic(N: natural);
+  generic(N: natural range 1 to 8);
   port (
     x : in arr_type(0 to N-1);
     w : in warr_type(0 to N-1);
@@ -22,9 +22,9 @@ begin
     else
       sum := 0;
       for i in 0 to N-1 loop
-        sum := sum + to_integer(unsigned(x(i)) * unsigned(w(i)));
+        sum := sum + to_integer(signed(x(i)) * signed(w(i)));
       end loop;
-      a <= std_logic_vector(to_unsigned(sum, a'length));
+      a <= std_logic_vector(to_signed(sum, a'length));
     end if;
   end process;
 end architecture;
