@@ -27,6 +27,7 @@ begin
   stim_proc : process
   begin
     wait for 20 ns;
+    -- a(0) = X"040"=64; a(1) = X"64"=100; a(2)=X"0FE"=254
     x <= ("010000", "001000"); wait for 10 ns; assert z = ("000010", "000110", "001010");
     -- success message
     assert false report "end of test" severity note;
