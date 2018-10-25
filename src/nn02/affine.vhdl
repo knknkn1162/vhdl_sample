@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.nn_pkg.ALL;
 
-entity dot is
+entity affine is
   generic(N: natural range 1 to 8);
   port (
     x : in arr_type(0 to N-1);
@@ -12,7 +12,7 @@ entity dot is
   );
 end entity;
 
-architecture behavior of dot is
+architecture behavior of affine is
 begin
   process(x, w)
     variable sum : integer;

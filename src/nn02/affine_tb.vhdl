@@ -2,11 +2,11 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.nn_pkg.ALL;
 
-entity dot_tb is
+entity affine_tb is
 end entity;
 
-architecture testbench of dot_tb is
-  component dot is
+architecture testbench of affine_tb is
+  component affine is
     -- N < 8
     generic(N: natural range 1 to 8);
     port (
@@ -22,7 +22,7 @@ architecture testbench of dot_tb is
   signal a : std_logic_vector(DSIZE-1 downto 0);
 
 begin
-  uut : dot generic map (N=>N)
+  uut : affine generic map (N=>N)
   port map (
     x, w, a
   );
