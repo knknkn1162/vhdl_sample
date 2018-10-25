@@ -1,28 +1,19 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.nn_pkg.ALL;
-
-package nn_const_pkg is
-  constant M : natural := 4;
-  constant N : natural := 2;
-  constant w : warr_type(0 to M*N-1) := ("000010", "000100", "100110", "011110", "001110", "111001", "101010", "100100");
-end package;
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.nn_pkg.ALL;
-use work.nn_const_pkg.ALL;
 
 entity nn1 is
+  generic(M : natural; N : natural);
   port (
     x : in arr_type(0 to M-1);
+    w : in warr_type(0 to M*N-1);
     z : out arr_type(0 to N-1)
   );
 end entity;
 
 architecture behavior of nn1 is
-  component affine is
+  component affine
     generic(N: natural range 1 to 1023);
     port (
       x : in arr_type(0 to N-1);
@@ -31,7 +22,7 @@ architecture behavior of nn1 is
     );
   end component;
 
-  component sigmoid is
+  component sigmoid
     port (
       a : in std_logic_vector(ASIZE-1 downto 0);
       z : out std_logic_vector(SIZE-1 downto 0)
@@ -39,13 +30,13 @@ architecture behavior of nn1 is
   end component;
 
   signal a1 : aarr_type(0 to N-1);
-
+  signal w1 : warr_type(0 to M-1);
 begin
   gen_weight : for i in 0 to N-1 generate
     weight : affine generic map(N=>M)
     port map (
       x => x,
-      w => extract_row(w, i, M),
+      w => w(i*M to i*M+M-1), -- mat(row*ColN to row*ColN+ColN-1);
       a => a1(i)
     );
   end generate;
