@@ -5,7 +5,7 @@ use work.nn_pkg.ALL;
 package nn_const_pkg is
   constant M : natural := 4;
   constant N : natural := 2;
-  constant w : warr_type(0 to M*N-1) := ("000001", "000100", "111110", "000000", "011111", "011111", "011111", "011111");
+  constant w : warr_type(0 to M*N-1) := ("000001", "000100", "111110", "000000", "011111", "011111", "011111", "001010");
 end package;
 
 library IEEE;
@@ -38,8 +38,9 @@ begin
   stim_proc : process
   begin
     wait for 20 ns;
-    -- z(0) = 1*1+4*127+255*(-2)+255*0
-    x <= (X"01", X"7F", X"FF", X"FF"); wait for 10 ns; assert z = (X"7F", X"FF");
+    -- z(0) = 1*1+4*127+255*(-2)+255*0=-1
+    -- z(1) = 1*31+127*31+255*31+255*10=14423=0x3857
+    x <= (X"01", X"7F", X"FF", X"FF"); wait for 10 ns; assert z = (X"7F", X"DA");
     -- success message
     assert false report "end of test" severity note;
     wait;
