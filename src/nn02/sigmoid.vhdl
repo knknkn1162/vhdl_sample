@@ -5,14 +5,14 @@ use work.nn_pkg.ALL;
 
 entity sigmoidal is
   port (
-    a : in std_logic_vector(DSIZE-1 downto 0);
+    a : in std_logic_vector(ASIZE-1 downto 0);
     z : out std_logic_vector(SIZE-1 downto 0)
   );
 end entity;
 
 architecture behavior of sigmoidal is
   function conv(a : std_logic_vector) return integer is
-    variable input : integer range 0 to 2**DSIZE-1;
+    variable input : integer range 0 to 2**ASIZE-1;
     variable b : integer range 0 to 2**SIZE-1;
   begin
     input := to_integer(abs(signed(a)));

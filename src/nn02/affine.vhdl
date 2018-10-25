@@ -8,7 +8,7 @@ entity affine is
   port (
     x : in arr_type(0 to N-1);
     w : in warr_type(0 to N-1);
-    a : out std_logic_vector(DSIZE-1 downto 0)
+    a : out std_logic_vector(ASIZE-1 downto 0)
   );
 end entity;
 
