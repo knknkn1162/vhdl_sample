@@ -22,7 +22,7 @@ begin
     else
       sum := 0;
       for i in 0 to N-1 loop
-        sum := sum + to_integer(signed(x(i)) * signed(w(i)));
+        sum := sum + to_integer(unsigned(x(i))) * to_integer(signed(w(i)));
       end loop;
       a <= std_logic_vector(to_signed(sum, a'length));
     end if;
