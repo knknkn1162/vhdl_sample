@@ -6,7 +6,9 @@ use work.nn_pkg.ALL;
 entity affine is
   generic(N: natural range 1 to 1023);
   port (
+    -- normalize [0, -1)
     x : in arr_type(0 to N-1);
+    -- normalize [-1, 1)
     w : in warr_type(0 to N-1);
     a : out std_logic_vector(ASIZE-1 downto 0)
   );

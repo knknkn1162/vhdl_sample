@@ -26,8 +26,8 @@ begin
   begin
     wait for 20 ns;
     a <= X"000000"; wait for 10 ns; assert z = X"80";
-    -- sig(256/256) = 0.731*256=187
-    a <= X"000100"; wait for 10 ns; assert z =X"BB";
+    -- sig(8192/2^13) = 0.731*256=187
+    a <= X"002000"; wait for 10 ns; assert z =X"BB";
     -- success message
     assert false report "end of test" severity note;
     wait;
