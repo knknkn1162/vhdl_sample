@@ -8,7 +8,7 @@ end entity;
 architecture testbench of affine_tb is
   component affine is
     -- N < 8
-    generic(N: natural range 1 to 8);
+    generic(N: natural range 1 to 1023);
     port (
       x : in arr_type(0 to N-1);
       w : in warr_type(0 to N-1);
