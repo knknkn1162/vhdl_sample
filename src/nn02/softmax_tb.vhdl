@@ -19,22 +19,13 @@ architecture testbench of softmax_tb is
 
   constant N : natural := 4;
   signal a : aarr_type(0 to N-1);
-  signal a1 : std_logic_vector(ASIZE-1 downto 0);
-  signal a2 : std_logic_vector(ASIZE-1 downto 0);
-  signal a3 : std_logic_vector(ASIZE-1 downto 0);
-  signal a4 : std_logic_vector(ASIZE-1 downto 0);
   signal z : arr_type(0 to N-1);
-  signal z1 : std_logic_vector(SIZE-1 downto 0);
-  signal z2 : std_logic_vector(SIZE-1 downto 0);
-  signal z3 : std_logic_vector(SIZE-1 downto 0);
-  signal z4 : std_logic_vector(SIZE-1 downto 0);
 
 begin
   uut : softmax generic map (N=>N)
   port map (
     a => a, z => z
   );
-  z <= (z1, z2, z3, z4);
 
   stim_proc: process
   begin
