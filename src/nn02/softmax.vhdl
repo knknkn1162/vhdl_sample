@@ -125,19 +125,11 @@ architecture behavior of softmax is
     return to_integer(unsigned(n(n'length-1 downto shiftn)));
   end function;
 
-  component min
-    generic(N: natural);
-    port (
-      x : in aarr_type(0 to N-1);
-      y : out std_logic_vector(ASIZE-1 downto 0)
-    );
-  end component;
-
 begin
   process(a)
     variable num : natural;
     variable amin : integer;
-    variable sgn : std_logic_vector(ASiZE-1 downto 0);
+    variable sgn : std_logic_vector(ASIZE-1 downto 0);
     variable b : aarr_type(0 to N-1);
     variable sum : natural;
   begin
@@ -154,17 +146,16 @@ begin
         end if;
       end loop;
 
-      for i in 0 to 1-1 loop
+      for i in 0 to N-1 loop
         num := to_integer(signed(a(i))-amin);
-        b(i) := std_logic_vector(to_unsigned(num, 24));
-        --b(i) := std_logic_vector(to_unsigned(conv(num), ASIZE));
+        b(i) := std_logic_vector(to_unsigned(conv(num), ASIZE));
         sum := sum + to_integer(unsigned(b(i)));
       end loop;
 
-      --sum := slt2(std_logic_vector(to_unsigned(sum, ASIZE)), 8);
-      
+
+      sum := slt2(std_logic_vector(to_unsigned(sum, ASIZE)), 8);
       for i in 0 to N-1 loop
-        z(i) <= std_logic_vector(to_unsigned(num, 8)); --std_logic_vector(unsigned(b(i)) / sum);
+        z(i) <= std_logic_vector(to_unsigned(to_integer(unsigned(b(i)))/sum, 8));
       end loop;
     end if;
   end process;

@@ -30,9 +30,9 @@ begin
   stim_proc: process
   begin
     wait for 20 ns;
-    a <= (X"000010", X"000000", X"000000", X"000000");
+    a <= (X"000010", X"000010", X"000000", X"000000");
     wait for 10 ns;
-    assert z = (X"10", X"00", X"00", X"00");
+    assert z = (X"40", X"40", X"40", X"40");
     -- success message
     assert false report "end of test" severity note;
     wait;
