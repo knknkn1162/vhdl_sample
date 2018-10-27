@@ -12,7 +12,7 @@ er:
 
 all:
 	make clean
-	ghdl -a nn_pkg.vhdl ${F}.${VHDL} ${F}_tb.$(VHDL)
+	ghdl -a ../nn_pkg.vhdl ${F}.${VHDL} ${F}_tb.$(VHDL)
 	make er F=${F}
 nn1:
 	make clean
