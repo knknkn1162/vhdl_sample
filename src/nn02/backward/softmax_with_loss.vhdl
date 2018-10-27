@@ -25,7 +25,7 @@ begin
     a <= (others => (others => '-'));
   else
     for i in 0 to N-1 loop
-      -- see https://stackoverflow.com/questions/34039510/std-logic-to-integer-conversion#comment84596633_34039685
+      -- https://www.edaboard.com/showthread.php?310376-Unsigned-and-Signed-Addition-and-subtraction-VHDL&p=1327786&viewfull=1#post1327786
       -- unsigned("0" & y(i)) : can't resolve overload for operator "&"
       tmp := std_logic_vector(unsigned('0' & y(i)) - unsigned('0' & zero_or_one( to_integer(unsigned'('0' & t(i))) )));
       if i = 1 then
