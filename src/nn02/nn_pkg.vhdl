@@ -6,8 +6,6 @@ package nn_pkg is
   constant WSIZE : natural := 6; -- signed
   constant ASIZE : natural := 24;
   type arr_type is array(natural range<>) of std_logic_vector(SIZE-1 downto 0);
-  -- extend 1 bit
-  type arr1_type is array(natural range<>) of std_logic_vector(SIZE downto 0);
   type warr_type is array(natural range<>) of std_logic_vector(WSIZE-1 downto 0);
   type aarr_type is array(natural range<>) of std_logic_vector(ASIZE-1 downto 0);
   type narr_type is array(natural range<>) of natural;
