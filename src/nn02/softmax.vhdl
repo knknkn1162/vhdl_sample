@@ -125,11 +125,24 @@ architecture behavior of softmax is
     return to_integer(unsigned(n(n'length-1 downto shiftn)));
   end function;
 
+  function min(a: aarr_type) return integer is
+    variable amin : integer;
+    variable sgn : std_logic_vector(ASIZE-1 downto 0);
+  begin
+    amin := to_integer(signed(a(0)));
+    for i in 0 to N-1 loop
+      sgn := std_logic_vector(signed(a(i)) - amin);
+      if sgn(ASIZE-1)='1' then
+        amin := to_integer(signed(a(i)));
+      end if;
+    end loop;
+    return amin;
+  end function;
+
 begin
   process(a)
     variable num : natural;
     variable amin : integer;
-    variable sgn : std_logic_vector(ASIZE-1 downto 0);
     variable b : aarr_type(0 to N-1);
     variable sum : natural;
   begin
@@ -137,14 +150,8 @@ begin
     if is_X(a(0)) then
       z <= (others => (others => '-'));
     else
-      -- calc min(a)
-      amin := to_integer(signed(a(0)));
-      for i in 0 to N-1 loop
-        sgn := std_logic_vector(signed(a(i)) - amin);
-        if sgn(ASIZE-1)='1' then
-          amin := to_integer(signed(a(i)));
-        end if;
-      end loop;
+      -- calc min of a
+      amin := min(a);
 
       for i in 0 to N-1 loop
         num := to_integer(signed(a(i))-amin);
