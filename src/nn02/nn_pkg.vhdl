@@ -8,4 +8,5 @@ package nn_pkg is
   type arr_type is array(natural range<>) of std_logic_vector(SIZE-1 downto 0);
   type warr_type is array(natural range<>) of std_logic_vector(WSIZE-1 downto 0);
   type aarr_type is array(natural range<>) of std_logic_vector(ASIZE-1 downto 0);
+  type narr_type is array(natural range<>) of natural;
 end package;
