@@ -33,6 +33,12 @@ begin
     a <= (X"000010", X"000010", X"000000", X"000000");
     wait for 10 ns;
     assert z = (X"40", X"40", X"40", X"40");
+    -- 16, 32768, 0, 0
+    -- 258, 14087, 256, 256 => 14857
+    a <= (X"000010", X"008000", X"000000", X"000000");
+    wait for 10 ns;
+
+    assert z = (X"04", X"F2", X"04", X"04");
     -- success message
     assert false report "end of test" severity note;
     wait;

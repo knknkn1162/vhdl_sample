@@ -160,6 +160,7 @@ begin
       end loop;
 
 
+      -- denominator of z is 256, so the sum is multiplied in advance
       sum := slt2(std_logic_vector(to_unsigned(sum, ASIZE)), 8);
       for i in 0 to N-1 loop
         z(i) <= std_logic_vector(to_unsigned(to_integer(unsigned(b(i)))/sum, 8));
