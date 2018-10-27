@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.nn_pkg.ALL;
 
-entity loss_with_softmax is
+entity softmax_with_loss is
   generic(N: natural);
   port (
     -- [-(2**23)/2**13, (2**23-1)/2**13)
@@ -13,7 +13,7 @@ entity loss_with_softmax is
   );
 end entity;
 
-architecture behavior of loss_with_softmax is
+architecture behavior of softmax_with_loss is
   function conv(a : natural) return natural is
     variable b : natural range 0 to 2**ASIZE-1;
   begin

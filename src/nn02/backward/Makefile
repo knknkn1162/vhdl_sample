@@ -16,9 +16,9 @@ all:
 	make er F=${F}
 nn1:
 	make clean
-	ghdl -a nn_pkg.vhdl sigmoid.vhdl affine.vhdl nn1.vhdl nn1_tb.vhdl
+	ghdl -a ../nn_pkg.vhdl sigmoid.vhdl affine.vhdl nn1.vhdl nn1_tb.vhdl
 	make er F=nn1
 softmax:
 	make clean
-	ghdl -a nn_pkg.vhdl min.vhdl softmax.vhdl softmax_tb.vhdl
+	ghdl -a ../nn_pkg.vhdl min.vhdl softmax.vhdl softmax_tb.vhdl
 	make er F=softmax
