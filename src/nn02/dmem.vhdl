@@ -39,9 +39,10 @@ begin
     variable char_buf : character;
     variable idx : natural;
   begin
-    file_open(label_file_in, "./assets/train-labels-idx1-ubyte", READ_MODE);
-    file_open(image_file_in, "./assets/train-images-idx3-ubyte", READ_MODE);
     if not is_X(offset) then
+
+      file_open(label_file_in, "./assets/train-labels-idx1-ubyte", READ_MODE);
+      file_open(image_file_in, "./assets/train-images-idx3-ubyte", READ_MODE);
       -- initialization
       for i in 7 downto 0 loop
         -- trash
@@ -61,7 +62,6 @@ begin
           read(image_file_in, char_buf);
         end loop;
       end loop;
-
       for i in 0 to N-1 loop
         read(label_file_in, char_buf);
         label_mem(i) <= std_logic_vector(to_unsigned(character'pos(char_buf), 4));
@@ -73,9 +73,9 @@ begin
           image_mem(i)(j*8+7 downto j*8) <= std_logic_vector(to_unsigned(character'pos(char_buf), 8));
         end loop;
       end loop;
+      file_close(label_file_in);
+      file_close(image_file_in);
     end if;
-    file_close(label_file_in);
-    file_close(image_file_in);
   end process;
 
   process(a)
