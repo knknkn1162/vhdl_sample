@@ -22,3 +22,7 @@ softmax:
 	make clean
 	ghdl -a ../nn_pkg.vhdl min.vhdl softmax.vhdl softmax_tb.vhdl
 	make er F=softmax
+two_layer:
+	make clean
+	ghdl -a ../nn_pkg.vhdl affine.vhdl sigmoid.vhdl softmax_with_loss.vhdl two_layer.vhdl
+	make er F=two_layer
