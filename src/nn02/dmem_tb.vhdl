@@ -22,7 +22,8 @@ architecture testbench of dmem_tb is
 begin
 
   uut : dmem port map (
-    a => a,  id => id, cnt => cnt, data => data
+    a => a,
+    id => id, cnt => cnt, data => data
   );
 
   stim_proc : process
