@@ -14,7 +14,7 @@ architecture testbench of dmem_tb is
       a : in std_logic_vector(15 downto 0);
       offset : in std_logic_vector(15 downto 0);
       -- image
-      x : out std_logic_vector(8*IMAGE_SIZE*IMAGE_SIZE-1 downto 0); --out arr_type(0 to IMAGE_SIZE*IMAGE_SIZE-1);
+      x : out arr_type(0 to IMAGE_SIZE*IMAGE_SIZE-1);
       -- [0, 9)
       t : out std_logic_vector(3 downto 0)
     );
@@ -22,7 +22,7 @@ architecture testbench of dmem_tb is
 
   signal N : natural := 10;
   signal a, offset : std_logic_vector(15 downto 0);
-  signal x : std_logic_vector(8*IMAGE_SIZE*IMAGE_SIZE-1 downto 0);
+  signal x : arr_type(0 to IMAGE_SIZE*IMAGE_SIZE-1);
   signal t : std_logic_vector(3 downto 0);
 
 begin
