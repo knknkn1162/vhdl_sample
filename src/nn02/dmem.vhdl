@@ -16,31 +16,36 @@ architecture behavior of dmem is
   type char_file_type is file of character;
   type ramtype is array(0 to N-1) of std_logic_vector(7 downto 0);
   signal mem : ramtype;
+  signal load : std_logic;
 
 begin
+  load <= '1';
   process(a)
-    file file_in : char_file_type open read_mode is "./assets/train-labels-idx1-ubyte";
-    variable char_buf : character;
-    variable idx : natural;
+      file file_in : char_file_type open read_mode is "./assets/train-labels-idx1-ubyte";
+      variable char_buf : character;
+      variable idx : natural;
   begin
-    for i in 3 downto 0 loop
-      read(file_in, char_buf);
-      id(i*8+7 downto i*8) <= std_logic_vector(to_unsigned(character'pos(char_buf),8));
-    end loop;
+    -- initialization
+    if load = '1' then
+      for i in 3 downto 0 loop
+        read(file_in, char_buf);
+        id(i*8+7 downto i*8) <= std_logic_vector(to_unsigned(character'pos(char_buf),8));
+      end loop;
 
-    for i in 3 downto 0 loop
-      read(file_in, char_buf);
-      cnt(i*8+7 downto i*8) <= std_logic_vector(to_unsigned(character'pos(char_buf),8));
-    end loop;
+      for i in 3 downto 0 loop
+        read(file_in, char_buf);
+        cnt(i*8+7 downto i*8) <= std_logic_vector(to_unsigned(character'pos(char_buf),8));
+      end loop;
 
-    idx := 0;
+      idx := 0;
 
-    for i in 0 to 29996-1 loop
-      read(file_in, char_buf);
-      mem(i) <= std_logic_vector(to_unsigned(character'pos(char_buf), 8));
-      idx := idx+1;
-    end loop;
-
+      for i in 0 to N-1 loop
+        read(file_in, char_buf);
+        mem(i) <= std_logic_vector(to_unsigned(character'pos(char_buf), 8));
+        idx := idx+1;
+      end loop;
+    end if;
+    load <= '0';
   end process;
 
 end architecture;
