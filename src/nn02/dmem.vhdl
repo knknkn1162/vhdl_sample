@@ -49,10 +49,10 @@ begin
       file_close(file_in);
     end if;
 
-    -- if is_X(a) then
-    --   data <= (others => '-');
-    -- else
-    --   data <= mem(to_integer(unsigned(a)));
-    -- end if;
+    if is_X(a) then
+      data <= (others => '-');
+    else
+      data <= mem(to_integer(unsigned(a)));
+    end if;
   end process;
 end architecture;

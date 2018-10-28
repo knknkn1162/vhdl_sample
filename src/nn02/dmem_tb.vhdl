@@ -29,10 +29,10 @@ begin
   begin
     wait for 20 ns;
     -- assume to be assets/train-labels-idx1-ubyte
-    a <= X"0000"; wait for 10 ns; data <= X"05";
-    a <= X"0001"; wait for 10 ns; data <= X"00";
-    a <= X"0002"; wait for 10 ns; data <= X"04";
-    a <= X"0003"; wait for 10 ns; data <= X"01";
+    a <= X"0000"; wait for 10 ns; assert data = X"05";
+    a <= X"0001"; wait for 10 ns; assert data = X"00";
+    a <= X"0002"; wait for 10 ns; assert data = X"04";
+    a <= X"0003"; wait for 10 ns; assert data = X"01";
     -- success message
     assert false report "end of test" severity note;
     wait;
