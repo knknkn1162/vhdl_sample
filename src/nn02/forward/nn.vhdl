@@ -14,6 +14,7 @@ entity nn is
   port (
     clk, rst : in std_logic;
     offset : in std_logic_vector(15 downto 0);
+    -- maybe R/W in file or memory
     w1 : in warr_type(0 to N*N1-1);
     w2 : in warr_type(0 to N1*M-1);
     count : out std_logic_vector(BSIZE-1 downto 0)
