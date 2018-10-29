@@ -15,14 +15,12 @@ use work.nn_pkg.ALL;
 use work.two_layer_pkg.ALL;
 
 entity two_layer is
-  generic(M: integer);
   port (
     x : in arr_type(0 to M-1);
     -- 6bit
     w1 : in warr_type(0 to N*N1-1);
     w2 : in warr_type(0 to N1*M-1);
     z : out arr_type(0 to N-1);
-    idx : out harr_type(0 to N-1)
   );
 end entity;
 
@@ -50,14 +48,6 @@ architecture behavior of two_layer is
       a : in aarr_type(0 to N-1);
       -- [0, (2**8-1)/2**8]
       z : out arr_type(0 to N-1)
-    );
-  end component;
-
-  component umax is
-    generic(N: natural);
-    port (
-      z : in arr_type(0 to N-1);
-      y : out std_logic_vector(HSIZE-1 downto 0)
     );
   end component;
 
@@ -98,11 +88,4 @@ begin
     z => z0
   );
   z <= z0;
-
-  umax0 : umax generic map(N=>N)
-  port map (
-    z => z0,
-    idx => idx
-  );
-
 end architecture;
