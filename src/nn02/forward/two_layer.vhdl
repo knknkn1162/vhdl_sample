@@ -64,7 +64,7 @@ architecture behavior of two_layer is
   signal a1 : aarr_type(0 to N1-1);
   signal a2 : aarr_type(0 to N-1);
   signal x1 : arr_type(0 to N1-1);
-  signal z0 : arr_thpe(0 to N-1);
+  signal z0 : arr_type(0 to N-1);
 
 begin
   gen_weight0 : for i in 0 to N1-1 generate
