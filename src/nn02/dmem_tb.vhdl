@@ -48,14 +48,14 @@ begin
     a <= X"0006"; wait for 10 ns; assert t = X"1";
     a <= X"0007"; wait for 10 ns; assert t = X"3";
     offset <= X"0008"; wait for 10 ns;
-    a <= X"0008"; wait for 10 ns; assert t = X"1";
-    a <= X"0009"; wait for 10 ns; assert t = X"4";
-    a <= X"000A"; wait for 10 ns; assert t = X"3";
-    a <= X"000B"; wait for 10 ns; assert t = X"5";
-    a <= X"000C"; wait for 10 ns; assert t = X"3";
-    a <= X"000D"; wait for 10 ns; assert t = X"6";
-    a <= X"000E"; wait for 10 ns; assert t = X"1";
-    a <= X"000F"; wait for 10 ns; assert t = X"7";
+    a <= X"0000"; wait for 10 ns; assert t = X"1";
+    a <= X"0001"; wait for 10 ns; assert t = X"4";
+    a <= X"0002"; wait for 10 ns; assert t = X"3";
+    a <= X"0003"; wait for 10 ns; assert t = X"5";
+    a <= X"0004"; wait for 10 ns; assert t = X"3";
+    a <= X"0005"; wait for 10 ns; assert t = X"6";
+    a <= X"0006"; wait for 10 ns; assert t = X"1";
+    a <= X"0007"; wait for 10 ns; assert t = X"7";
     -- success message
     assert false report "end of test" severity note;
     wait;

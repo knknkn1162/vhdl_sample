@@ -3,6 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 package dmem_const_pkg is
   constant IMAGE_SIZE : natural := 28;
+  constant IMAGE_SIZE2 : natural := IMAGE_SIZE*IMAGE_SIZE;
 end package;
 
 library IEEE;
@@ -18,7 +19,7 @@ entity dmem is
     -- [0, 60000)
     offset : in std_logic_vector(15 downto 0);
     -- image
-    x : out arr_type(0 to IMAGE_SIZE*IMAGE_SIZE-1);
+    x : out arr_type(0 to IMAGE_SIZE2-1);
     -- [0, 9)
     t : out std_logic_vector(3 downto 0)
   );
@@ -28,7 +29,7 @@ architecture behavior of dmem is
   constant N : natural := BATCH_SIZE;
   type char_file_type is file of character;
   type labeltype is array(0 to N-1) of std_logic_vector(3 downto 0);
-  subtype imgtype is arr_type(0 to N*IMAGE_SIZE*IMAGE_SIZE-1);
+  subtype imgtype is arr_type(0 to N*IMAGE_SIZE2-1);
   signal label_mem : labeltype;
   signal image_mem : imgtype;
 
@@ -55,10 +56,11 @@ begin
       end loop;
 
 
+      -- seek until offset
       idx := to_integer(unsigned(offset));
       for i in 0 to idx-1 loop
         read(label_file_in, char_buf);
-        for j in 0 to IMAGE_SIZE*IMAGE_SIZE-1 loop
+        for j in 0 to IMAGE_SIZE2-1 loop
           read(image_file_in, char_buf);
         end loop;
       end loop;
@@ -69,7 +71,7 @@ begin
 
       idx := 0;
       for i in 0 to N-1 loop
-        for j in IMAGE_SIZE*IMAGE_SIZE-1 downto 0 loop
+        for j in IMAGE_SIZE2-1 downto 0 loop
           read(image_file_in, char_buf);
           image_mem(i) <= std_logic_vector(to_unsigned(character'pos(char_buf), 8));
           idx := idx + 1;
@@ -84,12 +86,12 @@ begin
     variable idx : natural;
   begin
     if not is_X(offset) then
-      idx := to_integer(unsigned(a)-unsigned(offset));
+      idx := to_integer(unsigned(a));
       if is_X(a) then
         x <= (others => (others => '-'));
         t <= (others => '-');
       else
-        x <= image_mem(idx*IMAGE_SIZE*IMAGE_SIZE to (idx+1)*IMAGE_SIZE*IMAGE_SIZE-1);
+        x <= image_mem(idx*IMAGE_SIZE2 to (idx+1)*IMAGE_SIZE2-1);
         t <= label_mem(idx);
       end if;
     end if;
