@@ -12,18 +12,18 @@ entity counter is
 end entity;
 
 architecture behavior of counter is
+  signal tmp : std_logic_vector(N-1 downto 0);
 begin
   process(rst, clk)
-    variable tmp : std_logic_vector(N-1 downto 0);
   begin
     if rst='1' then
-      tmp := (others => '0');
+      tmp <= (others => '0');
     elsif rising_edge(clk) then
       if ena = '1' then
         -- update
-        tmp := std_logic_vector(unsigned(tmp) + 1);
+        tmp <= std_logic_vector(unsigned(tmp) + 1);
       end if;
     end if;
-    cnt <= tmp;
   end process;
+  cnt <= tmp;
 end architecture;
