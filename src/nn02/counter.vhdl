@@ -6,6 +6,7 @@ entity counter is
   generic(N: natural);
   port (
     clk, rst : in std_logic;
+    ena : in std_logic;
     cnt : out std_logic_vector(N-1 downto 0)
   );
 end entity;
@@ -30,5 +31,5 @@ begin
       y => cnt0 -- not cnt as entity counter
   );
   cnt <= cnt0;
-  nxt <= std_logic_vector(unsigned(cnt0) + 1);
+  nxt <= std_logic_vector(unsigned(cnt0) + 1) when ena='1' else cnt0;
 end architecture;

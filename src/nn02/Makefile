@@ -22,3 +22,7 @@ softmax:
 	make clean
 	ghdl -a nn_pkg.vhdl min.vhdl softmax.vhdl softmax_tb.vhdl
 	make er F=softmax
+counter:
+	make clean
+	ghdl -a flopr.vhdl counter.vhdl counter_tb.vhdl
+	make er F=counter

@@ -11,7 +11,7 @@ architecture testbench of counter_tb is
     generic(N: natural);
     port (
       clk, rst : in std_logic;
-      -- ena : in std_logic;
+      ena : in std_logic;
       cnt : out std_logic_vector(N-1 downto 0)
     );
   end component;
@@ -26,7 +26,7 @@ begin
   uut: counter generic map (N=>N)
   port map (
     clk => clk, rst => rst,
-    -- ena => ena,
+    ena => ena,
     cnt => cnt
   );
 
@@ -44,12 +44,12 @@ begin
     wait for clk_period*2;
     rst <= '1'; wait for 1 ns; rst <= '0';
     assert cnt = X"0";
-    --ena <= '1';
+    ena <= '1';
     wait for clk_period/2;
     assert cnt = X"1";
-    --ena <= '0';
+    ena <= '0';
     wait for clk_period;
-    assert cnt = X"2";
+    assert cnt = X"1";
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;
