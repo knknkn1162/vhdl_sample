@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.nn_pkg.ALL;
 
-entity nn1 is
+entity single_layer is
   generic(M : natural; N : natural);
   port (
     x : in arr_type(0 to M-1);
@@ -12,7 +12,7 @@ entity nn1 is
   );
 end entity;
 
-architecture behavior of nn1 is
+architecture behavior of single_layer is
   component affine
     generic(N: natural range 1 to 1023);
     port (

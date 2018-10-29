@@ -13,11 +13,11 @@ use IEEE.STD_LOGIC_1164.ALL;
 use work.nn_pkg.ALL;
 use work.nn_const_pkg.ALL;
 
-entity nn1_tb is
+entity single_layer_tb is
 end entity;
 
-architecture testbench of nn1_tb is
-  component nn1
+architecture testbench of single_layer_tb is
+  component single_layer
     generic(M : natural; N : natural);
     port (
       x : in arr_type(0 to M-1);
@@ -30,7 +30,7 @@ architecture testbench of nn1_tb is
   signal z : arr_type(0 to N-1);
 
 begin
-  uut : nn1 generic map (M=>M, N=>N)
+  uut : single_layer generic map (M=>M, N=>N)
   port map (
     x => x, w => w, z => z
   );

@@ -14,10 +14,10 @@ all:
 	make clean
 	ghdl -a ../nn_pkg.vhdl ${F}.${VHDL} ${F}_tb.$(VHDL)
 	make er F=${F}
-nn1:
+single_layer:
 	make clean
-	ghdl -a ../nn_pkg.vhdl sigmoid.vhdl affine.vhdl nn1.vhdl nn1_tb.vhdl
-	make er F=nn1
+	ghdl -a ../nn_pkg.vhdl sigmoid.vhdl affine.vhdl single_layer.vhdl single_layer_tb.vhdl
+	make er F=single_layer
 softmax:
 	make clean
 	ghdl -a ../nn_pkg.vhdl min.vhdl softmax.vhdl softmax_tb.vhdl
