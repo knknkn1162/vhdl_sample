@@ -21,7 +21,8 @@ entity two_layer is
     -- 6bit
     w1 : in warr_type(0 to N*N1-1);
     w2 : in warr_type(0 to N1*M-1);
-    z : out arr_type(0 to M-1)
+    z : out arr_type(0 to N-1);
+    idx : out harr_type(0 to N-1)
   );
 end entity;
 
@@ -52,9 +53,18 @@ architecture behavior of two_layer is
     );
   end component;
 
+  component umax is
+    generic(N: natural);
+    port (
+      z : in arr_type(0 to N-1);
+      y : out std_logic_vector(HSIZE-1 downto 0)
+    );
+  end component;
+
   signal a1 : aarr_type(0 to N1-1);
   signal a2 : aarr_type(0 to N-1);
   signal x1 : arr_type(0 to N1-1);
+  signal z0 : arr_thpe(0 to N-1);
 
 begin
   gen_weight0 : for i in 0 to N1-1 generate
@@ -82,12 +92,17 @@ begin
     );
   end generate;
 
-  gen_activation1 : for i in 0 to N-1 generate
-    softmax_with_loss0 : softmax_with_loss generic map(N=>N1)
-    port map (
-      a => a2,
-      z => z
-    );
-  end generate;
+  softmax_with_loss0 : softmax_with_loss generic map(N=>N1)
+  port map (
+    a => a2,
+    z => z0
+  );
+  z <= z0;
+
+  umax0 : umax generic map(N=>N)
+  port map (
+    z => z0,
+    idx => idx
+  );
 
 end architecture;
