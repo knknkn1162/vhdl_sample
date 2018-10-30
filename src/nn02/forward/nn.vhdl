@@ -43,7 +43,7 @@ architecture behavior of nn is
   end component;
 
   component two_layer is
-    generic(INPUT_SIZE: natural);
+    generic(INPUT_SIZE: natural; HIDDEN_SIZE: natural; OUTPUT_SIZE: natural);
     port (
       x : in arr_type(0 to INPUT_SIZE-1);
       -- 6bit
@@ -93,7 +93,7 @@ begin
     x => x, t => t
   );
 
-  two_layer0 : two_layer generic map(INPUT_SIZE=>INPUT_SIZE)
+  two_layer0 : two_layer generic map (INPUT_SIZE=>INPUT_SIZE, HIDDEN_SIZE=>HIDDEN_SIZE, OUTPUT_SIZE=>OUTPUT_SIZE)
   port map (
     x => x,
     w1 => w1,
