@@ -21,7 +21,7 @@ softmax:
 	make clean
 	ghdl -a ../nn_pkg.vhdl min.vhdl softmax.vhdl softmax_tb.vhdl
 two_layer:
-	ghdl -a ../nn_pkg.vhdl affine.vhdl sigmoid.vhdl softmax_with_loss.vhdl two_layer.vhdl
+	ghdl -a ../nn_pkg.vhdl affine.vhdl sigmoid.vhdl softmax_with_loss.vhdl two_layer.vhdl two_layer_tb.vhdl
 nn:
 	make two_layer
 	ghdl -a counter.vhdl ../dmem.vhdl umax.vhdl nn.vhdl nn_tb.vhdl

@@ -2,18 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.nn_pkg.ALL;
 
-package two_layer_pkg is
-  constant HIDDEN_SIZE : natural := 100;
-  constant OUTPUT_SIZE : natural := 10;
-end package;
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use work.nn_pkg.ALL;
-use work.two_layer_pkg.ALL;
-
 entity two_layer is
-  generic(INPUT_SIZE: natural);
+  generic(INPUT_SIZE: natural; HIDDEN_SIZE: natural; OUTPUT_SIZE: natural);
   port (
     x : in arr_type(0 to INPUT_SIZE-1);
     -- 6bit
@@ -76,12 +66,12 @@ begin
     weight1 : affine generic map(N=>HIDDEN_SIZE)
     port map (
       x => x1,
-      w => w2(i*OUTPUT_SIZE to i*OUTPUT_SIZE+OUTPUT_SIZE-1), -- mat(row*ColN to row*ColN+ColN-1);
+      w => w2(i*HIDDEN_SIZE to i*HIDDEN_SIZE+HIDDEN_SIZE-1), -- mat(row*ColN to row*ColN+ColN-1);
       a => a2(i)
     );
   end generate;
 
-  softmax_with_loss0 : softmax_with_loss generic map(N=>HIDDEN_SIZE)
+  softmax_with_loss0 : softmax_with_loss generic map(N=>OUTPUT_SIZE)
   port map (
     a => a2,
     z => z0
