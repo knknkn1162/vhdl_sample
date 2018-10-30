@@ -12,7 +12,7 @@ architecture testbench of dmem_tb is
     generic(BATCH_SIZE: natural);
     port (
       a : in std_logic_vector(TRAINING_BSIZE-1 downto 0);
-      offset : in std_logic_vector(15 downto 0);
+      offset : in std_logic_vector(TRAINING_BSIZE-1 downto 0);
       -- image
       x : out arr_type(0 to IMAGE_SIZE*IMAGE_SIZE-1);
       -- [0, 9)
@@ -21,7 +21,7 @@ architecture testbench of dmem_tb is
   end component;
 
   signal N : natural := 10;
-  signal a, offset : std_logic_vector(15 downto 0);
+  signal a, offset : std_logic_vector(TRAINING_BSIZE-1 downto 0);
   signal x : arr_type(0 to IMAGE_SIZE*IMAGE_SIZE-1);
   signal t : std_logic_vector(3 downto 0);
 

@@ -20,7 +20,7 @@ entity dmem is
   port (
     a : in std_logic_vector(TRAINING_BSIZE-1 downto 0);
     -- [0, 60000)
-    offset : in std_logic_vector(15 downto 0);
+    offset : in std_logic_vector(TRAINING_BSIZE-1 downto 0);
     -- image
     x : out arr_type(0 to IMAGE_SIZE2-1);
     -- [0, 9)
