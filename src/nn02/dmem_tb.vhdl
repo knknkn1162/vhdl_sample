@@ -11,7 +11,7 @@ architecture testbench of dmem_tb is
   component dmem
     generic(BATCH_SIZE: natural);
     port (
-      a : in std_logic_vector(15 downto 0);
+      a : in std_logic_vector(TRAINING_BSIZE-1 downto 0);
       offset : in std_logic_vector(15 downto 0);
       -- image
       x : out arr_type(0 to IMAGE_SIZE*IMAGE_SIZE-1);

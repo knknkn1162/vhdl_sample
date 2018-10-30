@@ -4,6 +4,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 package dmem_const_pkg is
   constant IMAGE_SIZE : natural := 28;
   constant IMAGE_SIZE2 : natural := IMAGE_SIZE*IMAGE_SIZE;
+
+  constant TRAINING_SIZE : natural := 60000;
+  constant TRAINING_BSIZE : natural := 16; -- 2**16 = 65536
 end package;
 
 library IEEE;
@@ -15,7 +18,7 @@ use work.nn_pkg.ALL;
 entity dmem is
   generic(BATCH_SIZE: natural);
   port (
-    a : in std_logic_vector(15 downto 0);
+    a : in std_logic_vector(TRAINING_BSIZE-1 downto 0);
     -- [0, 60000)
     offset : in std_logic_vector(15 downto 0);
     -- image
