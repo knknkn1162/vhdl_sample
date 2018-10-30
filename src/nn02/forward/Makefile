@@ -17,12 +17,11 @@ all:
 single_layer:
 	make clean
 	ghdl -a ../nn_pkg.vhdl sigmoid.vhdl affine.vhdl single_layer.vhdl single_layer_tb.vhdl
-	make er F=single_layer
 softmax:
 	make clean
 	ghdl -a ../nn_pkg.vhdl min.vhdl softmax.vhdl softmax_tb.vhdl
-	make er F=softmax
 two_layer:
-	make clean
 	ghdl -a ../nn_pkg.vhdl affine.vhdl sigmoid.vhdl softmax_with_loss.vhdl two_layer.vhdl
-	make er F=two_layer
+nn:
+	make two_layer
+	ghdl -a counter.vhdl ../dmem.vhdl umax.vhdl nn.vhdl nn_tb.vhdl
