@@ -48,6 +48,16 @@ begin
   stim_proc : process
   begin
     wait for clk_period*2;
+    w1 <= (others => (others => '0'));
+    w2 <= (others => (others => '0'));
+    offset <= (others => '0');
+    rst <= '1'; wait for 1 ns; rst <= '0';
+    wait for clk_period/2;
+    wait for clk_period;
+    wait for clk_period;
+    wait for clk_period;
+
+
     -- success message
     assert false report "end of test" severity note;
     stop <= TRUE;
