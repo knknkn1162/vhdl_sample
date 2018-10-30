@@ -3,10 +3,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 use work.nn_pkg.ALL;
 
 package two_layer_pkg is
-  constant N1 : natural := 100;
-  constant N : natural := 10;
-  constant M : natural := 756; -- 28*28
-
+  constant HIDDEN_SIZE : natural := 100;
+  constant OUTPUT_SIZE : natural := 10;
 end package;
 
 library IEEE;
@@ -15,12 +13,13 @@ use work.nn_pkg.ALL;
 use work.two_layer_pkg.ALL;
 
 entity two_layer is
+  generic(INPUT_SIZE: natural);
   port (
-    x : in arr_type(0 to M-1);
+    x : in arr_type(0 to INPUT_SIZE-1);
     -- 6bit
-    w1 : in warr_type(0 to N*N1-1);
-    w2 : in warr_type(0 to N1*M-1);
-    z : out arr_type(0 to N-1);
+    w1 : in warr_type(0 to INPUT_SIZE*HIDDEN_SIZE-1);
+    w2 : in warr_type(0 to HIDDEN_SIZE*OUTPUT_SIZE-1);
+    z : out arr_type(0 to OUTPUT_SIZE-1)
   );
 end entity;
 
@@ -51,38 +50,38 @@ architecture behavior of two_layer is
     );
   end component;
 
-  signal a1 : aarr_type(0 to N1-1);
-  signal a2 : aarr_type(0 to N-1);
-  signal x1 : arr_type(0 to N1-1);
-  signal z0 : arr_type(0 to N-1);
+  signal a1 : aarr_type(0 to HIDDEN_SIZE-1);
+  signal a2 : aarr_type(0 to OUTPUT_SIZE-1);
+  signal x1 : arr_type(0 to HIDDEN_SIZE-1);
+  signal z0 : arr_type(0 to OUTPUT_SIZE-1);
 
 begin
-  gen_weight0 : for i in 0 to N1-1 generate
-    weight0 : affine generic map(N=>M)
+  gen_weight0 : for i in 0 to HIDDEN_SIZE-1 generate
+    weight0 : affine generic map(N=>INPUT_SIZE)
     port map (
       x => x,
-      w => w1(i*M to i*M+M-1), -- mat(row*ColN to row*ColN+ColN-1);
+      w => w1(i*INPUT_SIZE to i*INPUT_SIZE+INPUT_SIZE-1), -- mat(row*ColN to row*ColN+ColN-1);
       a => a1(i)
     );
   end generate;
 
-  gen_activation0 : for i in 0 to N1-1 generate
+  gen_activation0 : for i in 0 to HIDDEN_SIZE-1 generate
     sigmoid0 : sigmoid port map (
       a => a1(i),
       z => x1(i)
     );
   end generate;
 
-  gen_weight1 : for i in 0 to N-1 generate
-    weight1 : affine generic map(N=>N1)
+  gen_weight1 : for i in 0 to OUTPUT_SIZE-1 generate
+    weight1 : affine generic map(N=>HIDDEN_SIZE)
     port map (
       x => x1,
-      w => w2(i*M to i*M+M-1), -- mat(row*ColN to row*ColN+ColN-1);
+      w => w2(i*OUTPUT_SIZE to i*OUTPUT_SIZE+OUTPUT_SIZE-1), -- mat(row*ColN to row*ColN+ColN-1);
       a => a2(i)
     );
   end generate;
 
-  softmax_with_loss0 : softmax_with_loss generic map(N=>N1)
+  softmax_with_loss0 : softmax_with_loss generic map(N=>HIDDEN_SIZE)
   port map (
     a => a2,
     z => z0
