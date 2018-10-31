@@ -19,7 +19,7 @@ entity datapath is
     -- jump, branch, pc
     pcn_jmp_s : in std_logic;
 
-    -- for testbench
+    -- scan for testbench
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
     instr : out std_logic_vector(31 downto 0);
