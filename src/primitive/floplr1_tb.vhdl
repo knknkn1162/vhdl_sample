@@ -5,7 +5,7 @@ entity floplr1_tb is
 end entity;
 
 architecture behavior of floplr1_tb is
-  component floplr1 is
+  component floplr1
     port (
       clk, rst, load : in std_logic;
       sin, d : in std_logic;
