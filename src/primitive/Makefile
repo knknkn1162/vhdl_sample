@@ -39,7 +39,10 @@ cla_block:
 	make clean
 	ghdl -a carry_lookahead_adder.vhdl cla_block_tb.vhdl
 	make er F=cla_block
-floplr1:
+floplr1: mux1.vhdl flopr1.vhdl floplr1.vhdl
 	make clean
 	ghdl -a mux1.vhdl flopr1.vhdl floplr1.vhdl floplr1_tb.vhdl
 	make er F=floplr1
+floplrn: floplr1.vhdl floplrn.vhdl floplr1_tb.vhdl
+	ghdl -a mux1.vhdl flopr1.vhdl floplr1.vhdl floplrn.vhdl floplrn_tb.vhdl
+	make er F=floplrn
