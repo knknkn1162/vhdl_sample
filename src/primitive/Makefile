@@ -39,13 +39,13 @@ cla_block:
 	make clean
 	ghdl -a carry_lookahead_adder.vhdl cla_block_tb.vhdl
 	make er F=cla_block
-floplr1: mux1.vhdl flopr1.vhdl floplr1.vhdl
-	make clean
-	ghdl -a mux1.vhdl flopr1.vhdl floplr1.vhdl floplr1_tb.vhdl
-	make er F=floplr1
-floplrn: floplr1.vhdl floplrn.vhdl floplrn_tb.vhdl
+flopr1:
+	ghdl -a flopr1.vhdl flopr1_tb.vhdl
+floplrn: floplr1 floplrn floplrn_tb
 	ghdl -a mux1.vhdl flopr1.vhdl floplr1.vhdl floplrn.vhdl floplrn_tb.vhdl
 	make er F=floplrn
-floplrn_scannable: floplr1.vhdl floplrn_scannable.vhdl
+floplrn_scannable: floplr1 floplrn_scannable
 	ghdl -a mux1.vhdl flopr1.vhdl floplr1.vhdl floplrn_scannable.vhdl floplrn_scannable_tb.vhdl
 	make er F=floplrn
+mult_dff1: flopr1
+	ghdl -a flopr1.vhdl mult_dff1.vhdl mult_dff1_tb.vhdl
