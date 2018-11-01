@@ -58,11 +58,12 @@ begin
     assert c = ((as(0) and b(3)) xor (as(1) and b(2)) xor (as(2) and b(1)) xor (as(2) and b(0)));
     wait for clk_period- 1 ns; a <= as(4); wait for 1 ns;
     assert c = ((as(1) and b(3)) xor (as(2) and b(2)) xor (as(3) and b(1)) xor (as(4) and b(0)));
+    -- a <= '0' forever
     wait for clk_period- 1 ns; a <= '0'; wait for 1 ns;
     assert c = ((as(2) and b(3)) xor (as(3) and b(2)) xor (as(4) and b(1)));
-    wait for clk_period- 1 ns; a <= '0'; wait for 1 ns;
+    wait for clk_period- 1 ns; wait for 1 ns;
     assert c = ((as(3) and b(3)) xor (as(4) and b(2)));
-    wait for clk_period- 1 ns; a <= '0'; wait for 1 ns;
+    wait for clk_period- 1 ns; wait for 1 ns;
     assert c = (as(4) and b(3));
     -- skip
     stop <= TRUE;
