@@ -51,3 +51,5 @@ mult_dff1: flopr1
 	ghdl -a flopr1.vhdl mult_dff1.vhdl mult_dff1_tb.vhdl
 mult_dffn : mult_dff1
 	ghdl -a mult_dffn.vhdl mult_dffn_tb.vhdl
+mult_dffn_rev : mult_dff1
+	ghdl -a mult_dffn_rev.vhdl mult_dffn_rev_tb.vhdl
