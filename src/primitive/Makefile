@@ -17,8 +17,7 @@ a:
 	make clean
 	ghdl -a ${F}.${VHDL}
 all:
-	make a
-	ghdl -a ${F}_tb.$(VHDL)
+	ghdl -a ${F}.${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
 half_adder:
@@ -53,3 +52,7 @@ mult_dffn : mult_dff1
 	ghdl -a mult_dffn.vhdl mult_dffn_tb.vhdl
 mult_dffn_rev : mult_dff1
 	ghdl -a mult_dffn_rev.vhdl mult_dffn_rev_tb.vhdl
+div_dff1: flopr1
+	ghdl -a div_dff1.vhdl div_dff1_tb.vhdl
+div_dffn: div_dff1
+	make all F=div_dffn
