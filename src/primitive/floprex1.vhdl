@@ -2,9 +2,8 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity floprex1 is
-  generic(init: std_logic);
   port (
-    clk, rst: in std_logic;
+    clk, rst, init: in std_logic;
     a : in std_logic;
     y : out std_logic
   );

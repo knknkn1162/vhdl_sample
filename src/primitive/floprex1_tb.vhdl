@@ -6,23 +6,20 @@ end entity;
 
 architecture testbench of floprex1_tb is
   component floprex1 is
-    generic(INIT: std_logic);
     port (
-      clk, rst: in std_logic;
+      clk, rst, init: in std_logic;
       a : in std_logic;
       y : out std_logic
     );
   end component;
 
-  signal clk, rst, a, y : std_logic;
+  signal clk, rst, init, a, y : std_logic;
   constant clk_period : time := 10 ns;
   signal stop : boolean;
-  constant INIT : std_logic := '1';
 
 begin
-  uut : floprex1 generic map (INIT=>INIT)
-  port map (
-    clk => clk, rst => rst,
+  uut : floprex1 port map (
+    clk => clk, rst => rst, init => init,
     a => a, y => y
   );
 
@@ -38,6 +35,7 @@ begin
   stim_proc : process
   begin
     wait for clk_period*2;
+    init <= '1';
     rst <= '1'; wait for 1 ns; rst <= '0'; assert y = '1';
     a <= '0'; wait for clk_period/2; assert y = '0';
     -- skip
