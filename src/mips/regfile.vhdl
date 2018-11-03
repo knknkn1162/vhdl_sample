@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity regfile is
   port (
-    clk : in std_logic;
+    clk, rst : in std_logic;
     -- 25:21(read)
     a1 : in std_logic_vector(4 downto 0);
     rd1 : out std_logic_vector(31 downto 0);
@@ -21,10 +21,12 @@ end entity;
 architecture behavior of regfile is
   -- $0($zero) ~ $31($ra)
   type ramtype is array (31 downto 0) of std_logic_vector(31 downto 0);
-  signal mem : ramtype := (others => (others => '0'));
+  signal mem : ramtype;
 begin
   process(clk) begin
-    if rising_edge(clk) then
+    if rst = '1' then
+      mem <= (others => (others => '0'));
+    elsif rising_edge(clk) then
       -- if write enables
       if we3='1' then
         -- avoid $zero register
@@ -37,14 +39,13 @@ begin
     end if;
   end process;
 
-  -- if a1 is constant while writing the content of a1, we need `clk` in the sensitivity list.
-  process(clk, a1) begin
+  process(we3, a1) begin
     if not is_X(a1) then
       rd1 <= mem(to_integer(unsigned(a1)));
     end if;
   end process;
 
-  process(clk, a2) begin
+  process(we3, a2) begin
     if not is_X(a2) then
       rd2 <= mem(to_integer(unsigned(a2)));
     end if;
