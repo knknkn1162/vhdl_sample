@@ -56,7 +56,10 @@ div_dff1: flopr1
 	ghdl -a div_dff1.vhdl div_dff1_tb.vhdl
 div_dffn: div_dff1
 	make all F=div_dffn
-random_three: div_dff1
+random_three: random1
 	make all F=random_three
+random1: floprex1
+	ghdl -a random1.vhdl
 floprex1:
 	make all F=floprex1
+
