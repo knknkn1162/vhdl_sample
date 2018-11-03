@@ -16,11 +16,14 @@ er:
 	make e
 	make r
 all:
-	make a
-	ghdl -a ${F}_tb.$(VHDL)
+	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
 mips:
 	make clean
 	ghdl -a alu.vhdl mux2.vhdl sltn.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl dmem.vhdl datapath.vhdl controller.vhdl mips.vhdl mips_tb.vhdl
 	make er F=mips
+dmem:
+	make all F=dmem
+regfile:
+	make all F=regfile

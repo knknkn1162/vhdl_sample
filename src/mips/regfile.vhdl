@@ -20,8 +20,9 @@ end entity;
 
 architecture behavior of regfile is
   -- $0($zero) ~ $31($ra)
-  type ramtype is array (31 downto 0) of std_logic_vector(31 downto 0);
-  signal mem : ramtype;
+  type ramtype is array(natural range<>) of std_logic_vector(31 downto 0);
+  constant SIZE: natural := 32;
+  signal mem : ramtype(SIZE-1 downto 0);
 begin
   process(clk) begin
     if rst = '1' then
