@@ -1,12 +1,12 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity memadr_tb is
+entity calc_tb is
 end entity;
 
-architecture testbench of memadr_tb is
+architecture testbench of calc_tb is
 
-  component memadr
+  component calc
     port (
       clk, rst : in std_logic;
       rs, rt, imm : in std_logic_vector(31 downto 0);
@@ -27,7 +27,7 @@ architecture testbench of memadr_tb is
   signal stop : boolean;
 
 begin
-  uut : memadr port map (
+  uut : calc port map (
     clk => clk, rst => rst,
     rs => rs, rt => rt, imm => imm,
     alures => alures,

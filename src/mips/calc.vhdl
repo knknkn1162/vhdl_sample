@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity memadr is
+entity calc is
   port (
     clk, rst : in std_logic;
     rs, rt, imm : in std_logic_vector(31 downto 0);
@@ -13,7 +13,7 @@ entity memadr is
   );
 end entity;
 
-architecture behavior of memadr is
+architecture behavior of calc is
   component flopr_en
     port (
       clk, rst, en: in std_logic;
