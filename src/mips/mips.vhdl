@@ -5,7 +5,6 @@ use IEEE.NUMERIC_STD.ALL;
 entity mips is
   port (
     clk, rst : in std_logic;
-    addr : in std_logic_vector(31 downto 0);
     -- controller
     -- for memadr
     pc_aluout_s, pc_en : in std_logic;
@@ -19,13 +18,12 @@ entity mips is
     -- scan for testbench
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
-    mem_addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
+    addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
     reg_wa : out std_logic_vector(4 downto 0);
     reg_wd : out std_logic_vector(31 downto 0);
-    rs, rt : out std_logic_vector(31 downto 0);
-    imm : out std_logic_vector(31 downto 0);
+    rs, rt, imm : out std_logic_vector(31 downto 0);
     aluout : out std_logic_vector(31 downto 0)
-      );
+  );
 end entity;
 
 architecture behavior of mips is
@@ -79,8 +77,8 @@ architecture behavior of mips is
     );
   end component;
 
-  signal alures0, addr0 : std_logic_vector(31 downto 0);
-  signal mem_rd0, mem_wd0 : std_logic_vector(31 downto 0);
+  signal alures0 : std_logic_vector(31 downto 0);
+  signal mem_rd0, mem_wd0, mem_addr0 : std_logic_vector(31 downto 0);
   signal rs0, rt0, imm0 : std_logic_vector(31 downto 0);
   signal zero0 : std_logic;
 
@@ -88,18 +86,19 @@ begin
   memadr0 : memadr port map (
     clk => clk, rst => rst,
     alures => alures0,
-    addr => addr0,
+    addr => mem_addr0,
     pc_aluout_s => pc_aluout_s, pc_en => pc_en,
     pc => pc, pcnext => pcnext
   );
   mem_wd0 <= rt0;
   fetch_memrw0 : fetch_memrw port map (
     clk => clk, rst => rst,
-    addr => addr0,
+    addr => mem_addr0,
     wd => mem_wd0,
     rd => mem_rd0,
     we => mem_we
   );
+  addr <= mem_addr0;
   mem_rd <= mem_rd0;
 
   decode_writeback0 : decode_writeback port map (
@@ -115,6 +114,8 @@ begin
     clk => clk, rst => rst,
     rs => rs0, rt => rt0, imm => imm0,
     alures => alures0,
-    zero => zero0
+    zero => zero0,
+    alucont => alucont,
+    rt_imm_s => rt_imm_s
   );
 end architecture;
