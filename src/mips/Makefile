@@ -24,6 +24,8 @@ mips: mem regfile flopr_en sltn alu mux2 sgnext
 	make er F=mips
 fetch: mem mux2 flopr_en
 	make all F=fetch
+decode_writeback: regfile sgnext flopr_en
+	make all F=decode_writeback
 flopr:
 	make all F=flopr
 flopr_en:

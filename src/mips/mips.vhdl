@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity mips is
   port (
@@ -100,6 +101,7 @@ begin
     y => pc0
   );
   pc <= pc0;
+  pcnext0 <= std_logic_vector(unsigned(pc0) + 4);
   pcnext <= pcnext0;
 
   pc_alu_mux : mux2 generic map (N=>32)
@@ -114,7 +116,7 @@ begin
     clk => clk, rst => rst,
     we => mem_we,
     a => mem_addr0(31 downto 2),
-    --wd => wd,
+    -- wd => mem_wd,
     rd => mem_rd0
   );
   mem_rd <= mem_rd0;
@@ -158,12 +160,7 @@ begin
     y => imm0
   );
   imm <= imm0;
-
-  reg_ext : flopr_en port map (
-    clk => clk, rst => rst, en => '1',
-    a => imm0,
-    y => srcb0
-  );
+  srcb0 <= imm0;
 
   alu0 : alu port map (
     a => srca0, b => srcb0,

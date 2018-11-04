@@ -2,19 +2,21 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity decode is
+entity decode_writeback is
   port (
     clk, rst : in std_logic;
     mem_rd : in std_logic_vector(31 downto 0);
     rs, rt : out std_logic_vector(31 downto 0);
     imm : out std_logic_vector(31 downto 0);
     -- controller
-    instr_en, reg_we : in std_logic
-    
+    instr_en, reg_we : in std_logic;
+    -- scan
+    reg_wa : out std_logic_vector(4 downto 0);
+    reg_wd : out std_logic_vector(31 downto 0)
   );
 end entity;
 
-architecture behavior of decode is
+architecture behavior of decode_writeback is
   component regfile
     port (
       clk, rst : in std_logic;
@@ -47,7 +49,7 @@ architecture behavior of decode is
   end component;
 
   signal instr0, wd0 : std_logic_vector(31 downto 0);
-
+  signal a30 : std_logic_vector(4 downto 0);
 begin
   reg_instr : flopr_en port map (
     clk => clk, rst => rst, en => instr_en,
@@ -61,21 +63,22 @@ begin
     y => wd0
   );
 
+  a30 <= instr0(20 downto 16);
   regfile0 : regfile port map (
     clk => clk, rst => rst,
     a1 => instr0(25 downto 21),
     rd1 => rs,
     a2 => instr0(20 downto 16),
     rd2 => rt,
-    a3 => instr0(20 downto 16),
+    a3 => a30,
     wd3 => wd0,
     we3 => reg_we
   );
+  reg_wa <= a30;
+  reg_wd <= wd0;
 
   sgnext0 : sgnext port map (
     a => instr0(15 downto 0),
     y => imm
   );
-
-
 end architecture;
