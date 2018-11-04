@@ -6,9 +6,10 @@ entity decode_writeback is
   port (
     clk, rst : in std_logic;
     mem_rd : in std_logic_vector(31 downto 0);
-    rs, rt : out std_logic_vector(31 downto 0);
-    imm : out std_logic_vector(31 downto 0);
+    rs, rt, imm : out std_logic_vector(31 downto 0);
     -- controller
+    opcode : out std_logic_vector(5 downto 0);
+    funct : out std_logic_vector(5 downto 0);
     instr_en, reg_we : in std_logic;
     -- scan
     reg_wa : out std_logic_vector(4 downto 0);
@@ -56,6 +57,9 @@ begin
     a => mem_rd,
     y => instr0
   );
+  -- for controller
+  opcode <= instr0(31 downto 26);
+  funct <= instr0(5 downto 0);
 
   reg_wdata : flopr_en port map (
     clk => clk, rst => rst, en => '1',
