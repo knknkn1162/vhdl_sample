@@ -11,7 +11,7 @@ entity fetch is
     -- controller
     pc_aluout_s, mem_we : in std_logic;
     -- scan
-    pc, pcnext : out std_logic_vector(31 downto 0)
+    mem_addr, pcnext : out std_logic_vector(31 downto 0)
   );
 end entity;
 
@@ -56,7 +56,7 @@ begin
   );
 
   pcnext0 <= std_logic_vector(unsigned(pc0) + 4);
-  pc <= pc0; pcnext <= pcnext0;
+  pcnext <= pcnext0;
 
   pc_alu_mux : mux2 generic map (N=>32)
   port map (
@@ -65,6 +65,7 @@ begin
     s => pc_aluout_s,
     y => mem_addr0
   );
+  mem_addr <= mem_addr0;
 
   mem0 : mem port map (
     clk => clk, rst => rst,
