@@ -9,12 +9,12 @@ architecture testbench of memadr_tb is
     port (
       clk, rst : in std_logic;
       alures : in std_logic_vector(31 downto 0);
-      pc_aluout_s, pc_en : in std_logic;
       addr : out std_logic_vector(31 downto 0);
+      -- controller
+      pc_aluout_s, pc_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0)
-
     );
   end component;
 
@@ -30,8 +30,8 @@ begin
   uut : memadr port map (
     clk => clk, rst => rst, pc_en => pc_en,
     alures => alures,
-    pc_aluout_s => pc_aluout_s,
     addr => addr,
+    pc_aluout_s => pc_aluout_s,
     pc => pc, pcnext => pcnext
   );
 

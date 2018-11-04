@@ -6,12 +6,12 @@ entity memadr is
   port (
     clk, rst : in std_logic;
     alures : in std_logic_vector(31 downto 0);
-    pc_aluout_s, pc_en : in std_logic;
     addr : out std_logic_vector(31 downto 0);
+    -- controller
+    pc_aluout_s, pc_en : in std_logic;
     -- scan
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0)
-
   );
 end entity;
 
