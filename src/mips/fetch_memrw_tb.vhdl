@@ -8,21 +8,18 @@ architecture testbench of fetch_memrw_tb is
   component fetch_memrw
     port (
       clk, rst: in std_logic;
-      mem_wd : in std_logic_vector(31 downto 0);
-      aluout : in std_logic_vector(31 downto 0);
-      mem_rd : out std_logic_vector(31 downto 0);
+      addr : in std_logic_vector(31 downto 0);
+      wd : in std_logic_vector(31 downto 0);
+      rd : out std_logic_vector(31 downto 0);
       -- controller
-      pc_aluout_s, mem_we : in std_logic;
-      -- scan
-      mem_addr, pcnext : out std_logic_vector(31 downto 0)
+      we : in std_logic
     );
   end component;
 
   signal clk, rst : std_logic;
-  signal pc_aluout_s, mem_we : std_logic;
-  signal aluout : std_logic_vector(31 downto 0);
-  signal mem_rd, mem_wd : std_logic_vector(31 downto 0);
-  signal mem_addr, pcnext : std_logic_vector(31 downto 0);
+  signal rd, wd : std_logic_vector(31 downto 0);
+  signal we : std_logic;
+  signal addr : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
@@ -30,12 +27,9 @@ begin
 
   uut : fetch_memrw port map (
     clk => clk, rst => rst,
-    mem_wd => mem_wd,
-    aluout => aluout,
-    mem_rd => mem_rd, 
-    -- controller
-    pc_aluout_s => pc_aluout_s, mem_we => mem_we,
-    mem_addr => mem_addr, pcnext => pcnext
+    addr => addr,
+    wd => wd, rd => rd,
+    we => we
   );
   clk_process: process
   begin
@@ -49,19 +43,18 @@ begin
   stim_proc : process
   begin
     wait for clk_period;
-    rst <= '1'; pc_aluout_s <= '0'; mem_we <= '0'; wait for 1 ns; rst <= '0';
-    assert mem_addr = X"00000000"; assert mem_rd = X"8C1003FC";
-    wait for clk_period/2;
-    assert mem_addr = X"00000004"; assert mem_rd = X"AC1003F8";
-    aluout <= X"000003FC"; pc_aluout_s <= '1'; wait for clk_period;
-    assert mem_addr = X"000003FC"; assert mem_rd = X"FFFFFFFF";
+    rst <= '1'; we <= '0'; wait for 1 ns; rst <= '0';
+
+    addr <= X"00000000"; wait for clk_period/2;
+    assert rd = X"8C1003FC";
+    addr <= X"00000004"; wait for clk_period; assert rd = X"AC1003F8";
+    addr <= X"000003FC"; wait for clk_period; assert rd = X"FFFFFFFF";
 
     -- mem writeback
-    aluout <= X"00000001"; pc_aluout_s <= '1';
-    mem_we <= '1'; mem_wd <= X"0000000A"; wait for clk_period;
+    addr <= X"00000004"; we <= '1'; wd <= X"0000000A"; wait for clk_period;
     -- check whether the data is written
-    aluout <= X"00000001"; mem_we <= '0'; wait for clk_period;
-    assert mem_rd = X"0000000A";
+    addr <= X"00000004"; we <= '0'; wait for clk_period;
+    assert rd = X"0000000A";
 
     -- skip
     stop <= TRUE;
