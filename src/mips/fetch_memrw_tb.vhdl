@@ -56,6 +56,13 @@ begin
     aluout <= X"000003FC"; pc_aluout_s <= '1'; wait for clk_period;
     assert mem_addr = X"000003FC"; assert mem_rd = X"FFFFFFFF";
 
+    -- mem writeback
+    aluout <= X"00000001"; pc_aluout_s <= '1';
+    mem_we <= '1'; mem_wd <= X"0000000A"; wait for clk_period;
+    -- check whether the data is written
+    aluout <= X"00000001"; mem_we <= '0'; wait for clk_period;
+    assert mem_rd = X"0000000A";
+
     -- skip
     stop <= TRUE;
     -- success message
