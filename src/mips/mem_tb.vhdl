@@ -51,8 +51,9 @@ begin
     -- clk is in rising_edge
     a <= b"00" & X"0000002"; wait for 2 ns; assert rd = X"00000000";
 
+    wait until falling_edge(clk);
     -- write in ram
-    we <= '1'; a <= b"00" & X"0000002"; wd <= X"FFFFFFFF"; wait for clk_period;
+    we <= '1'; a <= b"00" & X"0000002"; wd <= X"FFFFFFFF"; wait for clk_period/2+ 1 ns;
     we <= '0'; wait for 1 ns; assert rd = X"FFFFFFFF";
     -- skip
     stop <= TRUE;
