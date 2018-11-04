@@ -19,9 +19,11 @@ all:
 	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-mips: mem regfile flopr_en sltn alu mux2 sgnext
+mips: memadr fetch_memrw decode_writeback calc controller
 	ghdl -a mips.vhdl mips_tb.vhdl
 	make er F=mips
+controller:
+	ghdl -a controller.vhdl
 fetch_memrw: mem mux2 flopr_en
 	make all F=fetch_memrw
 decode_writeback: regfile sgnext flopr_en
