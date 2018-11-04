@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity fetch is
+entity fetch_memrw is
   port (
     clk, rst: in std_logic;
     aluout : in std_logic_vector(31 downto 0);
@@ -15,7 +15,7 @@ entity fetch is
   );
 end entity;
 
-architecture behavior of fetch is
+architecture behavior of fetch_memrw is
   component flopr_en
     port (
       clk, rst, en: in std_logic;

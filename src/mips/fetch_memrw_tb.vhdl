@@ -1,11 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity fetch_tb is
+entity fetch_memrw_tb is
 end entity;
 
-architecture testbench of fetch_tb is
-  component fetch
+architecture testbench of fetch_memrw_tb is
+  component fetch_memrw
     port (
       clk, rst: in std_logic;
       mem_wd : in std_logic_vector(31 downto 0);
@@ -28,7 +28,7 @@ architecture testbench of fetch_tb is
 
 begin
 
-  uut : fetch port map (
+  uut : fetch_memrw port map (
     clk => clk, rst => rst,
     mem_wd => mem_wd,
     aluout => aluout,
