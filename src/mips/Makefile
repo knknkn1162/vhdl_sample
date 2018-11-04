@@ -22,6 +22,8 @@ all:
 mips: mem regfile flopr_en sltn alu mux2 sgnext
 	ghdl -a mips.vhdl mips_tb.vhdl
 	make er F=mips
+fetch: mem mux2 flopr_en
+	make all F=fetch
 flopr:
 	make all F=flopr
 flopr_en:
