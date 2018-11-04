@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity flopr is
   port (
-    clk, reset: in std_logic;
+    clk, rst: in std_logic;
     a : in std_logic_vector(31 downto 0);
     y : out std_logic_vector(31 downto 0)
        );
@@ -12,8 +12,8 @@ end entity;
 
 architecture behavior of flopr is
 begin
-  process(clk, reset) begin
-    if reset='1' then
+  process(clk, rst) begin
+    if rst='1' then
       y <= (others => '0');
     elsif rising_edge(clk) then
       y <= a;

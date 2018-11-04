@@ -7,13 +7,13 @@ end entity;
 architecture behavior of flopr_tb is
   component flopr
     port (
-      clk, reset: in std_logic;
+      clk, rst: in std_logic;
       a : in std_logic_vector(31 downto 0);
       y : out std_logic_vector(31 downto 0)
         );
   end component;
   signal clk : std_logic;
-  signal reset : std_logic;
+  signal rst : std_logic;
   signal a : std_logic_vector(31 downto 0);
   signal y : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
@@ -21,7 +21,7 @@ architecture behavior of flopr_tb is
 
 begin
   uut : flopr port map (
-    clk, reset, a, y
+    clk, rst, a, y
   );
 
   clk_process: process
@@ -35,7 +35,7 @@ begin
 
   stim_proc : process
   begin
-    reset <= '1'; wait for 1 ns; reset <= '0';
+    rst <= '1'; wait for 1 ns; rst <= '0';
     wait for 1 ns; assert y = X"00000000";
     a <= X"00000001"; wait for clk_period/2; assert y = X"00000001";
     a <= X"00000002"; wait for clk_period/2; assert y = X"00000001";
