@@ -26,8 +26,10 @@ fetch_memrw: mem mux2 flopr_en
 	make all F=fetch_memrw
 decode_writeback: regfile sgnext flopr_en
 	make all F=decode_writeback
-calc: flopr_en alu mux2
+calc: flopr_en alu
 	make all F=calc
+memadr: flopr_en mux2
+	make all F=memadr
 flopr:
 	make all F=flopr
 flopr_en:

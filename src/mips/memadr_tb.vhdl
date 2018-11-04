@@ -9,7 +9,7 @@ architecture testbench of memadr_tb is
     port (
       clk, rst : in std_logic;
       alures : in std_logic_vector(31 downto 0);
-      pc_aluout_s : in std_logic;
+      pc_aluout_s, pc_en : in std_logic;
       addr : out std_logic_vector(31 downto 0);
       -- scan
       pc : out std_logic_vector(31 downto 0);
@@ -20,7 +20,7 @@ architecture testbench of memadr_tb is
 
   signal clk, rst : std_logic;
   signal alures : std_logic_vector(31 downto 0);
-  signal pc_aluout_s : std_logic;
+  signal pc_aluout_s, pc_en : std_logic;
   signal addr : std_logic_vector(31 downto 0);
   signal pc, pcnext : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
@@ -28,7 +28,7 @@ architecture testbench of memadr_tb is
 
 begin
   uut : memadr port map (
-    clk => clk, rst => rst,
+    clk => clk, rst => rst, pc_en => pc_en,
     alures => alures,
     pc_aluout_s => pc_aluout_s,
     addr => addr,
@@ -47,7 +47,15 @@ begin
   stim_proc : process
   begin
     wait for clk_period;
-    rst <= '1'; wait for 1 ns; rst <= '0'; assert pc = X"00000000";
+    rst <= '1'; wait for 1 ns; rst <= '0';
+    assert pc = X"00000000"; assert pcnext = X"00000004";
+    alures <= X"0000002C"; pc_aluout_s <= '1'; wait for clk_period/2; assert addr = X"0000002C";
+    -- enable pc counter
+    pc_aluout_s <= '0'; pc_en <= '1'; wait for clk_period; 
+    assert pc = X"00000004"; assert pcnext = X"00000008"; assert addr = X"00000004";
+    -- 
+    pc_en <= '0'; wait for clk_period;
+    assert addr = X"00000004";
     -- skip
     stop <= TRUE;
     -- success message

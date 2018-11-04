@@ -6,7 +6,7 @@ entity memadr is
   port (
     clk, rst : in std_logic;
     alures : in std_logic_vector(31 downto 0);
-    pc_aluout_s : in std_logic;
+    pc_aluout_s, pc_en : in std_logic;
     addr : out std_logic_vector(31 downto 0);
     -- scan
     pc : out std_logic_vector(31 downto 0);
@@ -38,7 +38,7 @@ architecture behavior of memadr is
 begin
 
   reg_pc : flopr_en port map (
-    clk => clk, rst => rst, en => '1',
+    clk => clk, rst => rst, en => pc_en,
     a => pcnext0,
     y => pc0
   );
