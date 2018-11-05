@@ -11,7 +11,7 @@ entity controller is
     mem_we: out std_logic;
     -- for writeback
     instr_en, reg_we : out std_logic;
-    -- for memadr
+    -- for calc
     alucont : out std_logic_vector(2 downto 0);
     rt_imm_s : out std_logic
   );
@@ -19,7 +19,7 @@ end entity;
 
 architecture behavior of controller is
   type statetype is (
-    FetchS, DecodeS, MemAdrS, MemReadS, MemWritebackS,
+    FetchS, DecodeS, AddrCalcS, MemReadS, RegWritebackS,
     MemWriteS
     -- ExecuteS, ALUWriteBackS,
     -- BranchS,
@@ -49,41 +49,44 @@ begin
         case opcode is
           -- lw or sw
           when op_lw | op_sw =>
-            nextState <= MemAdrS;
+            nextState <= AddrCalcS;
           --when op_rtype =>
           --  nextState <= ExecuteS;
           when others =>
             nextState <= FetchS;
         end case;
-      when MemAdrS =>
+      when AddrCalcS =>
         case opcode is
           when op_lw =>
+            nextState <= MemReadS;
+          when op_sw =>
             nextState <= MemWriteS;
           when others =>
             nextState <= FetchS;
         end case;
       when MemReadS =>
-        nextState <= MemWritebackS;
+        nextState <= RegWritebackS;
       -- when final state
-      when MemWriteBackS | MemWriteS =>
+      when RegWriteBackS | MemWriteS =>
         nextState <= FetchS;
       -- if undefined
       when others =>
         nextState <= FetchS;
     end case;
   end process;
+
   process(state)
     -- for memadr
     variable pc_aluout_s0, pc_en0 : std_logic;
     -- for memwrite
-    variable mem_we: std_logic;
+    variable mem_we0: std_logic;
     -- for decode
-    variable instr_en,
+    variable instr_en0 : std_logic;
     -- for writeback
-    variable reg_we : std_logic;
+    variable reg_we0 : std_logic;
     -- for memadr
-    variable alucont : std_logic_vector(2 downto 0);
-    variable rt_imm_s : std_logic
+    variable alucont0 : std_logic_vector(2 downto 0);
+    variable rt_imm_s0 : std_logic;
   begin
     pc_aluout_s0 := '0';
     pc_en0 := '0';
@@ -92,7 +95,6 @@ begin
     reg_we0 := '0';
     alucont0 := "000";
     rt_imm_s0 := '0';
-
     case state is
       when FetchS =>
         -- for memadr
@@ -100,9 +102,27 @@ begin
         pc_aluout_s0 := '0';
       when DecodeS =>
         instr_en0 := '1';
+        -- reg_we0 := '0';
+      when AddrCalcS =>
+        alucont0 := "010";
+        rt_imm_s0 := '1';
+      when MemReadS =>
+        -- pc_en0 := '0';
+        pc_aluout_s0 := '1';
+      when MemWriteS =>
+        -- pc_en0 := '0';
+        mem_we0 := '1';
+      when RegWriteBackS =>
+        reg_we0 := '1';
       when others =>
         -- do nothing
     end case;
     pc_aluout_s <= pc_aluout_s0;
+    pc_en <= pc_en0;
+    mem_we <= mem_we0;
+    instr_en <= instr_en0;
+    reg_we <= reg_we0;
+    alucont <= alucont0;
+    rt_imm_s <= rt_imm_s0;
   end process;
 end architecture;
