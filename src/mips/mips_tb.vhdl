@@ -55,7 +55,14 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period;
-    rst <= '1'; wait for 1 ns; rst <= '0'; assert pc <= X"00000000";
+    rst <= '1'; wait for 1 ns; rst <= '0';
+    wait for clk_period/2;
+    assert pc = X"00000000"; assert pcnext = X"00000004";
+    assert mem_rd = X"8C1003FC";
+    wait for clk_period;
+    assert pc = X"00000000"; assert pcnext = X"00000004";
+    assert mem_rd = X"8C1003FC";
+    wait for clk_period;
 
     assert false report "end of test" severity note;
     stop <= TRUE;

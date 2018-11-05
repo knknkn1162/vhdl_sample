@@ -47,7 +47,7 @@ begin
   process(clk, rst, opcode, funct) begin
     case state is
       when InitS =>
-        nextState <= FetchS;
+        nextState <= DecodeS;
       when FetchS =>
         nextState <= DecodeS;
       when DecodeS =>
