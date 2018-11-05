@@ -11,8 +11,8 @@ entity mips is
     addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
     reg_wa : out std_logic_vector(4 downto 0);
     reg_wd : out std_logic_vector(31 downto 0);
-    rs, rt, imm : out std_logic_vector(31 downto 0);
-    aluout : out std_logic_vector(31 downto 0)
+    rds, rdt, immext : out std_logic_vector(31 downto 0);
+    alures : out std_logic_vector(31 downto 0)
   );
 end entity;
 
@@ -50,7 +50,9 @@ architecture behavior of mips is
 
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       -- controller
-      we : in std_logic
+      we : in std_logic;
+      -- scan
+      wa : out std_logic_vector(4 downto 0)
     );
   end component;
 
@@ -99,6 +101,7 @@ architecture behavior of mips is
   signal rs0, rt0 : std_logic_vector(4 downto 0);
   signal imm0 : std_logic_vector(15 downto 0);
   signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
+  signal reg_wa0 : std_logic_vector(4 downto 0);
   signal reg_wd0 : std_logic_vector(31 downto 0);
   signal alures0 : std_logic_vector(31 downto 0);
   signal zero0 : std_logic;
@@ -122,6 +125,9 @@ begin
     -- controller
     we => mem_we
   );
+  addr <= mem_addr0;
+  mem_wd <= mem_wd0;
+  mem_rd <= mem_rd0;
 
   decode0 : decode port map (
     clk => clk, rst => rst,
@@ -141,8 +147,13 @@ begin
     wd => reg_wd0,
     rds => rds0, rdt => rdt0, immext => immext0,
     -- controller
-    we => reg_we
+    we => reg_we,
+    -- scan
+    wa => reg_wa0
   );
+  reg_wa <= reg_wa0;
+  reg_wd <= reg_wd0;
+  rds <= rds0; rdt <= rdt0; immext <= immext0;
 
   calc0 : calc port map (
     clk => clk, rst => rst,
@@ -163,6 +174,7 @@ begin
     -- scan
     pc => pc, pcnext => pcnext
   );
+  alures <= alures0;
 
   controller0 : controller port map (
     clk => clk, rst => rst,

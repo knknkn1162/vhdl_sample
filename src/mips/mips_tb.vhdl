@@ -15,8 +15,8 @@ architecture behavior of mips_tb is
       addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
       reg_wa : out std_logic_vector(4 downto 0);
       reg_wd : out std_logic_vector(31 downto 0);
-      rs, rt, imm : out std_logic_vector(31 downto 0);
-      aluout : out std_logic_vector(31 downto 0)
+      rds, rdt, immext : out std_logic_vector(31 downto 0);
+      alures : out std_logic_vector(31 downto 0)
     );
   end component;
 
@@ -25,8 +25,8 @@ architecture behavior of mips_tb is
   signal addr, mem_rd, mem_wd : std_logic_vector(31 downto 0);
   signal reg_wa : std_logic_vector(4 downto 0);
   signal reg_wd : std_logic_vector(31 downto 0);
-  signal rs, rt, imm : std_logic_vector(31 downto 0);
-  signal aluout : std_logic_vector(31 downto 0);
+  signal rds, rdt, immext : std_logic_vector(31 downto 0);
+  signal alures : std_logic_vector(31 downto 0);
 
   constant clk_period : time := 10 ns;
   signal stop : boolean;
@@ -38,8 +38,8 @@ begin
     addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,
     reg_wa => reg_wa,
     reg_wd => reg_wd,
-    rs => rs, rt => rt, imm => imm,
-    aluout => aluout
+    rds => rds, rdt => rdt, immext => immext,
+    alures => alures
   );
 
   clk_process: process
