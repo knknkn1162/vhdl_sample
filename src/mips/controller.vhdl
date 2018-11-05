@@ -19,6 +19,8 @@ end entity;
 
 architecture behavior of controller is
   type statetype is (
+    -- soon after the initialization
+    InitS,
     FetchS, DecodeS, AddrCalcS, MemReadS, RegWritebackS,
     MemWriteS
     -- ExecuteS, ALUWriteBackS,
@@ -35,7 +37,7 @@ architecture behavior of controller is
 begin
   process(clk, rst) begin
     if rst = '1' then
-      state <= FetchS;
+      state <= InitS;
     elsif rising_edge(clk) then
       state <= nextState;
     end if;
@@ -44,6 +46,8 @@ begin
   -- State Machine
   process(clk, rst, opcode, funct) begin
     case state is
+      when InitS =>
+        nextState <= FetchS;
       when FetchS =>
         nextState <= DecodeS;
       when DecodeS =>
@@ -97,6 +101,8 @@ begin
     alucont0 := "000";
     rdt_immext_s0 := '0';
     case state is
+      when InitS =>
+        -- do nothing
       when FetchS =>
         -- for memadr
         pc_en0 := '1';
