@@ -21,7 +21,7 @@ architecture behavior of controller is
   type statetype is (
     -- soon after the initialization
     InitS,
-    FetchS, DecodeS, AddrCalcS, MemReadS, RegWritebackS,
+    FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
     MemWriteS
     -- ExecuteS, ALUWriteBackS,
     -- BranchS,
@@ -54,13 +54,13 @@ begin
         case opcode is
           -- lw or sw
           when op_lw | op_sw =>
-            nextState <= AddrCalcS;
+            nextState <= AdrCalcS;
           --when op_rtype =>
           --  nextState <= ExecuteS;
           when others =>
             nextState <= FetchS;
         end case;
-      when AddrCalcS =>
+      when AdrCalcS =>
         case opcode is
           when op_lw =>
             nextState <= MemReadS;
@@ -110,7 +110,7 @@ begin
       when DecodeS =>
         instr_en0 := '1';
         -- reg_we0 := '0';
-      when AddrCalcS =>
+      when AdrCalcS =>
         alucont0 := "010";
         rdt_immext_s0 := '1';
       when MemReadS =>
