@@ -13,7 +13,7 @@ entity controller is
     instr_en, reg_we : out std_logic;
     -- for calc
     alucont : out std_logic_vector(2 downto 0);
-    rt_imm_s : out std_logic
+    rdt_immext_s : out std_logic
   );
 end entity;
 
@@ -86,7 +86,7 @@ begin
     variable reg_we0 : std_logic;
     -- for memadr
     variable alucont0 : std_logic_vector(2 downto 0);
-    variable rt_imm_s0 : std_logic;
+    variable rdt_immext_s0 : std_logic;
   begin
     pc_aluout_s0 := '0';
     pc_en0 := '0';
@@ -94,7 +94,7 @@ begin
     instr_en0 := '0';
     reg_we0 := '0';
     alucont0 := "000";
-    rt_imm_s0 := '0';
+    rdt_immext_s0 := '0';
     case state is
       when FetchS =>
         -- for memadr
@@ -105,7 +105,7 @@ begin
         -- reg_we0 := '0';
       when AddrCalcS =>
         alucont0 := "010";
-        rt_imm_s0 := '1';
+        rdt_immext_s0 := '1';
       when MemReadS =>
         -- pc_en0 := '0';
         pc_aluout_s0 := '1';
@@ -123,6 +123,6 @@ begin
     instr_en <= instr_en0;
     reg_we <= reg_we0;
     alucont <= alucont0;
-    rt_imm_s <= rt_imm_s0;
+    rdt_immext_s <= rdt_immext_s0;
   end process;
 end architecture;
