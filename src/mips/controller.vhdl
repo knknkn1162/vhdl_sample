@@ -80,26 +80,20 @@ begin
     end case;
   end process;
 
-  process(state)
-    -- for memadr
-    variable pc_aluout_s0, pc_en0 : std_logic;
+  -- for sequential logic
+  -- ex) D-flipflop enable signal should be turned on before rising_edge(clk)
+  process(state, nextstate)
+    variable pc_en0 : std_logic;
+    variable instr_en0 : std_logic;
     -- for memwrite
     variable mem_we0: std_logic;
-    -- for decode
-    variable instr_en0 : std_logic;
     -- for writeback
     variable reg_we0 : std_logic;
-    -- for memadr
-    variable alucont0 : std_logic_vector(2 downto 0);
-    variable rdt_immext_s0 : std_logic;
   begin
-    pc_aluout_s0 := '0';
     pc_en0 := '0';
-    mem_we0 := '0';
     instr_en0 := '0';
+    mem_we0 := '0';
     reg_we0 := '0';
-    alucont0 := "000";
-    rdt_immext_s0 := '0';
     case state is
       when InitS =>
         -- do nothing
@@ -107,32 +101,60 @@ begin
         -- pc_en0 := '0';
         instr_en0 := '1';
       when FetchS =>
+        -- pc_en0 := '0';
+        instr_en0 := '1'; -- if nextstate = DecodeS
+      when DecodeS =>
+      when AdrCalcS =>
+        if nextstate = MemWriteS then
+          mem_we0 := '1';
+        end if;
+      when MemReadS =>
+        -- instr_en0 = '0'; -- if nextState = RegWriteBackS
+        reg_we0 := '1';
+      when MemWriteS|RegWriteBackS =>
+        pc_en0 := '1'; -- if nextstate = FetchS
+      when others =>
+        -- do nothing;
+    end case;
+
+    pc_en <= pc_en0;
+    instr_en <= instr_en0;
+    mem_we <= mem_we0;
+    reg_we <= reg_we0;
+  end process;
+
+  -- for combinatorial logic
+  process(state)
+    -- for memadr
+    variable pc_aluout_s0 : std_logic;
+    -- for memadr
+    variable alucont0 : std_logic_vector(2 downto 0);
+    variable rdt_immext_s0 : std_logic;
+  begin
+    pc_aluout_s0 := '0';
+    alucont0 := "000";
+    rdt_immext_s0 := '0';
+    case state is
+      when InitS =>
+        -- do nothing
+      when InitFetchS =>
+        -- do nothing
+      when FetchS =>
         -- for decoding
-        pc_en0 := '1';
-        instr_en0 := '1';
         pc_aluout_s0 := '0';
       when DecodeS =>
-        -- instr_en0 := '0';
         -- reg_we0 := '0';
       when AdrCalcS =>
         alucont0 := "010";
         rdt_immext_s0 := '1';
       when MemReadS =>
-        -- pc_en0 := '0';
         pc_aluout_s0 := '1';
       when MemWriteS =>
-        -- pc_en0 := '0';
-        mem_we0 := '1';
       when RegWriteBackS =>
-        reg_we0 := '1';
       when others =>
         -- do nothing
     end case;
     pc_aluout_s <= pc_aluout_s0;
-    pc_en <= pc_en0;
-    mem_we <= mem_we0;
-    instr_en <= instr_en0;
-    reg_we <= reg_we0;
     alucont <= alucont0;
     rdt_immext_s <= rdt_immext_s0;
   end process;
