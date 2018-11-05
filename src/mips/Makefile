@@ -26,8 +26,10 @@ controller:
 	ghdl -a controller.vhdl
 fetch_memrw: mem mux2 flopr_en
 	make all F=fetch_memrw
-decode_writeback: regfile sgnext flopr_en
-	make all F=decode_writeback
+decode: flopr_en
+	make all F=decode
+regrw: regfile sgnext
+	make all F=regrw
 calc: flopr_en alu
 	make all F=calc
 memadr: flopr_en mux2
