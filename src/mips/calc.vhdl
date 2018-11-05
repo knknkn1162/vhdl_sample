@@ -4,12 +4,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity calc is
   port (
     clk, rst : in std_logic;
-    rs, rt, imm : in std_logic_vector(31 downto 0);
+    rds, rdt, immext : in std_logic_vector(31 downto 0);
     alures : out std_logic_vector(31 downto 0);
     zero : out std_logic;
     -- controller
     alucont : in std_logic_vector(2 downto 0);
-    rt_imm_s : in std_logic
+    rdt_immext_s : in std_logic
   );
 end entity;
 
@@ -43,26 +43,26 @@ architecture behavior of calc is
   end component;
 
   signal srca, srcb : std_logic_vector(31 downto 0);
-  signal rt0 : std_logic_vector(31 downto 0);
+  signal rdt0 : std_logic_vector(31 downto 0);
 
 begin
-  reg_rs : flopr_en port map (
+  reg_rds : flopr_en port map (
     clk => clk, rst => rst, en => '1',
-    a => rs,
+    a => rds,
     y => srca
   );
 
-  reg_rt : flopr_en port map (
+  reg_rdt : flopr_en port map (
     clk => clk, rst => rst, en => '1',
-    a => rt,
-    y => rt0
+    a => rdt,
+    y => rdt0
   );
 
-  rt_imm_mux : mux2 generic map (N=>32)
+  rdt_immext_mux : mux2 generic map (N=>32)
   port map (
-    d0 => rt0,
-    d1 => imm,
-    s => rt_imm_s,
+    d0 => rdt0,
+    d1 => immext,
+    s => rdt_immext_s,
     y => srcb
   );
 
