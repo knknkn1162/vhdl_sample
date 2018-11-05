@@ -10,7 +10,9 @@ entity regrw is
 
     rds, rdt, immext : out std_logic_vector(31 downto 0);
     -- controller
-    we : in std_logic
+    we : in std_logic;
+    -- scan
+    wa : out std_logic_vector(4 downto 0)
   );
 end entity;
 
@@ -37,13 +39,17 @@ architecture behavior of regrw is
       y : out std_logic_vector(31 downto 0)
         );
   end component;
+  signal wa0 : std_logic_vector(4 downto 0);
 begin
+  wa0 <= rt;
   regfile0 : regfile port map (
     clk => clk, rst => rst,
     a1 => rs, rd1 => rds,
     a2 => rt, rd2 => rdt,
-    a3 => rt, wd3 => wd, we3 => we
+    a3 => wa0, wd3 => wd, we3 => we
   );
+  wa <= wa0;
+
   sgnext0 : sgnext port map (
     a => imm,
     y => immext

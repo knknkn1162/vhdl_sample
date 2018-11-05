@@ -14,7 +14,8 @@ architecture testbench of regrw_tb is
 
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       -- controller
-      we : in std_logic
+      we : in std_logic;
+      wa : out std_logic_vector(4 downto 0)
     );
   end component;
 
@@ -25,6 +26,7 @@ architecture testbench of regrw_tb is
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
   -- controller
   signal we : std_logic;
+  signal wa : std_logic_vector(4 downto 0);
 
   constant clk_period : time := 10 ns;
   signal stop : boolean;
@@ -36,7 +38,7 @@ begin
     wd => wd,
     imm => imm,
     rds => rds, rdt => rdt, immext => immext,
-    we => we
+    we => we, wa => wa
   );
 
   clk_process: process
@@ -55,9 +57,9 @@ begin
 
     -- mem writeback
     rt <= "00001"; we <= '1'; wd <= X"0000000A"; wait for clk_period/2;
+    assert wa <= "00001";
     -- check whether the data is written
     rt <= "00001"; we <= '0'; wait for clk_period;
-    assert rdt = X"0000000A";
 
     imm <= X"0020"; wait for 1 ns; assert immext = X"00000020";
 

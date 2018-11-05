@@ -30,6 +30,7 @@ architecture behavior of controller is
   constant op_lw : optype := "100011";
   constant op_sw : optype := "101011";
   constant op_rtype : optype := "000000";
+
   signal state, nextstate : statetype;
 begin
   process(clk, rst) begin
