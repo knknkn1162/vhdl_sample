@@ -19,13 +19,13 @@ all:
 	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-mips: memadr fetch_memrw decode_writeback calc controller
+mips: memrw decode regrw calc memadr controller
 	ghdl -a mips.vhdl mips_tb.vhdl
 	make er F=mips
 controller:
 	ghdl -a controller.vhdl
-fetch_memrw: mem mux2 flopr_en
-	make all F=fetch_memrw
+memrw: mem
+	make all F=memrw
 decode: flopr_en
 	make all F=decode
 regrw: regfile sgnext
