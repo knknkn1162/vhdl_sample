@@ -66,6 +66,7 @@ architecture behavior of mips is
       rt_imm_s : in std_logic
     );
   end component;
+
   component controller
     port (
       clk, rst : in std_logic;
