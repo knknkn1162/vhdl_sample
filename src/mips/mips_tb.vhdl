@@ -55,13 +55,19 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period;
+    -- InitS
     rst <= '1'; wait for 1 ns; rst <= '0';
     wait for clk_period/2;
+    -- InitFetchS
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"8C1003FC";
+    -- (not yet)
+    assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
+    -- DecodeS
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"8C1003FC";
+    assert rds = X"00000000"; assert immext = X"000003FC";
     wait for clk_period;
 
     assert false report "end of test" severity note;

@@ -20,7 +20,7 @@ end entity;
 architecture behavior of controller is
   type statetype is (
     -- soon after the initialization
-    InitS,
+    InitS, InitFetchS,
     FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
     MemWriteS
     -- ExecuteS, ALUWriteBackS,
@@ -47,8 +47,8 @@ begin
   process(clk, rst, opcode, funct) begin
     case state is
       when InitS =>
-        nextState <= DecodeS;
-      when FetchS =>
+        nextState <= InitFetchS;
+      when InitFetchS|FetchS =>
         nextState <= DecodeS;
       when DecodeS =>
         case opcode is
@@ -103,12 +103,16 @@ begin
     case state is
       when InitS =>
         -- do nothing
+      when InitFetchS =>
+        -- pc_en0 := '0';
+        instr_en0 := '1';
       when FetchS =>
-        -- for memadr
+        -- for decoding
         pc_en0 := '1';
+        instr_en0 := '1';
         pc_aluout_s0 := '0';
       when DecodeS =>
-        instr_en0 := '1';
+        -- instr_en0 := '0';
         -- reg_we0 := '0';
       when AdrCalcS =>
         alucont0 := "010";
