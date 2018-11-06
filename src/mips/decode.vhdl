@@ -38,5 +38,9 @@ begin
   imm <= instr0(15 downto 0);
   funct <= instr0(5 downto 0);
 
-  wd <= mem_rd;
+  reg_wdata : flopr_en port map (
+    clk => clk, rst => rst, en => '1',
+    a => mem_rd,
+    y => wd
+  );
 end architecture;

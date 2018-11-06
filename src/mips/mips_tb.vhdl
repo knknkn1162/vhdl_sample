@@ -79,8 +79,7 @@ begin
     wait for clk_period;
     -- MemReadS(memadr + memrw(r))
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert addr = X"000003FC";
-    assert mem_rd = X"FFFFFFFF";
+    assert addr = X"000003FC"; assert mem_rd = X"FFFFFFFF";
     wait for clk_period;
     -- MemWriteBackS(decode+regrw(w))
     assert pc = X"00000000"; assert pcnext = X"00000004";
