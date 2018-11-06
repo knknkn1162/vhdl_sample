@@ -34,7 +34,7 @@ architecture behavior of mips is
       mem_rd : in std_logic_vector(31 downto 0);
       rs, rt : out std_logic_vector(4 downto 0);
       imm : out std_logic_vector(15 downto 0);
-      wd : out std_logic_vector(31 downto 0);
+      reg_memrd : out std_logic_vector(31 downto 0);
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
       instr_en : in std_logic
@@ -105,7 +105,7 @@ architecture behavior of mips is
   signal rs0, rt0 : std_logic_vector(4 downto 0);
   signal imm0 : std_logic_vector(15 downto 0);
   signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
-  signal reg_aluout0 : std_logic_vector(31 downto 0);
+  signal reg_aluout0, reg_memrd0 : std_logic_vector(31 downto 0);
   signal reg_wa0 : std_logic_vector(4 downto 0);
   signal reg_wd0 : std_logic_vector(31 downto 0);
   signal alures0 : std_logic_vector(31 downto 0);
@@ -142,7 +142,7 @@ begin
     mem_rd => mem_rd0,
     rs => rs0, rt => rt0,
     imm => imm0,
-    wd => reg_wd0,
+    reg_memrd => reg_memrd0,
     -- controller
     opcode => opcode, funct => funct,
     instr_en => instr_en
@@ -151,7 +151,7 @@ begin
   regrw0 : regrw port map (
     clk => clk, rst => rst,
     rs => rs0, rt => rt0,
-    mem_rd => mem_rd0, aluout => reg_aluout0,
+    mem_rd => reg_memrd0, aluout => reg_aluout0,
     imm => imm0,
     rds => rds0, rdt => rdt0, immext => immext0,
     -- controller
@@ -197,6 +197,7 @@ begin
     mem_we => mem_we,
     -- for writeback
     instr_en => instr_en, reg_we => reg_we,
+    memrd_aluout_s => memrd_aluout_s,
     -- for memadr
     alucont => alucont,
     rdt_immext_s => rdt_immext_s

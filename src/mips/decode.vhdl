@@ -8,7 +8,7 @@ entity decode is
     mem_rd : in std_logic_vector(31 downto 0);
     rs, rt : out std_logic_vector(4 downto 0);
     imm : out std_logic_vector(15 downto 0);
-    wd : out std_logic_vector(31 downto 0);
+    reg_memrd : out std_logic_vector(31 downto 0);
     -- controller
     opcode, funct : out std_logic_vector(5 downto 0);
     instr_en : in std_logic
@@ -41,6 +41,6 @@ begin
   reg_wdata : flopr_en port map (
     clk => clk, rst => rst, en => '1',
     a => mem_rd,
-    y => wd
+    y => reg_memrd
   );
 end architecture;

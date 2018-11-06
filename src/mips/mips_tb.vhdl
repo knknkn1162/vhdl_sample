@@ -58,32 +58,27 @@ begin
     -- InitS
     rst <= '1'; wait for 1 ns; rst <= '0';
     wait for clk_period/2;
-    -- -- lw $s0, 1020($0) 1000/11 00/000 1/0000 0x03FC
-    -- ram(0) <= X"8C1003FC";
+    --    main:   addi $2, $0, 5      # initialize $2 = 5  0       20020005
+    -- 0010/00 00/000 0/0010/ X0005
     -- InitFetchS
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"8C1003FC";
+    assert mem_rd = X"20020005";
     -- (not yet)
     assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
     -- DecodeS
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"8C1003FC";
-    assert rds = X"00000000"; assert immext = X"000003FC";
+    assert mem_rd = X"20020005";
+    assert rds = X"00000000"; assert immext = X"00000005";
     wait for clk_period;
-    -- AdrCalcS
+    -- AddiExecuteS
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"8C1003FC";
-    assert addr = X"00000000";
-    assert alures = X"000003FC";
+    assert mem_rd = X"20020005";
+    assert alures = X"00000005";
     wait for clk_period;
-    -- MemReadS(memadr + memrw(r))
+    -- AddiWritebackS
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert addr = X"000003FC"; assert mem_rd = X"FFFFFFFF";
-    wait for clk_period;
-    -- MemWriteBackS(decode+regrw(w))
-    assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert reg_wa = "10000"; assert reg_wd = X"FFFFFFFF";
+    assert reg_wa = "00010"; assert reg_wd = X"00000005";
     wait for clk_period;
 
     -- -- sw $s0, 1016($0) 1010/11 00/000 1/0000 0x03F8
