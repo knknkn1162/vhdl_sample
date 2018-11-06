@@ -82,7 +82,7 @@ begin
 
   -- for sequential logic
   -- ex) D-flipflop enable signal should be turned on before rising_edge(clk)
-  process(state, nextstate)
+  process(nextstate)
     variable pc_en0 : std_logic;
     variable instr_en0 : std_logic;
     -- for memwrite
@@ -94,25 +94,23 @@ begin
     instr_en0 := '0';
     mem_we0 := '0';
     reg_we0 := '0';
-    case state is
+    case nextstate is
       when InitS =>
         -- do nothing
       when InitFetchS =>
-        -- pc_en0 := '0';
-        instr_en0 := '1';
       when FetchS =>
-        -- pc_en0 := '0';
-        instr_en0 := '1'; -- if nextstate = DecodeS
+        pc_en0 := '1';
       when DecodeS =>
+        instr_en0 := '1';
       when AdrCalcS =>
-        if nextstate = MemWriteS then
-          mem_we0 := '1';
-        end if;
+        -- do nothing
+      when MemWriteS =>
+        mem_we0 := '1';
       when MemReadS =>
-        -- instr_en0 = '0'; -- if nextState = RegWriteBackS
+        -- do nothing
+      when RegWriteBackS =>
+        -- instr_en0 = '0';
         reg_we0 := '1';
-      when MemWriteS|RegWriteBackS =>
-        pc_en0 := '1'; -- if nextstate = FetchS
       when others =>
         -- do nothing;
     end case;
