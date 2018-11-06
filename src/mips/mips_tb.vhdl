@@ -81,31 +81,50 @@ begin
     assert reg_wa = "00010"; assert reg_wd = X"00000005";
     wait for clk_period;
 
-    -- -- sw $s0, 1016($0) 1010/11 00/000 1/0000 0x03F8
-    -- ram(1) <= X"AC1003F8";
+    --            addi $3, $0, 12     # initialize $3 = 12 4       2003000c
+    -- 0010/00 00/000 0/0011/ X000C
     -- FetchS
     assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"AC1003F8";
+    assert mem_rd = X"2003000C";
     wait for clk_period;
     -- DecodeS
     assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"AC1003F8";
-    assert rds = X"00000000"; assert rdt = X"FFFFFFFF"; assert immext = X"000003F8";
+    assert mem_rd = X"2003000C";
+    assert rds = X"00000000"; assert immext = X"0000000C";
+    wait for clk_period;
+    -- AddiExecuteS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"2003000C";
+    assert alures = X"0000000C";
+    wait for clk_period;
+    -- AddiWritebackS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert reg_wa = "00011"; assert reg_wd = X"0000000C";
     wait for clk_period;
 
-    -- AdrCalcS
-    assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"AC1003F8";
-    assert addr = X"00000004"; assert alures = X"000003F8";
+    --            addi $7, $3, -9     # initialize $7 = 3  8       2067fff7
+    -- 0010/00 00/011 0/0111/ XFFF7
+    -- FetchS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert mem_rd = X"2067FFF7";
     wait for clk_period;
-
-    -- MemWriteS
-    assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert addr = X"000003F8"; assert mem_wd = X"FFFFFFFF";
+    -- DecodeS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert mem_rd = X"2067FFF7";
+    assert rds = X"0000000C"; assert immext = X"FFFFFFF7";
+    wait for clk_period;
+    -- AddiExecuteS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert mem_rd = X"2067FFF7";
+    assert alures = X"00000003";
+    wait for clk_period;
+    -- AddiWritebackS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert reg_wa = "00111"; assert reg_wd = X"00000003";
     wait for clk_period;
 
     -- FetchS
-    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert pc = X"0000000C"; assert pcnext = X"00000010";
 
     assert false report "end of test" severity note;
     stop <= TRUE;
