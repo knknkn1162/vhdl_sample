@@ -5,14 +5,17 @@ entity regrw is
   port (
     clk, rst : in std_logic;
     rs, rt : in std_logic_vector(4 downto 0);
-    wd : in std_logic_vector(31 downto 0);
+    mem_rd : in std_logic_vector(31 downto 0);
+    aluout : in std_logic_vector(31 downto 0);
     imm : in std_logic_vector(15 downto 0);
 
     rds, rdt, immext : out std_logic_vector(31 downto 0);
     -- controller
     we : in std_logic;
+    memrd_aluout_s : in std_logic;
     -- scan
-    wa : out std_logic_vector(4 downto 0)
+    wa : out std_logic_vector(4 downto 0);
+    wd : out std_logic_vector(31 downto 0)
   );
 end entity;
 
@@ -39,16 +42,37 @@ architecture behavior of regrw is
       y : out std_logic_vector(31 downto 0)
         );
   end component;
+
+  component mux2
+    generic(N : integer);
+    port (
+      d0 : in std_logic_vector(N-1 downto 0);
+      d1 : in std_logic_vector(N-1 downto 0);
+      s : in std_logic;
+      y : out std_logic_vector(N-1 downto 0)
+        );
+  end component;
+
   signal wa0 : std_logic_vector(4 downto 0);
+  signal wd0 : std_logic_vector(31 downto 0);
+
 begin
+  memrd_aluout_mux : mux2 generic map(N=>32)
+  port map (
+    d0 => mem_rd,
+    d1 => aluout,
+    s => memrd_aluout_s,
+    y => wd0
+  );
+
   wa0 <= rt;
   regfile0 : regfile port map (
     clk => clk, rst => rst,
     a1 => rs, rd1 => rds,
     a2 => rt, rd2 => rdt,
-    a3 => wa0, wd3 => wd, we3 => we
+    a3 => wa0, wd3 => wd0, we3 => we
   );
-  wa <= wa0;
+  wa <= wa0; wd <= wd0;
 
   sgnext0 : sgnext port map (
     a => imm,
