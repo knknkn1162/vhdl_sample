@@ -24,9 +24,9 @@ architecture behavior of controller is
     InitS,
     FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
     MemWriteS,
-    -- ExecuteS, ALUWriteBackS,
+    RtypeCalcS, ALUWriteBackS,
     -- BranchS,
-    AddiExecuteS, AddiWriteBackS
+    AddiCalcS, AddiWriteBackS
     -- JumpS
   );
   subtype optype is std_logic_vector(5 downto 0);
@@ -34,6 +34,22 @@ architecture behavior of controller is
   constant OP_SW : optype := "101011";
   constant OP_ADDI : optype := "001000";
   constant OP_RTYPE : optype := "000000";
+
+  subtype functtype is std_logic_vector(5 downto 0);
+  constant FUNCT_ADD : functtype := "100000"; -- 0x20
+  constant FUNCT_ADDU : functtype := "100001"; -- 0x21
+  constant FUNCT_AND : functtype := "100100"; -- 0x24
+  constant FUNCT_DIV : functtype := "011010"; -- 0x1A
+  constant FUNCT_DIVU : functtype := "011011"; -- 0x1B
+  constant FUNCT_JR : functtype := "001000"; -- 0x08
+  constant FUNCT_NOR : functtype := "100111"; -- 0x27
+  constant FUNCT_XOR : functtype := "100110"; -- 0x26
+  constant FUNCT_OR : functtype := "100101"; -- 0x25
+  constant FUNCT_SLT : functtype := "101010"; -- 0x2A
+  constant FUNCT_SLL : functtype := "000000"; -- 0x00
+  constant FUNCT_SRL : functtype := "000010"; -- 0x02
+  constant FUNCT_SUB : functtype := "100010"; -- 0x22
+  constant FUNCT_SUBU : functtype := "100011"; -- 0x23
 
   signal state, nextstate : statetype;
 begin
@@ -57,10 +73,10 @@ begin
           -- lw or sw
           when OP_LW | OP_SW =>
             nextState <= AdrCalcS;
-          --when OP_RTYPE =>
-          --  nextState <= ExecuteS;
+          when OP_RTYPE =>
+            nextState <= RtypeCalcS;
           when OP_ADDI =>
-            nextState <= AddiExecuteS;
+            nextState <= AddiCalcS;
           when others =>
             nextState <= FetchS;
         end case;
@@ -73,7 +89,7 @@ begin
           when others =>
             nextState <= FetchS;
         end case;
-      when AddiExecuteS =>
+      when AddiCalcS =>
         nextState <= AddiWriteBackS;
       when MemReadS =>
         nextState <= RegWritebackS;
@@ -100,12 +116,13 @@ begin
       when FetchS =>
         instr_en0 := '1';
       when DecodeS =>
-      when AddiExecuteS =>
+      when RtypeCalcS =>
+      when AddiCalcS =>
       when AdrCalcS =>
         -- do nothing
       when MemReadS =>
         -- do nothing
-      when MemWriteS | RegWriteBackS | AddiWritebackS =>
+      when MemWriteS | RegWriteBackS | AddiWritebackS | ALUWriteBackS =>
         pc_en0 := '1'; -- for fetchS
       when others =>
         -- do nothing;
@@ -119,8 +136,6 @@ begin
   process(state)
     -- for memadr
     variable pc_aluout_s0 : std_logic;
-    -- for memadr
-    variable alucont0 : std_logic_vector(2 downto 0);
     variable rdt_immext_s0 : std_logic;
     -- for regwriteback
     variable memrd_aluout_s0 : std_logic;
@@ -132,7 +147,6 @@ begin
     variable reg_we0 : std_logic;
   begin
     pc_aluout_s0 := '0';
-    alucont0 := "000";
     rdt_immext_s0 := '0';
     memrd_aluout_s0 := '0';
     reg_we0 := '0';
@@ -146,10 +160,10 @@ begin
       when DecodeS =>
         -- reg_we0 := '0';
       when AdrCalcS =>
-        alucont0 := "010";
         rdt_immext_s0 := '1';
-      when AddiExecuteS =>
-        alucont0 := "010";
+      when RtypeCalcS =>
+        -- rdt_immext_s0 := '0';
+      when AddiCalcS =>
         rdt_immext_s0 := '1';
       when MemReadS =>
         pc_aluout_s0 := '1';
@@ -166,10 +180,48 @@ begin
         -- do nothing
     end case;
     pc_aluout_s <= pc_aluout_s0;
-    alucont <= alucont0;
     rdt_immext_s <= rdt_immext_s0;
     memrd_aluout_s <= memrd_aluout_s0;
     mem_we <= mem_we0;
     reg_we <= reg_we0;
+  end process;
+
+  -- alucontroller
+  process(state)
+    -- for memadr
+    variable alucont0 : std_logic_vector(2 downto 0);
+  begin
+    alucont0 := "000";
+    case state is
+      when InitS =>
+      when FetchS =>
+      when DecodeS =>
+      when AdrCalcS =>
+        alucont0 := "010";
+      when RtypeCalcS =>
+        case funct is
+          when FUNCT_ADD =>
+            alucont0 := "010";
+          when FUNCT_AND =>
+            alucont0 := "000";
+          when FUNCT_SUB =>
+            alucont0 := "110";
+          when FUNCT_SLT =>
+            alucont0 := "111";
+          when FUNCT_OR =>
+            alucont0 := "001";
+          when others =>
+            alucont0 := "000";
+        end case;
+      when AddiCalcS =>
+        alucont0 := "010";
+      when MemReadS =>
+      when MemWriteS =>
+      when RegWriteBackS =>
+      when AddiWritebackS =>
+      when others =>
+        -- do nothing
+    end case;
+    alucont <= alucont0;
   end process;
 end architecture;
