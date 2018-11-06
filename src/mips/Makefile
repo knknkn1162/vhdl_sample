@@ -28,7 +28,7 @@ memrw: mem
 	make all F=memrw
 decode: flopr_en
 	make all F=decode
-regrw: regfile sgnext
+regrw: regfile sgnext mux2
 	make all F=regrw
 calc: flopr_en alu mux2
 	make all F=calc
