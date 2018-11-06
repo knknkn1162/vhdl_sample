@@ -7,6 +7,7 @@ entity memadr is
     clk, rst : in std_logic;
     alures : in std_logic_vector(31 downto 0);
     addr : out std_logic_vector(31 downto 0);
+    reg_aluout : out std_logic_vector(31 downto 0);
     -- controller
     pc_aluout_s, pc_en : in std_logic;
     -- scan
@@ -37,17 +38,18 @@ architecture behavior of memadr is
   signal pc0, pcnext0, aluout : std_logic_vector(31 downto 0);
 begin
 
-  reg_pc : flopr_en port map (
+  flopr_pc : flopr_en port map (
     clk => clk, rst => rst, en => pc_en,
     a => pcnext0,
     y => pc0
   );
   pc <= pc0;
 
-  reg_aluout : flopr_en port map (
+  flopr_aluout : flopr_en port map (
     clk => clk, rst => rst, en => '1',
     a => alures, y => aluout
   );
+  reg_aluout <= aluout;
   pcnext0 <= std_logic_vector(unsigned(pc0) + 4);
   pcnext <= pcnext0;
 

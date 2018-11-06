@@ -10,6 +10,7 @@ architecture testbench of memadr_tb is
       clk, rst : in std_logic;
       alures : in std_logic_vector(31 downto 0);
       addr : out std_logic_vector(31 downto 0);
+      reg_aluout : out std_logic_vector(31 downto 0);
       -- controller
       pc_aluout_s, pc_en : in std_logic;
       -- scan
@@ -19,7 +20,7 @@ architecture testbench of memadr_tb is
   end component;
 
   signal clk, rst : std_logic;
-  signal alures : std_logic_vector(31 downto 0);
+  signal alures, reg_aluout : std_logic_vector(31 downto 0);
   signal pc_aluout_s, pc_en : std_logic;
   signal addr : std_logic_vector(31 downto 0);
   signal pc, pcnext : std_logic_vector(31 downto 0);
@@ -31,6 +32,7 @@ begin
     clk => clk, rst => rst, pc_en => pc_en,
     alures => alures,
     addr => addr,
+    reg_aluout => reg_aluout,
     pc_aluout_s => pc_aluout_s,
     pc => pc, pcnext => pcnext
   );
