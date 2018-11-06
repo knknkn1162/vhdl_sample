@@ -32,8 +32,6 @@ begin
       ram(2) <= X"2067fff7";
       -- initialize with zeros
       ram(3 to SIZE-2) <= (others => (others => '0'));
-      -- data
-      ram(SIZE-1) <= X"FFFFFFFF";
     -- write
     elsif rising_edge(clk) then
       if we = '1' then
