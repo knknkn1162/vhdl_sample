@@ -11,6 +11,7 @@ entity controller is
     mem_we: out std_logic;
     -- for writeback
     instr_en, reg_we : out std_logic;
+    memrd_aluout_s : out std_logic; -- for lw or addi
     -- for calc
     alucont : out std_logic_vector(2 downto 0);
     rdt_immext_s : out std_logic
@@ -22,16 +23,17 @@ architecture behavior of controller is
     -- soon after the initialization
     InitS, InitFetchS,
     FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
-    MemWriteS
+    MemWriteS,
     -- ExecuteS, ALUWriteBackS,
     -- BranchS,
-    -- AddiExecuteS, AddiWriteBackS,
+    AddiExecuteS, AddiWriteBackS
     -- JumpS
   );
   subtype optype is std_logic_vector(5 downto 0);
-  constant op_lw : optype := "100011";
-  constant op_sw : optype := "101011";
-  constant op_rtype : optype := "000000";
+  constant OP_LW : optype := "100011";
+  constant OP_SW : optype := "101011";
+  constant OP_ADDI : optype := "001000";
+  constant OP_RTYPE : optype := "000000";
 
   signal state, nextstate : statetype;
 begin
@@ -53,26 +55,30 @@ begin
       when DecodeS =>
         case opcode is
           -- lw or sw
-          when op_lw | op_sw =>
+          when OP_LW | OP_SW =>
             nextState <= AdrCalcS;
-          --when op_rtype =>
+          --when OP_RTYPE =>
           --  nextState <= ExecuteS;
+          when OP_ADDI =>
+            nextState <= AddiExecuteS;
           when others =>
             nextState <= FetchS;
         end case;
       when AdrCalcS =>
         case opcode is
-          when op_lw =>
+          when OP_LW =>
             nextState <= MemReadS;
-          when op_sw =>
+          when OP_SW =>
             nextState <= MemWriteS;
           when others =>
             nextState <= FetchS;
         end case;
+      when AddiExecuteS =>
+        nextState <= AddiWriteBackS;
       when MemReadS =>
         nextState <= RegWritebackS;
       -- when final state
-      when RegWriteBackS | MemWriteS =>
+      when RegWriteBackS | MemWriteS | AddiWriteBackS =>
         nextState <= FetchS;
       -- if undefined
       when others =>
@@ -94,11 +100,12 @@ begin
       when FetchS|InitFetchS =>
         instr_en0 := '1';
       when DecodeS =>
+      when AddiExecuteS =>
       when AdrCalcS =>
         -- do nothing
       when MemReadS =>
         -- do nothing
-      when MemWriteS|RegWriteBackS =>
+      when MemWriteS | RegWriteBackS | AddiWritebackS =>
         pc_en0 := '1'; -- for fetchS
       when others =>
         -- do nothing;
@@ -115,6 +122,8 @@ begin
     -- for memadr
     variable alucont0 : std_logic_vector(2 downto 0);
     variable rdt_immext_s0 : std_logic;
+    -- for regwriteback
+    variable memrd_aluout_s0 : std_logic;
 
     -- write in the end of the clk process
     -- for memwrite
@@ -125,6 +134,7 @@ begin
     pc_aluout_s0 := '0';
     alucont0 := "000";
     rdt_immext_s0 := '0';
+    memrd_aluout_s0 := '0';
     reg_we0 := '0';
     mem_we0 := '0';
     case state is
@@ -140,6 +150,9 @@ begin
       when AdrCalcS =>
         alucont0 := "010";
         rdt_immext_s0 := '1';
+      when AddiExecuteS =>
+        alucont0 := "010";
+        rdt_immext_s0 := '1';
       when MemReadS =>
         pc_aluout_s0 := '1';
       when MemWriteS =>
@@ -147,12 +160,17 @@ begin
         pc_aluout_s0 := '1';
       when RegWriteBackS =>
         reg_we0 := '1';
+        -- memrd_aluout_s := '0';
+      when AddiWritebackS =>
+        reg_we0 := '1';
+        memrd_aluout_s0 := '1';
       when others =>
         -- do nothing
     end case;
     pc_aluout_s <= pc_aluout_s0;
     alucont <= alucont0;
     rdt_immext_s <= rdt_immext_s0;
+    memrd_aluout_s <= memrd_aluout_s0;
     mem_we <= mem_we0;
     reg_we <= reg_we0;
   end process;

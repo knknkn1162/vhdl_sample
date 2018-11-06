@@ -45,14 +45,16 @@ architecture behavior of mips is
     port (
       clk, rst : in std_logic;
       rs, rt : in std_logic_vector(4 downto 0);
-      wd : in std_logic_vector(31 downto 0);
+      mem_rd, aluout : in std_logic_vector(31 downto 0);
       imm : in std_logic_vector(15 downto 0);
 
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       -- controller
       we : in std_logic;
+      memrd_aluout_s : in std_logic;
       -- scan
-      wa : out std_logic_vector(4 downto 0)
+      wa : out std_logic_vector(4 downto 0);
+      wd : out std_logic_vector(31 downto 0)
     );
   end component;
 
@@ -73,6 +75,7 @@ architecture behavior of mips is
       clk, rst : in std_logic;
       alures : in std_logic_vector(31 downto 0);
       addr : out std_logic_vector(31 downto 0);
+      reg_aluout : out std_logic_vector(31 downto 0);
       -- controller
       pc_aluout_s, pc_en : in std_logic;
       -- scan
@@ -91,6 +94,7 @@ architecture behavior of mips is
       mem_we: out std_logic;
       -- for writeback
       instr_en, reg_we : out std_logic;
+      memrd_aluout_s : out std_logic; -- for lw or addi
       -- for memadr
       alucont : out std_logic_vector(2 downto 0);
       rdt_immext_s : out std_logic
@@ -101,6 +105,7 @@ architecture behavior of mips is
   signal rs0, rt0 : std_logic_vector(4 downto 0);
   signal imm0 : std_logic_vector(15 downto 0);
   signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
+  signal reg_aluout0 : std_logic_vector(31 downto 0);
   signal reg_wa0 : std_logic_vector(4 downto 0);
   signal reg_wd0 : std_logic_vector(31 downto 0);
   signal alures0 : std_logic_vector(31 downto 0);
@@ -112,6 +117,7 @@ architecture behavior of mips is
   signal mem_we: std_logic;
   -- for decode, writeback
   signal instr_en, reg_we : std_logic;
+  signal memrd_aluout_s : std_logic;
   -- for calc
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
@@ -145,13 +151,15 @@ begin
   regrw0 : regrw port map (
     clk => clk, rst => rst,
     rs => rs0, rt => rt0,
+    mem_rd => mem_rd0, aluout => reg_aluout0,
     imm => imm0,
-    wd => reg_wd0,
     rds => rds0, rdt => rdt0, immext => immext0,
     -- controller
     we => reg_we,
+    memrd_aluout_s => memrd_aluout_s,
     -- scan
-    wa => reg_wa0
+    wa => reg_wa0,
+    wd => reg_wd0
   );
   reg_wa <= reg_wa0;
   reg_wd <= reg_wd0;
@@ -171,6 +179,7 @@ begin
     clk => clk, rst => rst,
     alures => alures0,
     addr => mem_addr0,
+    reg_aluout => reg_aluout0,
     -- controller
     pc_aluout_s => pc_aluout_s, pc_en => pc_en,
     -- scan
