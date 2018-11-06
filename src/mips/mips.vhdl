@@ -119,6 +119,8 @@ architecture behavior of mips is
   signal pc_aluout_s, pc_en : std_logic;
 
 begin
+
+  mem_wd0 <= rdt0;
   memrw0 : memrw port map (
     clk => clk, rst => rst,
     addr => mem_addr0, wd => mem_wd0, rd => mem_rd0,

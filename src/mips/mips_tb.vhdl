@@ -58,9 +58,10 @@ begin
     -- InitS
     rst <= '1'; wait for 1 ns; rst <= '0';
     wait for clk_period/2;
+    -- -- lw $s0, 1020($0) 1000/11 00/000 1/0000 0x03FC
+    -- ram(0) <= X"8C1003FC";
     -- InitFetchS
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    -- lw $s0, 1020($0) 1000/11 00/000 1/0000 0x03FC
     assert mem_rd = X"8C1003FC";
     -- (not yet)
     assert rds = X"00000000"; assert immext = X"00000000";
@@ -86,7 +87,31 @@ begin
     assert reg_wa = "10000"; assert reg_wd = X"FFFFFFFF";
     wait for clk_period;
 
+    -- -- sw $s0, 1016($0) 1010/11 00/000 1/0000 0x03F8
+    -- ram(1) <= X"AC1003F8";
+    -- FetchS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"AC1003F8";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"AC1003F8";
+    assert rds = X"00000000"; assert rdt = X"FFFFFFFF"; assert immext = X"000003F8";
+    wait for clk_period;
 
+    -- AdrCalcS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"AC1003F8";
+    assert addr = X"00000004"; assert alures = X"000003F8";
+    wait for clk_period;
+
+    -- MemWriteS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert addr = X"000003F8"; assert mem_wd = X"FFFFFFFF";
+    wait for clk_period;
+
+    -- FetchS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
 
     assert false report "end of test" severity note;
     stop <= TRUE;
