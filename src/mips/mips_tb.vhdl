@@ -60,7 +60,7 @@ begin
     wait for clk_period/2;
     --    main:   addi $2, $0, 5      # initialize $2 = 5  0       20020005
     -- 0010/00 00/000 0/0010/ X0005
-    -- InitFetchS
+    -- FetchS
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"20020005";
     -- (not yet)
