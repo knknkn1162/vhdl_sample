@@ -24,12 +24,14 @@ begin
     -- initialization
     if rst = '1' then
       -- text
-      -- lw $s0, 1020($0) 1000/11 00/000 1/0000 0x03FC
-      ram(0) <= X"8C1003FC";
-      -- sw $s0, 1016($0) 1010/11 00/000 1/0000 0x03F8
-      ram(1) <= X"AC1003F8";
+--    main:   addi $2, $0, 5      # initialize $2 = 5  0       20020005
+      ram(0) <= X"20020005";
+--            addi $3, $0, 12     # initialize $3 = 12 4       2003000c
+      ram(1) <= X"2003000c";
+--            addi $7, $3, -9     # initialize $7 = 3  8       2067fff7 
+      ram(2) <= X"2067fff7";
       -- initialize with zeros
-      ram(2 to SIZE-2) <= (others => (others => '0'));
+      ram(3 to SIZE-2) <= (others => (others => '0'));
       -- data
       ram(SIZE-1) <= X"FFFFFFFF";
     -- write
