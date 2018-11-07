@@ -74,7 +74,6 @@ begin
     y => wa0
   );
 
-  wa0 <= rt;
   regfile0 : regfile port map (
     clk => clk, rst => rst,
     a1 => rs, rd1 => rds,
