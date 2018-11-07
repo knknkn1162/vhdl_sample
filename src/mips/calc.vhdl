@@ -7,6 +7,7 @@ entity calc is
     rds, rdt, immext : in std_logic_vector(31 downto 0);
     alures : out std_logic_vector(31 downto 0);
     zero : out std_logic;
+    brplus : out std_logic_vector(31 downto 0);
     -- controller
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic
@@ -42,6 +43,14 @@ architecture behavior of calc is
         );
   end component;
 
+  component slt2
+    port (
+      a : in std_logic_vector(31 downto 0);
+      y : out std_logic_vector(31 downto 0)
+    );
+  end component;
+
+
   signal srca, srcb : std_logic_vector(31 downto 0);
   signal rdt0 : std_logic_vector(31 downto 0);
 
@@ -64,6 +73,11 @@ begin
     d1 => immext,
     s => rdt_immext_s,
     y => srcb
+  );
+
+  immext_slt2 : slt2 port map (
+    a => immext,
+    y => brplus
   );
 
   alu0 : alu port map (
