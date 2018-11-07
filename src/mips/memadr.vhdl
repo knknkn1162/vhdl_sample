@@ -6,10 +6,12 @@ entity memadr is
   port (
     clk, rst : in std_logic;
     alures : in std_logic_vector(31 downto 0);
+    brplus : in std_logic_vector(31 downto 0);
     addr : out std_logic_vector(31 downto 0);
     reg_aluout : out std_logic_vector(31 downto 0);
     -- controller
-    pc_aluout_s, pc_en : in std_logic;
+    pc_aluout_s, pc4_br_s : in std_logic;
+    pc_en : in std_logic;
     -- scan
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0)
@@ -36,6 +38,8 @@ architecture behavior of memadr is
         );
   end component;
   signal pc0, pcnext0, aluout : std_logic_vector(31 downto 0);
+  signal pcplus0 : std_logic_vector(31 downto 0);
+  constant pc4 : std_logic_vector(31 downto 0) := X"00000004";
 begin
 
   flopr_pc : flopr_en port map (
@@ -50,7 +54,15 @@ begin
     a => alures, y => aluout
   );
   reg_aluout <= aluout;
-  pcnext0 <= std_logic_vector(unsigned(pc0) + 4);
+
+  pc4_rel_mux2 : mux2 generic map (N=>32)
+  port map (
+    d0 => pc4,
+    d1 => brplus,
+    s => pc4_br_s,
+    y => pcplus0
+  );
+  pcnext0 <= std_logic_vector(unsigned(pc0) + unsigned(pcplus0));
   pcnext <= pcnext0;
 
   pc_aluout_mux : mux2 generic map (N=>32)
