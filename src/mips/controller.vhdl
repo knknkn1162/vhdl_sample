@@ -12,6 +12,7 @@ entity controller is
     -- for writeback
     instr_en, reg_we : out std_logic;
     memrd_aluout_s : out std_logic; -- for lw or addi
+    rt_rd_s : out std_logic; -- Itype or Rtype
     -- for calc
     alucont : out std_logic_vector(2 downto 0);
     rdt_immext_s : out std_logic
@@ -141,6 +142,7 @@ begin
     variable rdt_immext_s0 : std_logic;
     -- for regwriteback
     variable memrd_aluout_s0 : std_logic;
+    variable rt_rd_s0 : std_logic;
 
     -- write in the end of the clk process
     -- for memwrite
@@ -151,6 +153,7 @@ begin
     pc_aluout_s0 := '0';
     rdt_immext_s0 := '0';
     memrd_aluout_s0 := '0';
+    rt_rd_s0 := '0';
     reg_we0 := '0';
     mem_we0 := '0';
     case state is
@@ -180,6 +183,7 @@ begin
         memrd_aluout_s0 := '1';
       when ALUWriteBackS =>
         reg_we0 := '1';
+        rt_rd_s0 := '1';
         memrd_aluout_s0 := '1';
       when others =>
         -- do nothing
@@ -187,6 +191,7 @@ begin
     pc_aluout_s <= pc_aluout_s0;
     rdt_immext_s <= rdt_immext_s0;
     memrd_aluout_s <= memrd_aluout_s0;
+    rt_rd_s <= rt_rd_s0;
     mem_we <= mem_we0;
     reg_we <= reg_we0;
   end process;

@@ -32,7 +32,7 @@ architecture behavior of mips is
     port (
       clk, rst : in std_logic;
       mem_rd : in std_logic_vector(31 downto 0);
-      rs, rt : out std_logic_vector(4 downto 0);
+      rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
       imm : out std_logic_vector(15 downto 0);
       reg_memrd : out std_logic_vector(31 downto 0);
       -- controller
@@ -44,14 +44,14 @@ architecture behavior of mips is
   component regrw
     port (
       clk, rst : in std_logic;
-      rs, rt : in std_logic_vector(4 downto 0);
+      rs, rt, rd : in std_logic_vector(4 downto 0);
       mem_rd, aluout : in std_logic_vector(31 downto 0);
       imm : in std_logic_vector(15 downto 0);
 
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       -- controller
       we : in std_logic;
-      memrd_aluout_s : in std_logic;
+      memrd_aluout_s , rt_rd_s: in std_logic;
       -- scan
       wa : out std_logic_vector(4 downto 0);
       wd : out std_logic_vector(31 downto 0)
@@ -95,14 +95,15 @@ architecture behavior of mips is
       -- for writeback
       instr_en, reg_we : out std_logic;
       memrd_aluout_s : out std_logic; -- for lw or addi
-      -- for memadr
+      rt_rd_s : out std_logic; -- Itype or Rtype
+      -- for calc
       alucont : out std_logic_vector(2 downto 0);
       rdt_immext_s : out std_logic
     );
   end component;
 
   signal mem_rd0, mem_wd0, mem_addr0 : std_logic_vector(31 downto 0);
-  signal rs0, rt0 : std_logic_vector(4 downto 0);
+  signal rs0, rt0, rd0, shamt0 : std_logic_vector(4 downto 0);
   signal imm0 : std_logic_vector(15 downto 0);
   signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
   signal reg_aluout0, reg_memrd0 : std_logic_vector(31 downto 0);
@@ -118,6 +119,7 @@ architecture behavior of mips is
   -- for decode, writeback
   signal instr_en, reg_we : std_logic;
   signal memrd_aluout_s : std_logic;
+  signal rt_rd_s : std_logic;
   -- for calc
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
@@ -140,7 +142,7 @@ begin
   decode0 : decode port map (
     clk => clk, rst => rst,
     mem_rd => mem_rd0,
-    rs => rs0, rt => rt0,
+    rs => rs0, rt => rt0, rd => rd0, shamt => shamt0,
     imm => imm0,
     reg_memrd => reg_memrd0,
     -- controller
@@ -150,17 +152,18 @@ begin
 
   regrw0 : regrw port map (
     clk => clk, rst => rst,
-    rs => rs0, rt => rt0,
+    rs => rs0, rt => rt0, rd => rd0,
     mem_rd => reg_memrd0, aluout => reg_aluout0,
     imm => imm0,
     rds => rds0, rdt => rdt0, immext => immext0,
     -- controller
     we => reg_we,
-    memrd_aluout_s => memrd_aluout_s,
+    memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
     -- scan
     wa => reg_wa0,
     wd => reg_wd0
   );
+
   reg_wa <= reg_wa0;
   reg_wd <= reg_wd0;
   rds <= rds0; rdt <= rdt0; immext <= immext0;
@@ -197,7 +200,7 @@ begin
     mem_we => mem_we,
     -- for writeback
     instr_en => instr_en, reg_we => reg_we,
-    memrd_aluout_s => memrd_aluout_s,
+    memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
     -- for memadr
     alucont => alucont,
     rdt_immext_s => rdt_immext_s
