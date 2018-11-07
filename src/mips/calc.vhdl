@@ -6,7 +6,7 @@ entity calc is
     clk, rst : in std_logic;
     rds, rdt, immext : in std_logic_vector(31 downto 0);
     alures : out std_logic_vector(31 downto 0);
-    zero : out std_logic;
+    aluzero : out std_logic;
     brplus : out std_logic_vector(31 downto 0);
     -- controller
     alucont : in std_logic_vector(2 downto 0);
@@ -84,6 +84,6 @@ begin
     a => srca, b => srcb,
     f => alucont,
     y => alures,
-    zero => zero
+    zero => aluzero
   );
 end architecture;

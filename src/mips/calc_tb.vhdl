@@ -11,7 +11,7 @@ architecture testbench of calc_tb is
       clk, rst : in std_logic;
       rds, rdt, immext : in std_logic_vector(31 downto 0);
       alures : out std_logic_vector(31 downto 0);
-      zero : out std_logic;
+      aluzero : out std_logic;
       brplus : out std_logic_vector(31 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
@@ -22,7 +22,7 @@ architecture testbench of calc_tb is
   signal clk, rst : std_logic;
   signal rds, rdt, immext, alures : std_logic_vector(31 downto 0);
   signal brplus : std_logic_vector(31 downto 0);
-  signal zero : std_logic;
+  signal aluzero : std_logic;
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
   constant clk_period : time := 10 ns;
@@ -33,7 +33,7 @@ begin
     clk => clk, rst => rst,
     rds => rds, rdt => rdt, immext => immext,
     alures => alures,
-    zero => zero, brplus => brplus,
+    aluzero => aluzero, brplus => brplus,
     -- controller
     alucont => alucont,
     rdt_immext_s => rdt_immext_s
@@ -55,12 +55,12 @@ begin
     -- for lw or sw instructions
     rds <= X"00000001"; immext <= X"00000040";
     alucont <= "010"; rdt_immext_s  <= '1'; wait for clk_period/2;
-    assert alures = X"00000041"; assert zero = '0';
+    assert alures = X"00000041"; assert aluzero = '0';
     assert brplus <= X"00000100";
     -- for R-type instructions
     rds <= X"00000006"; rdt <= X"00000006";
     alucont <= "010"; rdt_immext_s  <= '0'; wait for clk_period;
-    assert alures = X"0000000C"; assert zero = '1';
+    assert alures = X"0000000C"; assert aluzero = '1';
     -- skip
     stop <= TRUE;
     -- success message
