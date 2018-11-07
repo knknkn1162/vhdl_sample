@@ -44,6 +44,8 @@ alu:
 	make all F=alu
 mux2:
 	make all F=mux2
+mux4:
+	make all F=mux4
 sgnext:
 	make all F=sgnext
 mem:
