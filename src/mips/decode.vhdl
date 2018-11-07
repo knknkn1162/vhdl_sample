@@ -6,7 +6,7 @@ entity decode is
   port (
     clk, rst : in std_logic;
     mem_rd : in std_logic_vector(31 downto 0);
-    rs, rt : out std_logic_vector(4 downto 0);
+    rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
     imm : out std_logic_vector(15 downto 0);
     reg_memrd : out std_logic_vector(31 downto 0);
     -- controller
@@ -36,6 +36,8 @@ begin
   rs <= instr0(25 downto 21);
   rt <= instr0(20 downto 16);
   imm <= instr0(15 downto 0);
+  rd <= instr0(15 downto 11);
+  shamt <= instr0(10 downto 6);
   funct <= instr0(5 downto 0);
 
   reg_wdata : flopr_en port map (
