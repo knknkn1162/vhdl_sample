@@ -30,7 +30,7 @@ decode: flopr_en
 	make all F=decode
 regrw: regfile sgnext mux2
 	make all F=regrw
-calc: flopr_en alu mux2
+calc: flopr_en alu mux2 slt2
 	make all F=calc
 memadr: flopr_en mux2
 	make all F=memadr
@@ -38,6 +38,8 @@ flopr:
 	make all F=flopr
 flopr_en:
 	make all F=flopr_en
+slt2:
+	make all F=slt2
 sltn:
 	make all F=sltn
 alu:
