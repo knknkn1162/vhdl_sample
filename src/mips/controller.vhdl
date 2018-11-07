@@ -91,10 +91,12 @@ begin
         end case;
       when AddiCalcS =>
         nextState <= AddiWriteBackS;
+      when RtypeCalcS =>
+        nextstate <= ALUWriteBackS;
       when MemReadS =>
         nextState <= RegWritebackS;
       -- when final state
-      when RegWriteBackS | MemWriteS | AddiWriteBackS =>
+      when RegWriteBackS | MemWriteS | AddiWriteBackS | ALUWriteBackS =>
         nextState <= FetchS;
       -- if undefined
       when others =>
@@ -174,6 +176,9 @@ begin
         reg_we0 := '1';
         -- memrd_aluout_s := '0';
       when AddiWritebackS =>
+        reg_we0 := '1';
+        memrd_aluout_s0 := '1';
+      when ALUWriteBackS =>
         reg_we0 := '1';
         memrd_aluout_s0 := '1';
       when others =>
