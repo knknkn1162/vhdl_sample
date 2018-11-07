@@ -5,8 +5,11 @@ entity controller is
   port (
     clk, rst : in std_logic;
     opcode, funct : in std_logic_vector(5 downto 0);
+    aluzero : in std_logic;
     -- for memadr
-    pc_aluout_s, pc_en : out std_logic;
+    pc_aluout_s, pc4_br_s : out std_logic;
+    pc_en : out std_logic;
+
     -- for memwrite
     mem_we: out std_logic;
     -- for writeback
@@ -26,7 +29,7 @@ architecture behavior of controller is
     FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
     MemWriteS,
     RtypeCalcS, ALUWriteBackS,
-    -- BranchS,
+    BranchS,
     AddiCalcS, AddiWriteBackS
     -- JumpS
   );
@@ -35,6 +38,7 @@ architecture behavior of controller is
   constant OP_SW : optype := "101011";
   constant OP_ADDI : optype := "001000";
   constant OP_RTYPE : optype := "000000";
+  constant OP_BEQ : optype := "000100";
 
   subtype functtype is std_logic_vector(5 downto 0);
   constant FUNCT_ADD : functtype := "100000"; -- 0x20
@@ -78,6 +82,8 @@ begin
             nextState <= RtypeCalcS;
           when OP_ADDI =>
             nextState <= AddiCalcS;
+          when OP_BEQ =>
+            nextState <= BranchS;
           when others =>
             nextState <= FetchS;
         end case;
@@ -97,7 +103,7 @@ begin
       when MemReadS =>
         nextState <= RegWritebackS;
       -- when final state
-      when RegWriteBackS | MemWriteS | AddiWriteBackS | ALUWriteBackS =>
+      when RegWriteBackS | MemWriteS | AddiWriteBackS | ALUWriteBackS | BranchS =>
         nextState <= FetchS;
       -- if undefined
       when others =>
@@ -125,7 +131,7 @@ begin
         -- do nothing
       when MemReadS =>
         -- do nothing
-      when MemWriteS | RegWriteBackS | AddiWritebackS | ALUWriteBackS =>
+      when MemWriteS | RegWriteBackS | AddiWritebackS | ALUWriteBackS | BranchS =>
         pc_en0 := '1'; -- for fetchS
       when others =>
         -- do nothing;
@@ -139,6 +145,8 @@ begin
   process(state)
     -- for memadr
     variable pc_aluout_s0 : std_logic;
+    variable pc4_br_s0 : std_logic;
+
     variable rdt_immext_s0 : std_logic;
     -- for regwriteback
     variable memrd_aluout_s0 : std_logic;
@@ -151,6 +159,7 @@ begin
     variable reg_we0 : std_logic;
   begin
     pc_aluout_s0 := '0';
+    pc4_br_s0 := '0';
     rdt_immext_s0 := '0';
     memrd_aluout_s0 := '0';
     rt_rd_s0 := '0';
@@ -170,6 +179,8 @@ begin
         -- rdt_immext_s0 := '0';
       when AddiCalcS =>
         rdt_immext_s0 := '1';
+      when BranchS =>
+        pc4_br_s0 := aluzero;
       when MemReadS =>
         pc_aluout_s0 := '1';
       when MemWriteS =>
@@ -189,6 +200,7 @@ begin
         -- do nothing
     end case;
     pc_aluout_s <= pc_aluout_s0;
+    pc4_br_s <= pc4_br_s0;
     rdt_immext_s <= rdt_immext_s0;
     memrd_aluout_s <= memrd_aluout_s0;
     rt_rd_s <= rt_rd_s0;

@@ -63,7 +63,8 @@ architecture behavior of mips is
       clk, rst : in std_logic;
       rds, rdt, immext : in std_logic_vector(31 downto 0);
       alures : out std_logic_vector(31 downto 0);
-      zero : out std_logic;
+      aluzero : out std_logic;
+      brplus : out std_logic_vector(31 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic
@@ -74,10 +75,12 @@ architecture behavior of mips is
     port (
       clk, rst : in std_logic;
       alures : in std_logic_vector(31 downto 0);
+      brplus : in std_logic_vector(31 downto 0);
       addr : out std_logic_vector(31 downto 0);
       reg_aluout : out std_logic_vector(31 downto 0);
       -- controller
-      pc_aluout_s, pc_en : in std_logic;
+      pc_aluout_s, pc4_br_s : in std_logic;
+      pc_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0)
@@ -88,8 +91,10 @@ architecture behavior of mips is
     port (
       clk, rst : in std_logic;
       opcode, funct : in std_logic_vector(5 downto 0);
+      aluzero : in std_logic;
       -- for memadr
-      pc_aluout_s, pc_en : out std_logic;
+      pc_aluout_s, pc4_br_s : out std_logic;
+      pc_en : out std_logic;
       -- for memwrite
       mem_we: out std_logic;
       -- for writeback
@@ -110,7 +115,8 @@ architecture behavior of mips is
   signal reg_wa0 : std_logic_vector(4 downto 0);
   signal reg_wd0 : std_logic_vector(31 downto 0);
   signal alures0 : std_logic_vector(31 downto 0);
-  signal zero0 : std_logic;
+  signal aluzero0 : std_logic;
+  signal brplus0 : std_logic_vector(31 downto 0);
 
   -- controller
   signal opcode, funct : std_logic_vector(5 downto 0);
@@ -124,7 +130,8 @@ architecture behavior of mips is
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
   -- for memadr
-  signal pc_aluout_s, pc_en : std_logic;
+  signal pc_aluout_s, pc4_br_s : std_logic;
+  signal pc_en : std_logic;
 
 begin
 
@@ -171,8 +178,8 @@ begin
   calc0 : calc port map (
     clk => clk, rst => rst,
     rds => rds0, rdt => rdt0, immext => immext0,
-    alures => alures0,
-    zero => zero0,
+    alures => alures0, aluzero => aluzero0,
+    brplus => brplus0,
     -- controller
     alucont => alucont,
     rdt_immext_s => rdt_immext_s
@@ -180,11 +187,12 @@ begin
 
   memadr0 : memadr port map (
     clk => clk, rst => rst,
-    alures => alures0,
+    alures => alures0, brplus => brplus0,
     addr => mem_addr0,
     reg_aluout => reg_aluout0,
     -- controller
-    pc_aluout_s => pc_aluout_s, pc_en => pc_en,
+    pc_aluout_s => pc_aluout_s, pc4_br_s => pc4_br_s,
+    pc_en => pc_en,
     -- scan
     pc => pc, pcnext => pcnext
   );
@@ -193,9 +201,11 @@ begin
   controller0 : controller port map (
     clk => clk, rst => rst,
     opcode => opcode, funct => funct,
+    aluzero => aluzero0,
     -- out
     -- for memadr
-    pc_aluout_s => pc_aluout_s, pc_en => pc_en,
+    pc_aluout_s => pc_aluout_s, pc4_br_s => pc4_br_s,
+    pc_en => pc_en,
     -- for memwrite
     mem_we => mem_we,
     -- for writeback
