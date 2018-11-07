@@ -4,7 +4,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity regrw is
   port (
     clk, rst : in std_logic;
-    rs, rt : in std_logic_vector(4 downto 0);
+    rs, rt, rd : in std_logic_vector(4 downto 0);
     mem_rd : in std_logic_vector(31 downto 0);
     aluout : in std_logic_vector(31 downto 0);
     imm : in std_logic_vector(15 downto 0);
@@ -13,6 +13,7 @@ entity regrw is
     -- controller
     we : in std_logic;
     memrd_aluout_s : in std_logic;
+    rt_rd_s : in std_logic;
     -- scan
     wa : out std_logic_vector(4 downto 0);
     wd : out std_logic_vector(31 downto 0)
@@ -63,6 +64,14 @@ begin
     d1 => aluout,
     s => memrd_aluout_s,
     y => wd0
+  );
+
+  rt_rd_mux : mux2 generic map (N=>5)
+  port map (
+    d0 => rt,
+    d1 => rd,
+    s => rt_rd_s,
+    y => wa0
   );
 
   wa0 <= rt;
