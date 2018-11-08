@@ -16,6 +16,7 @@ architecture behavior of mips_tb is
       reg_wa : out std_logic_vector(4 downto 0);
       reg_wd : out std_logic_vector(31 downto 0);
       rds, rdt, immext : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0);
       alures : out std_logic_vector(31 downto 0)
     );
   end component;
@@ -26,6 +27,7 @@ architecture behavior of mips_tb is
   signal reg_wa : std_logic_vector(4 downto 0);
   signal reg_wd : std_logic_vector(31 downto 0);
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
+  signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
 
   constant clk_period : time := 10 ns;
@@ -39,6 +41,7 @@ begin
     reg_wa => reg_wa,
     reg_wd => reg_wd,
     rds => rds, rdt => rdt, immext => immext,
+    ja => ja,
     alures => alures
   );
 
@@ -363,6 +366,35 @@ begin
     assert pc = X"0000003C"; assert pcnext = X"00000040";
     assert mem_rd = X"08000011";
     wait for clk_period;
+    -- DecodeS
+    assert pc = X"0000003C"; assert pcnext = X"00000040";
+    assert mem_rd = X"08000011";
+    wait for clk_period;
+    -- JumpS
+    assert pc = X"0000003C"; assert pcnext = X"00000044";
+    wait for clk_period;
+
+    -- sw $rt, imm($rs)
+    -- end:    sw   $2, 84($0)     # write adr 84 = 7   44      ac020054
+    -- FetchS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert mem_rd = X"AC020054";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert mem_rd = X"AC020054";
+    assert rds = X"00000000"; assert rdt = X"00000007"; assert immext = X"00000054";
+    wait for clk_period;
+    -- AdrCalcS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert mem_rd = X"AC020054";
+    assert alures = X"00000054";
+    wait for clk_period;
+    -- MemWriteS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert addr = X"00000054"; assert mem_wd = X"00000007";
+    wait for clk_period;
+
 
     assert false report "end of test" severity note;
     stop <= TRUE;

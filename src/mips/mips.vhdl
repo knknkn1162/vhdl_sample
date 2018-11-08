@@ -12,6 +12,7 @@ entity mips is
     reg_wa : out std_logic_vector(4 downto 0);
     reg_wd : out std_logic_vector(31 downto 0);
     rds, rdt, immext : out std_logic_vector(31 downto 0);
+    ja : out std_logic_vector(27 downto 0);
     alures : out std_logic_vector(31 downto 0)
   );
 end entity;
@@ -34,6 +35,7 @@ architecture behavior of mips is
       mem_rd : in std_logic_vector(31 downto 0);
       rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
       imm : out std_logic_vector(15 downto 0);
+      target : out std_logic_vector(25 downto 0);
       reg_memrd : out std_logic_vector(31 downto 0);
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
@@ -62,9 +64,11 @@ architecture behavior of mips is
     port (
       clk, rst : in std_logic;
       rds, rdt, immext : in std_logic_vector(31 downto 0);
+      target : in std_logic_vector(25 downto 0);
       alures : out std_logic_vector(31 downto 0);
       aluzero : out std_logic;
       brplus : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic
@@ -75,11 +79,13 @@ architecture behavior of mips is
     port (
       clk, rst : in std_logic;
       alures : in std_logic_vector(31 downto 0);
+      ja : in std_logic_vector(27 downto 0);
       brplus : in std_logic_vector(31 downto 0);
       addr : out std_logic_vector(31 downto 0);
       reg_aluout : out std_logic_vector(31 downto 0);
       -- controller
-      pc_aluout_s, pc0_br_s : in std_logic;
+      pc_aluout_s : in std_logic;
+      pc0_br_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
@@ -93,7 +99,8 @@ architecture behavior of mips is
       opcode, funct : in std_logic_vector(5 downto 0);
       aluzero : in std_logic;
       -- for memadr
-      pc_aluout_s, pc0_br_s : out std_logic;
+      pc_aluout_s : out std_logic;
+      pc0_br_s : out std_logic_vector(1 downto 0);
       pc_en : out std_logic;
       -- for memwrite
       mem_we: out std_logic;
@@ -110,7 +117,9 @@ architecture behavior of mips is
   signal mem_rd0, mem_wd0, mem_addr0 : std_logic_vector(31 downto 0);
   signal rs0, rt0, rd0, shamt0 : std_logic_vector(4 downto 0);
   signal imm0 : std_logic_vector(15 downto 0);
+  signal target0 : std_logic_vector(25 downto 0);
   signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
+  signal ja0 : std_logic_vector(27 downto 0);
   signal reg_aluout0, reg_memrd0 : std_logic_vector(31 downto 0);
   signal reg_wa0 : std_logic_vector(4 downto 0);
   signal reg_wd0 : std_logic_vector(31 downto 0);
@@ -130,7 +139,8 @@ architecture behavior of mips is
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
   -- for memadr
-  signal pc_aluout_s, pc0_br_s : std_logic;
+  signal pc_aluout_s : std_logic;
+  signal pc0_br_s : std_logic_vector(1 downto 0);
   signal pc_en : std_logic;
 
 begin
@@ -151,6 +161,7 @@ begin
     mem_rd => mem_rd0,
     rs => rs0, rt => rt0, rd => rd0, shamt => shamt0,
     imm => imm0,
+    target => target0,
     reg_memrd => reg_memrd0,
     -- controller
     opcode => opcode, funct => funct,
@@ -178,8 +189,10 @@ begin
   calc0 : calc port map (
     clk => clk, rst => rst,
     rds => rds0, rdt => rdt0, immext => immext0,
+    target => target0,
     alures => alures0, aluzero => aluzero0,
     brplus => brplus0,
+    ja => ja0,
     -- controller
     alucont => alucont,
     rdt_immext_s => rdt_immext_s
@@ -187,7 +200,9 @@ begin
 
   memadr0 : memadr port map (
     clk => clk, rst => rst,
-    alures => alures0, brplus => brplus0,
+    alures => alures0,
+    ja => ja0,
+    brplus => brplus0,
     addr => mem_addr0,
     reg_aluout => reg_aluout0,
     -- controller
