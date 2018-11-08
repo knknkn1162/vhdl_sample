@@ -4,8 +4,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity slt2 is
   generic (N: natural);
   port (
-    a : in std_logic_vector(31 downto 0);
-    y : out std_logic_vector(31 downto 0)
+    a : in std_logic_vector(N-1 downto 0);
+    y : out std_logic_vector(N-1 downto 0)
   );
 end entity;
 
