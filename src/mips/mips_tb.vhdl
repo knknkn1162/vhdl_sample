@@ -250,10 +250,73 @@ begin
 
     -- slt $rd, $rs, $rt
     -- around: slt $4,  $7, $2     # $4 = 3 < 5 = 1     28      00e2202a
+    -- FetchS
     assert pc = X"00000028"; assert pcnext = X"0000002C";
     assert mem_rd = X"00e2202A";
     wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert mem_rd = X"00e2202A";
+    assert rds = X"00000003"; assert rdt = X"00000005";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert mem_rd = X"00e2202A";
+    assert alures = X"00000001";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert reg_wa = "00100"; assert reg_wd = X"00000001";
+    wait for clk_period;
 
+    -- add $rd, $rs, $rt
+    -- add $7,  $4, $5     # $7 = 1 + 11 = 12   2c      00853820
+    -- FetchS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert mem_rd = X"00853820";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert mem_rd = X"00853820";
+    assert rds = X"00000001"; assert rdt = X"0000000B";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert mem_rd = X"00853820";
+    assert alures = X"0000000C";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert reg_wa = "00111"; assert reg_wd = X"0000000C";
+    wait for clk_period;
+
+    -- sub $rd, $rs, $rt
+    -- sub $7,  $7, $2     # $7 = 12 - 5 = 7    30      00e23822
+    -- FetchS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert mem_rd = X"00E23822";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert mem_rd = X"00E23822";
+    assert rds = X"0000000C"; assert rdt = X"00000005";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert mem_rd = X"00E23822";
+    assert alures = X"00000007";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert reg_wa = "00111"; assert reg_wd = X"00000007";
+    wait for clk_period;
+
+    -- sw $rt, imm($rs)
+    -- sw   $7, 68($3)     # [80] = 7           34      ac670044
+    -- FetchS
+    assert pc = X"00000034"; assert pcnext = X"00000038";
+    assert mem_rd = X"AC670044";
+    wait for clk_period;
 
     assert false report "end of test" severity note;
     stop <= TRUE;
