@@ -185,23 +185,44 @@ begin
     assert pc = X"00000014"; assert pcnext = X"00000018";
     assert mem_rd = X"00a42820";
     wait for clk_period;
-
     -- DecodeS
     assert pc = X"00000014"; assert pcnext = X"00000018";
     assert mem_rd = X"00a42820";
     assert rds = X"00000004"; assert rdt = X"00000007";
     wait for clk_period;
-
     -- RtypeCalcS
     assert pc = X"00000014"; assert pcnext = X"00000018";
     assert mem_rd = X"00a42820";
     assert alures = X"0000000B";
     wait for clk_period;
-
     -- ALUWriteBackS
     assert pc = X"00000014"; assert pcnext = X"00000018";
     assert reg_wa = "00101"; assert reg_wd = X"0000000B";
     wait for clk_period;
+
+    -- beq $rs, $rt, imm
+    -- beq $5,  $7, end    # shouldnt be taken 18      10a7000a
+    -- 0001/00 00/100 0/0000 X"0001"
+    -- FetchS
+    assert pc = X"00000018"; assert pcnext = X"0000001C";
+    assert mem_rd = X"10a7000a";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000018"; assert pcnext = X"0000001C";
+    assert mem_rd = X"10a7000a";
+    assert rds = X"0000000B"; assert rdt = X"00000003";
+    wait for clk_period;
+    -- BranchS
+    assert pc = X"00000018";
+    assert pcnext = X"0000001C";
+    wait for clk_period;
+
+    -- slt $rd, $rs, $rt
+    -- slt $4,  $3, $4     # $4 = 12 < 7 = 0    1c      0064202a
+    -- FetchS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert mem_rd = X"0064202a";
+
 
     assert false report "end of test" severity note;
     stop <= TRUE;
