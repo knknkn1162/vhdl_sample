@@ -5,9 +5,11 @@ entity calc is
   port (
     clk, rst : in std_logic;
     rds, rdt, immext : in std_logic_vector(31 downto 0);
+    target : in std_logic_vector(25 downto 0);
     alures : out std_logic_vector(31 downto 0);
     aluzero : out std_logic;
     brplus : out std_logic_vector(31 downto 0);
+    ja : out std_logic_vector(31 downto 0);
     -- controller
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic
@@ -53,6 +55,8 @@ architecture behavior of calc is
 
   signal srca, srcb : std_logic_vector(31 downto 0);
   signal rdt0 : std_logic_vector(31 downto 0);
+  signal ja0 : std_logic_vector(31 downto 0);
+  signal target32 : std_logic_vector(31 downto 0);
 
 begin
   reg_rds : flopr_en port map (
@@ -79,6 +83,13 @@ begin
     a => immext,
     y => brplus
   );
+
+  target32 <= b"000000" & target;
+  target_slt2 : slt2 port map (
+    a => target32,
+    y => ja0
+  );
+  ja <= ja0;
 
   alu0 : alu port map (
     a => srca, b => srcb,

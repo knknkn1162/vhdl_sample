@@ -10,9 +10,11 @@ architecture testbench of calc_tb is
     port (
       clk, rst : in std_logic;
       rds, rdt, immext : in std_logic_vector(31 downto 0);
+      target : in std_logic_vector(25 downto 0);
       alures : out std_logic_vector(31 downto 0);
       aluzero : out std_logic;
       brplus : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(31 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic
@@ -21,7 +23,9 @@ architecture testbench of calc_tb is
 
   signal clk, rst : std_logic;
   signal rds, rdt, immext, alures : std_logic_vector(31 downto 0);
+  signal target : std_logic_vector(25 downto 0);
   signal brplus : std_logic_vector(31 downto 0);
+  signal ja : std_logic_vector(31 downto 0);
   signal aluzero : std_logic;
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
@@ -32,8 +36,10 @@ begin
   uut : calc port map (
     clk => clk, rst => rst,
     rds => rds, rdt => rdt, immext => immext,
+    target => target,
     alures => alures,
     aluzero => aluzero, brplus => brplus,
+    ja => ja,
     -- controller
     alucont => alucont,
     rdt_immext_s => rdt_immext_s
@@ -52,6 +58,7 @@ begin
   begin
     wait for clk_period;
     rst <= '1'; wait for 1 ns; rst <= '0';
+
     -- for lw or sw instructions
     rds <= X"00000001"; immext <= X"00000040";
     alucont <= "010"; rdt_immext_s  <= '1'; wait for clk_period/2;
@@ -61,6 +68,10 @@ begin
     rds <= X"00000006"; rdt <= X"00000006";
     alucont <= "010"; rdt_immext_s  <= '0'; wait for clk_period;
     assert alures = X"0000000C"; assert aluzero = '1';
+    -- for J-type instructions
+    target <= b"00" & X"000005"; wait for clk_period;
+    assert ja = X"00000014";
+
     -- skip
     stop <= TRUE;
     -- success message
