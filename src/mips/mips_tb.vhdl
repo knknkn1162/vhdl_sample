@@ -204,7 +204,7 @@ begin
     -- DecodeS
     assert pc = X"00000018"; assert pcnext = X"0000001C";
     assert mem_rd = X"10a7000a";
-    assert rds = X"0000000B"; assert rdt = X"00000003";
+    assert rds = X"0000000B"; assert rdt = X"00000003"; assert immext = X"0000000A";
     wait for clk_period;
     -- BranchS
     assert pc = X"00000018";
@@ -216,6 +216,43 @@ begin
     -- FetchS
     assert pc = X"0000001C"; assert pcnext = X"00000020";
     assert mem_rd = X"0064202a";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert mem_rd = X"0064202a";
+    assert rds = X"0000000C"; assert rdt = X"00000007";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert mem_rd = X"0064202a";
+    assert alures = X"00000000";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert reg_wa = "00100"; assert reg_wd = X"00000000";
+    wait for clk_period;
+
+    -- beq $rs, $rt, imm
+    -- beq $4,  $0, around # should be taken    20      10800001
+    -- FetchS
+    assert pc = X"00000020"; assert pcnext = X"00000024";
+    assert mem_rd = X"10800001";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000020"; assert pcnext = X"00000024";
+    assert mem_rd = X"10800001";
+    assert rds = X"00000000"; assert rdt = X"00000000"; assert immext = X"00000001";
+    wait for clk_period;
+    -- BranchS
+    assert pc = X"00000020";
+    assert pcnext = X"00000028";
+    wait for clk_period;
+
+    -- slt $rd, $rs, $rt
+    -- around: slt $4,  $7, $2     # $4 = 3 < 5 = 1     28      00e2202a
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert mem_rd = X"00e2202A";
+    wait for clk_period;
 
 
     assert false report "end of test" severity note;

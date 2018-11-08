@@ -142,7 +142,7 @@ begin
   end process;
 
   -- for combinatorial logic
-  process(state)
+  process(state, aluzero)
     -- for memadr
     variable pc_aluout_s0 : std_logic;
     variable pc0_br_s0 : std_logic;
