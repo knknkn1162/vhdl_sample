@@ -11,6 +11,7 @@ architecture testbench of decode_tb is
       mem_rd : in std_logic_vector(31 downto 0);
       rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
       imm : out std_logic_vector(15 downto 0);
+      target : out std_logic_vector(25 downto 0);
       reg_memrd : out std_logic_vector(31 downto 0);
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
@@ -22,6 +23,7 @@ architecture testbench of decode_tb is
   signal mem_rd : std_logic_vector(31 downto 0);
   signal rs, rt, rd, shamt : std_logic_vector(4 downto 0);
   signal imm : std_logic_vector(15 downto 0);
+  signal target : std_logic_vector(25 downto 0);
   signal reg_memrd : std_logic_vector(31 downto 0);
   signal opcode, funct : std_logic_vector(5 downto 0);
   signal instr_en : std_logic;
@@ -35,6 +37,7 @@ begin
     mem_rd => mem_rd,
     rs => rs, rt => rt, rd => rd, shamt => shamt,
     imm => imm,
+    target => target,
     reg_memrd => reg_memrd,
     -- controller
     opcode => opcode, funct => funct,
@@ -59,6 +62,10 @@ begin
     -- read
     mem_rd <= X"8C1003FC"; instr_en <= '1'; wait for clk_period/2;
     assert rs = "00000"; assert imm = X"03FC"; assert opcode = "100011";
+    
+    -- j read 0x02
+    mem_rd <= X"08000011"; instr_en <= '1'; wait for clk_period;
+    assert target = b"00" & X"000011";
 
     -- sll $t2, $s0, 4  0000/00 00/000 1/0000/ 0101/0 001/00 00/0000
     -- X"00105100"
