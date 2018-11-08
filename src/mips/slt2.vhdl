@@ -11,5 +11,5 @@ end entity;
 
 architecture behavior of slt2 is
 begin
-  y <= a(29 downto 0) & "00";
+  y <= a(N-3 downto 0) & "00";
 end architecture;

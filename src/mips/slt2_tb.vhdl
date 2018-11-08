@@ -26,7 +26,7 @@ begin
   stim_proc: process
   begin
     wait for 20 ns;
-    a <= X"00000FF0"; wait for 10 ns; y <= X"00003FC0";
+    a <= X"00000FF1"; wait for 10 ns; y <= X"00003FC4";
     -- success message
     assert false report "end of test" severity note;
     wait;
