@@ -79,7 +79,7 @@ architecture behavior of mips is
       addr : out std_logic_vector(31 downto 0);
       reg_aluout : out std_logic_vector(31 downto 0);
       -- controller
-      pc_aluout_s, pc4_br_s : in std_logic;
+      pc_aluout_s, pc0_br_s : in std_logic;
       pc_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
@@ -93,7 +93,7 @@ architecture behavior of mips is
       opcode, funct : in std_logic_vector(5 downto 0);
       aluzero : in std_logic;
       -- for memadr
-      pc_aluout_s, pc4_br_s : out std_logic;
+      pc_aluout_s, pc0_br_s : out std_logic;
       pc_en : out std_logic;
       -- for memwrite
       mem_we: out std_logic;
@@ -130,7 +130,7 @@ architecture behavior of mips is
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
   -- for memadr
-  signal pc_aluout_s, pc4_br_s : std_logic;
+  signal pc_aluout_s, pc0_br_s : std_logic;
   signal pc_en : std_logic;
 
 begin
@@ -191,7 +191,7 @@ begin
     addr => mem_addr0,
     reg_aluout => reg_aluout0,
     -- controller
-    pc_aluout_s => pc_aluout_s, pc4_br_s => pc4_br_s,
+    pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
     pc_en => pc_en,
     -- scan
     pc => pc, pcnext => pcnext
@@ -204,7 +204,7 @@ begin
     aluzero => aluzero0,
     -- out
     -- for memadr
-    pc_aluout_s => pc_aluout_s, pc4_br_s => pc4_br_s,
+    pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
     pc_en => pc_en,
     -- for memwrite
     mem_we => mem_we,

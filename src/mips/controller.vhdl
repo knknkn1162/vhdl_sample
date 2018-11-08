@@ -7,7 +7,7 @@ entity controller is
     opcode, funct : in std_logic_vector(5 downto 0);
     aluzero : in std_logic;
     -- for memadr
-    pc_aluout_s, pc4_br_s : out std_logic;
+    pc_aluout_s, pc0_br_s : out std_logic;
     pc_en : out std_logic;
 
     -- for memwrite
@@ -145,7 +145,7 @@ begin
   process(state)
     -- for memadr
     variable pc_aluout_s0 : std_logic;
-    variable pc4_br_s0 : std_logic;
+    variable pc0_br_s0 : std_logic;
 
     variable rdt_immext_s0 : std_logic;
     -- for regwriteback
@@ -159,7 +159,7 @@ begin
     variable reg_we0 : std_logic;
   begin
     pc_aluout_s0 := '0';
-    pc4_br_s0 := '0';
+    pc0_br_s0 := '0';
     rdt_immext_s0 := '0';
     memrd_aluout_s0 := '0';
     rt_rd_s0 := '0';
@@ -180,7 +180,7 @@ begin
       when AddiCalcS =>
         rdt_immext_s0 := '1';
       when BranchS =>
-        pc4_br_s0 := aluzero;
+        pc0_br_s0 := aluzero;
       when MemReadS =>
         pc_aluout_s0 := '1';
       when MemWriteS =>
@@ -200,7 +200,7 @@ begin
         -- do nothing
     end case;
     pc_aluout_s <= pc_aluout_s0;
-    pc4_br_s <= pc4_br_s0;
+    pc0_br_s <= pc0_br_s0;
     rdt_immext_s <= rdt_immext_s0;
     memrd_aluout_s <= memrd_aluout_s0;
     rt_rd_s <= rt_rd_s0;
