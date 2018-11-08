@@ -6,11 +6,13 @@ entity memadr is
   port (
     clk, rst : in std_logic;
     alures : in std_logic_vector(31 downto 0);
+    ja : in std_logic_vector(27 downto 0);
     brplus : in std_logic_vector(31 downto 0);
     addr : out std_logic_vector(31 downto 0);
     reg_aluout : out std_logic_vector(31 downto 0);
     -- controller
-    pc_aluout_s, pc0_br_s : in std_logic;
+    pc_aluout_s : in std_logic;
+    pc0_br_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
     -- scan
     pc : out std_logic_vector(31 downto 0);
@@ -37,9 +39,21 @@ architecture behavior of memadr is
       y : out std_logic_vector(N-1 downto 0)
         );
   end component;
+
+  component mux4
+    generic(N : natural);
+    port (
+      d00 : in std_logic_vector(N-1 downto 0);
+      d01 : in std_logic_vector(N-1 downto 0);
+      d10 : in std_logic_vector(N-1 downto 0);
+      d11 : in std_logic_vector(N-1 downto 0);
+      s : in std_logic_vector(1 downto 0);
+      y : out std_logic_vector(N-1 downto 0)
+    );
+  end component;
+
   signal pc0, pcnext0, aluout : std_logic_vector(31 downto 0);
-  signal pcplus0 : std_logic_vector(31 downto 0);
-  constant pcn : std_logic_vector(31 downto 0) := (others => '0');
+  signal pc4plus, br4plus, ja32 : std_logic_vector(31 downto 0);
 begin
 
   flopr_pc : flopr_en port map (
@@ -55,14 +69,19 @@ begin
   );
   reg_aluout <= aluout;
 
-  pc4_br_mux2 : mux2 generic map (N=>32)
+  br4plus <= std_logic_vector(unsigned(brplus) + unsigned(pc0) + 4);
+  pc4plus <= std_logic_vector(unsigned(pc0) + 4);
+  ja32 <= pc0(31 downto 28) & ja;
+
+  pc4_br_mux4 : mux4 generic map (N=>32)
   port map (
-    d0 => pcn,
-    d1 => brplus,
+    d00 => pc4plus,
+    d01 => br4plus,
+    d10 => ja32,
+    d11 => pc4plus, -- dummy
     s => pc0_br_s,
-    y => pcplus0
+    y => pcnext0
   );
-  pcnext0 <= std_logic_vector(unsigned(pcplus0) + unsigned(pc0) + 4);
   pcnext <= pcnext0;
 
   pc_aluout_mux : mux2 generic map (N=>32)

@@ -10,10 +10,12 @@ architecture testbench of memadr_tb is
       clk, rst : in std_logic;
       alures : in std_logic_vector(31 downto 0);
       brplus : in std_logic_vector(31 downto 0);
+      ja : in std_logic_vector(27 downto 0);
       addr : out std_logic_vector(31 downto 0);
       reg_aluout : out std_logic_vector(31 downto 0);
       -- controller
-      pc_aluout_s, pc0_br_s : in std_logic;
+      pc_aluout_s : in std_logic;
+      pc0_br_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
@@ -23,8 +25,10 @@ architecture testbench of memadr_tb is
 
   signal clk, rst : std_logic;
   signal brplus : std_logic_vector(31 downto 0);
+  signal ja : std_logic_vector(27 downto 0);
   signal alures, reg_aluout : std_logic_vector(31 downto 0);
-  signal pc_aluout_s, pc0_br_s, pc_en : std_logic;
+  signal pc_aluout_s, pc_en : std_logic;
+  signal pc0_br_s : std_logic_vector(1 downto 0);
   signal addr : std_logic_vector(31 downto 0);
   signal pc, pcnext : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
@@ -33,7 +37,8 @@ architecture testbench of memadr_tb is
 begin
   uut : memadr port map (
     clk => clk, rst => rst,
-    alures => alures, brplus => brplus,
+    alures => alures,
+    ja => ja, brplus => brplus,
     addr => addr,
     reg_aluout => reg_aluout,
     pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
@@ -53,19 +58,26 @@ begin
   stim_proc : process
   begin
     wait for clk_period;
-    rst <= '1'; wait for 1 ns; rst <= '0'; pc0_br_s <= '0';
+    pc0_br_s <= "00";
+    rst <= '1'; wait for 1 ns; rst <= '0';
     assert pc = X"00000000"; assert pcnext = X"00000004";
     alures <= X"0000002C"; pc_aluout_s <= '1'; wait for clk_period/2; assert addr = X"0000002C";
     -- enable pc counter
     pc_aluout_s <= '0'; pc_en <= '1'; wait for clk_period; 
     assert pc = X"00000004"; assert pcnext = X"00000008"; assert addr = X"00000004";
-    -- 
+
+    -- disable pc counter
     pc_en <= '0'; wait for clk_period;
     assert pc = X"00000004"; assert pcnext = X"00000008"; assert addr = X"00000004";
 
     -- check branch
-    pc0_br_s <= '1'; brplus <= X"000000F0"; pc_en <= '1'; wait for clk_period;
+    pc0_br_s <= "01"; brplus <= X"000000F0"; pc_en <= '1'; wait for clk_period;
     assert pc = X"000000F8";
+
+    -- check jump
+    pc0_br_s <= "10"; ja <= X"0000340"; pc_en <= '1'; wait for clk_period;
+    assert pc = X"00000340";
+
     -- skip
     stop <= TRUE;
     -- success message

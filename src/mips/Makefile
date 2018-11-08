@@ -32,7 +32,7 @@ regrw: regfile sgnext mux2
 	make all F=regrw
 calc: flopr_en alu mux2 slt2
 	make all F=calc
-memadr: flopr_en mux2
+memadr: flopr_en mux4
 	make all F=memadr
 flopr:
 	make all F=flopr
