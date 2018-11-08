@@ -14,7 +14,7 @@ architecture testbench of calc_tb is
       alures : out std_logic_vector(31 downto 0);
       aluzero : out std_logic;
       brplus : out std_logic_vector(31 downto 0);
-      ja : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic
@@ -25,7 +25,7 @@ architecture testbench of calc_tb is
   signal rds, rdt, immext, alures : std_logic_vector(31 downto 0);
   signal target : std_logic_vector(25 downto 0);
   signal brplus : std_logic_vector(31 downto 0);
-  signal ja : std_logic_vector(31 downto 0);
+  signal ja : std_logic_vector(27 downto 0);
   signal aluzero : std_logic;
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
@@ -70,7 +70,7 @@ begin
     assert alures = X"0000000C"; assert aluzero = '1';
     -- for J-type instructions
     target <= b"00" & X"000005"; wait for clk_period;
-    assert ja = X"00000014";
+    assert ja = X"0000014";
 
     -- skip
     stop <= TRUE;
