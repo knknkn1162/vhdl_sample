@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.controller_pkg.ALL;
 
 entity controller is
   port (
@@ -13,6 +14,9 @@ entity controller is
 
     -- for memwrite
     mem_we: out std_logic;
+    -- for decode
+    -- -- forwarding for pipeline
+    rd1_aluout_s, rd2_aluout_s : out std_logic;
     -- for writeback
     instr_en, reg_we : out std_logic;
     memrd_aluout_s : out std_logic; -- for lw or addi
@@ -24,255 +28,96 @@ entity controller is
 end entity;
 
 architecture behavior of controller is
-  type statetype is (
-    -- soon after the initialization
-    InitS,
-    FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
-    MemWriteS,
-    RtypeCalcS, ALUWriteBackS,
-    BranchS,
-    AddiCalcS, AddiWriteBackS,
-    JumpS
-  );
-  subtype optype is std_logic_vector(5 downto 0);
-  constant OP_LW : optype := "100011";
-  constant OP_SW : optype := "101011";
-  constant OP_ADDI : optype := "001000";
-  constant OP_RTYPE : optype := "000000";
-  constant OP_BEQ : optype := "000100";
-  constant OP_J : optype := "000010"; -- 0x02
+  signal stateA, nextstateA : statetype;
+  signal stateB, nextstateB : statetype;
 
-  subtype functtype is std_logic_vector(5 downto 0);
-  constant FUNCT_ADD : functtype := "100000"; -- 0x20
-  constant FUNCT_ADDU : functtype := "100001"; -- 0x21
-  constant FUNCT_AND : functtype := "100100"; -- 0x24
-  constant FUNCT_DIV : functtype := "011010"; -- 0x1A
-  constant FUNCT_DIVU : functtype := "011011"; -- 0x1B
-  constant FUNCT_JR : functtype := "001000"; -- 0x08
-  constant FUNCT_NOR : functtype := "100111"; -- 0x27
-  constant FUNCT_XOR : functtype := "100110"; -- 0x26
-  constant FUNCT_OR : functtype := "100101"; -- 0x25
-  constant FUNCT_SLT : functtype := "101010"; -- 0x2A
-  constant FUNCT_SLL : functtype := "000000"; -- 0x00
-  constant FUNCT_SRL : functtype := "000010"; -- 0x02
-  constant FUNCT_SUB : functtype := "100010"; -- 0x22
-  constant FUNCT_SUBU : functtype := "100011"; -- 0x23
-
-  signal state, nextstate : statetype;
 begin
   process(clk, rst) begin
     if rst = '1' then
-      state <= InitS;
+      stateA <= InitS;
+      stateB <= WaitS;
     elsif rising_edge(clk) then
-      state <= nextState;
+      stateA <= nextStateA;
+      stateB <= nextStateB;
     end if;
   end process;
 
   -- State Machine
-  process(clk, rst, opcode, funct) begin
-    case state is
-      when InitS =>
-        nextState <= FetchS;
-      when FetchS =>
-        nextState <= DecodeS;
-      when DecodeS =>
-        case opcode is
-          -- lw or sw
-          when OP_LW | OP_SW =>
-            nextState <= AdrCalcS;
-          when OP_RTYPE =>
-            nextState <= RtypeCalcS;
-          when OP_ADDI =>
-            nextState <= AddiCalcS;
-          when OP_BEQ =>
-            nextState <= BranchS;
-          when OP_J =>
-            nextstate <= JumpS;
-          when others =>
-            nextState <= FetchS;
-        end case;
-      when AdrCalcS =>
-        case opcode is
-          when OP_LW =>
-            nextState <= MemReadS;
-          when OP_SW =>
-            nextState <= MemWriteS;
-          when others =>
-            nextState <= FetchS;
-        end case;
-      when AddiCalcS =>
-        nextState <= AddiWriteBackS;
-      when RtypeCalcS =>
-        nextstate <= ALUWriteBackS;
-      when MemReadS =>
-        nextState <= RegWritebackS;
-      -- when final state
-      when RegWriteBackS | MemWriteS | AddiWriteBackS | ALUWriteBackS | BranchS | JumpS =>
-        nextState <= FetchS;
-      -- if undefined
-      when others =>
-        nextState <= FetchS;
-    end case;
+  process(clk, rst, opcode, funct)
+    variable stateA0, nextstateA0 : statetype;
+    variable stateB0, nextstateB0 : statetype;
+  begin
+    nextstateA0 := get_nextstate(stateA0, opcode);
+    nextstateB0 := get_nextstate(stateB0, opcode);
+    -- todo : additional expr
+    nextstateA <= nextstateA0;
+    nextstateB <= nextstateB0;
   end process;
 
   -- for sequential logic
   -- ex) D-flipflop enable signal should be turned on before rising_edge(clk)
-  process(state)
-    variable pc_en0 : std_logic;
-    variable instr_en0 : std_logic;
-  begin
-    pc_en0 := '0';
-    instr_en0 := '0';
-    case state is
-      when InitS =>
-        -- pc_en0 := '0';
-      when FetchS =>
-        instr_en0 := '1';
-      when DecodeS =>
-      when RtypeCalcS =>
-      when AddiCalcS =>
-      when AdrCalcS =>
-        -- do nothing
-      when MemReadS =>
-        -- do nothing
-      when MemWriteS | RegWriteBackS | AddiWritebackS | ALUWriteBackS | BranchS | JumpS =>
-        pc_en0 := '1'; -- for fetchS
-      when others =>
-        -- do nothing;
-    end case;
+  process(stateA, stateB)
+    -- for memadr
+    variable pc_aluout_sA, pc_aluout_sB : std_logic;
+    variable pc_enA, pc_enB : std_logic;
 
-    pc_en <= pc_en0;
-    instr_en <= instr_en0;
-  end process;
-
-  -- deside pcnext
-  process(state, aluzero)
-    variable pc0_br_s0 : std_logic_vector(1 downto 0);
-  begin
-    case state is
-      when BranchS =>
-        pc0_br_s <= "0" & aluzero;
-      when JumpS =>
-        pc0_br_s <= "10";
-      when others =>
-        -- pc+4
-        pc0_br_s <= "00";
-    end case;
-  end process;
-
-  -- Writeback
-  process(state)
-    -- write in the end of the clk process
     -- for memwrite
-    variable mem_we0: std_logic;
+    variable mem_weA, mem_weB: std_logic;
+    -- for decode
+    -- -- forwarding for pipeline
+    variable rd1_aluout_s : std_logic;
+    variable rd2_aluout_s : std_logic;
     -- for writeback
-    variable reg_we0 : std_logic;
+    variable instr_enA, instr_enB : std_logic;
+    variable reg_weA, reg_weB : std_logic;
+    variable memrd_aluout_sA, memrd_aluout_sB : std_logic; -- for lw or addi
+    variable rt_rd_sA, rt_rd_sB : std_logic; -- Itype or Rtype
+    -- for calc
+    variable alucontA, alucontB : std_logic_vector(2 downto 0);
+    variable rdt_immext_sA, rdt_immext_sB : std_logic;
   begin
-    reg_we0 := '0';
-    mem_we0 := '0';
-    case state is
-      when MemWriteS =>
-        mem_we0 := '1';
-      when RegWriteBackS | AddiWritebackS | ALUWriteBackS =>
-        reg_we0 := '1';
-      when MemReadS =>
-        -- mem_we0 := '0';
-      when DecodeS =>
-        -- reg_we0 := '0';
-      when BranchS | Jumps =>
-        -- do nothing
-      when others =>
-        -- do nothing
-    end case;
-    mem_we <= mem_we0;
-    reg_we <= reg_we0;
+    -- for memadr
+    pc_aluout_sA := get_pc_aluout_s(stateA); pc_aluout_sB := get_pc_aluout_s(stateB);
+    pc_aluout_s <= pc_aluout_sA or pc_aluout_sB;
+
+    pc_enA := get_pc_en(stateA); pc_enB := get_pc_en(stateB);
+    pc_en <= pc_enA or pc_enB;
+
+    -- for memwrite
+    mem_weA := get_mem_we(stateA); mem_weB := get_mem_we(stateB);
+    mem_we <= mem_weA or mem_weB;
+
+    -- for decode
+
+    -- for writeback
+    instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);
+    instr_en <= instr_enA or instr_enB;
+
+    reg_weA := get_reg_we(stateA); reg_weB := get_reg_we(stateB);
+    reg_we <= reg_weA or reg_weB;
+
+    memrd_aluout_sA := get_memrd_aluout_s(stateA); memrd_aluout_sB := get_memrd_aluout_s(stateB);
+    memrd_aluout_s <= memrd_aluout_sA or memrd_aluout_sB;
+
+    rt_rd_sA := get_rt_rd_s(stateA); rt_rd_sB := get_rt_rd_s(stateB);
+    rt_rd_s <= rt_rd_sA or rt_rd_sB;
+
+    -- for calc
+    alucontA := get_alucont(stateA, funct); alucontB := get_alucont(stateB, funct);
+    alucont <= alucontA or alucontB;
+
+    rdt_immext_sA := get_rdt_immext_s(stateA); rdt_immext_sB := get_rdt_immext_s(stateB);
+    rdt_immext_s <= rdt_immext_sA or rdt_immext_sB;
+
+    -- 
+
   end process;
 
-
-  -- multiplexer select signal
-  process(state)
-    -- for memadr
-    variable pc_aluout_s0 : std_logic;
-    variable rdt_immext_s0 : std_logic;
-    -- for regwriteback
-    variable memrd_aluout_s0 : std_logic;
-    variable rt_rd_s0 : std_logic;
+  -- depend on aluzero
+  process(stateA, stateB, aluzero)
+    variable pc0_br_sA, pc0_br_sB : std_logic_vector(1 downto 0);
   begin
-    pc_aluout_s0 := '0';
-    rdt_immext_s0 := '0';
-    memrd_aluout_s0 := '0';
-    rt_rd_s0 := '0';
-    case state is
-      when FetchS =>
-        -- for decoding
-        -- pc_aluout_s0 := '0';
-      when AdrCalcS =>
-        rdt_immext_s0 := '1';
-      when RtypeCalcS =>
-        -- rdt_immext_s0 := '0';
-      when AddiCalcS =>
-        rdt_immext_s0 := '1';
-      when MemReadS =>
-        pc_aluout_s0 := '1';
-      when MemWriteS =>
-        pc_aluout_s0 := '1';
-      when RegWriteBackS =>
-        -- memrd_aluout_s := '0';
-      when AddiWritebackS =>
-        -- rt_rd_s0 := '0';
-        memrd_aluout_s0 := '1';
-      when ALUWriteBackS =>
-        rt_rd_s0 := '1';
-        memrd_aluout_s0 := '1';
-      when BranchS | Jumps =>
-        -- do nothing
-      when InitS | DecodeS =>
-        -- do nothing
-      when others =>
-        -- do nothing
-    end case;
-    pc_aluout_s <= pc_aluout_s0;
-    rdt_immext_s <= rdt_immext_s0;
-    memrd_aluout_s <= memrd_aluout_s0;
-    rt_rd_s <= rt_rd_s0;
-  end process;
-
-  -- alucontroller
-  process(state)
-    -- for memadr
-    variable alucont0 : std_logic_vector(2 downto 0);
-  begin
-    alucont0 := "000";
-    case state is
-      when InitS =>
-      when FetchS =>
-      when DecodeS =>
-      when AdrCalcS =>
-        alucont0 := "010";
-      when RtypeCalcS =>
-        case funct is
-          when FUNCT_ADD =>
-            alucont0 := "010";
-          when FUNCT_AND =>
-            alucont0 := "000";
-          when FUNCT_SUB =>
-            alucont0 := "110";
-          when FUNCT_SLT =>
-            alucont0 := "111";
-          when FUNCT_OR =>
-            alucont0 := "001";
-          when others =>
-            alucont0 := "000";
-        end case;
-      when AddiCalcS =>
-        alucont0 := "010";
-      when MemReadS =>
-      when MemWriteS =>
-      when RegWriteBackS =>
-      when AddiWritebackS =>
-      when others =>
-        -- do nothing
-    end case;
-    alucont <= alucont0;
+    pc0_br_sA := get_pc0_br_s(stateA, aluzero); pc0_br_sB := get_pc0_br_s(stateB, aluzero);
+    pc0_br_s <= pc0_br_sA or pc0_br_sB;
   end process;
 end architecture;
