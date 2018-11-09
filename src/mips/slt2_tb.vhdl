@@ -6,24 +6,27 @@ end entity;
 
 architecture behavior of slt2_tb is
   component slt2 is
+    generic (N: natural);
     port (
-      a : in std_logic_vector(31 downto 0);
-      y : out std_logic_vector(31 downto 0)
+      a : in std_logic_vector(N-1 downto 0);
+      y : out std_logic_vector(N-1 downto 0)
     );
   end component;
 
-  signal a : std_logic_vector(31 downto 0);
-  signal y : std_logic_vector(31 downto 0);
+  constant N : natural := 32;
+  signal a : std_logic_vector(N-1 downto 0);
+  signal y : std_logic_vector(N-1 downto 0);
 
 begin
-  uut : slt2 port map (
+  uut : slt2 generic map (N=>N)
+  port map (
     a, y
   );
 
   stim_proc: process
   begin
     wait for 20 ns;
-    a <= X"00000FF0"; wait for 10 ns; y <= X"00003FC0";
+    a <= X"00000FF1"; wait for 10 ns; y <= X"00003FC4";
     -- success message
     assert false report "end of test" severity note;
     wait;

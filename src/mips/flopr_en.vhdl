@@ -1,22 +1,24 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity flopr is
+entity flopr_en is
   port (
-    clk, rst: in std_logic;
+    clk, rst, en: in std_logic;
     a : in std_logic_vector(31 downto 0);
     y : out std_logic_vector(31 downto 0)
        );
 end entity;
 
 
-architecture behavior of flopr is
+architecture behavior of flopr_en is
 begin
   process(clk, rst) begin
     if rst='1' then
       y <= (others => '0');
     elsif rising_edge(clk) then
-      y <= a;
+      if en = '1' then
+        y <= a;
+      end if;
     end if;
   end process;
 end architecture;

@@ -7,7 +7,7 @@ end entity;
 architecture behavior of regfile_tb is
   component regfile
     port (
-      clk : in std_logic;
+      clk, rst : in std_logic;
       -- 25:21(read)
       a1 : in std_logic_vector(4 downto 0);
       rd1 : out std_logic_vector(31 downto 0);
@@ -20,7 +20,7 @@ architecture behavior of regfile_tb is
       we3 : in std_logic
     );
   end component;
-  signal clk, we3 : std_logic;
+  signal clk, rst, we3 : std_logic;
 
   signal stop : boolean;
   signal a1, a2, a3 : std_logic_vector(4 downto 0);
@@ -29,7 +29,14 @@ architecture behavior of regfile_tb is
 
 begin
   uut : regfile port map (
-    clk, a1, rd1, a2, rd2, a3, wd3, we3
+    clk => clk, rst => rst,
+    a1 => a1,
+    rd1 => rd1,
+    a2 => a2,
+    rd2 => rd2,
+    a3 => a3,
+    wd3 => wd3,
+    we3 => we3
   );
   clk_process: process
   begin
@@ -43,9 +50,13 @@ begin
   stim_proc : process
   begin
     wait for clk_period;
+    rst <= '1'; wait for 1 ns; rst <= '0';
+    -- check initialization of register
+    a1 <= "00000"; wait for 1 ns; assert rd1 = X"00000000";
+
     -- write into memory
     we3 <= '1';
-    a3 <= "00000"; wd3 <= X"00000001"; wait for clk_period;
+    a3 <= "00000"; wd3 <= X"00000001"; wait for clk_period/2;
     a3 <= "00001"; wd3 <= X"00000011"; wait for clk_period;
 
     -- read from mem
@@ -53,11 +64,12 @@ begin
     assert rd1 = X"00000000"; assert rd2 = X"00000000";
     a1 <= "00001"; a2 <= "00001"; wait for 1 ns;
     assert rd1 = X"00000011"; assert rd2 = X"00000011";
+
+    we3 <= '0'; wait until rising_edge(clk);
+
     -- if we3='0' when rising_edge, stay the same.
-    a3 <= "00001"; wd3 <= X"00000111"; wait for 1 ns;
-    we3 <= '0'; wait for 3 ns;
-    a1 <= "00001"; a2 <= "00001";
-    wait for 1 ns;
+    a3 <= "00001"; wd3 <= X"00000111"; we3 <= '0'; wait for clk_period/2+1 ns;
+    a1 <= "00001"; a2 <= "00001"; wait for 1 ns;
     assert rd1 = X"00000011"; assert rd2 = X"00000011";
     stop <= TRUE;
     -- success message

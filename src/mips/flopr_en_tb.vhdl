@@ -1,27 +1,27 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity flopr_tb is
+entity flopr_en_tb is
 end entity;
 
-architecture behavior of flopr_tb is
-  component flopr
+architecture testbench of flopr_en_tb is
+  component flopr_en
     port (
-      clk, rst: in std_logic;
+      clk, rst, en: in std_logic;
       a : in std_logic_vector(31 downto 0);
       y : out std_logic_vector(31 downto 0)
         );
   end component;
-  signal clk : std_logic;
-  signal rst : std_logic;
-  signal a : std_logic_vector(31 downto 0);
-  signal y : std_logic_vector(31 downto 0);
+
+  signal clk, rst, en : std_logic;
+  signal a, y : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
-  uut : flopr port map (
-    clk, rst, a, y
+  uut : flopr_en port map (
+    clk => clk, rst => rst, en => en,
+    a => a, y => y
   );
 
   clk_process: process
@@ -35,15 +35,14 @@ begin
 
   stim_proc : process
   begin
-    rst <= '1'; wait for 1 ns; rst <= '0';
-    wait for 1 ns; assert y = X"00000000";
-    a <= X"00000001"; wait for clk_period/2; assert y = X"00000001";
-    a <= X"00000002"; wait for clk_period/2; assert y = X"00000001";
-    wait for clk_period/2; assert y = X"00000002";
+    wait for clk_period;
+    rst <= '1'; wait for 1 ns; rst <= '0'; assert y = X"00000000";
+    a <= X"00000001"; wait for clk_period/2; assert y = X"00000000";
+    en <= '1'; wait for clk_period; assert y = X"00000001";
+    -- skip
     stop <= TRUE;
     -- success message
     assert false report "end of test" severity note;
     wait;
   end process;
-
 end architecture;

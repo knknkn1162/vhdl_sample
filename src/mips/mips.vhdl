@@ -1,111 +1,141 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity mips is
   port (
-    clk, reset : in std_logic;
-    addr : in std_logic_vector(31 downto 0);
-    -- for testbench
+    clk, rst : in std_logic;
+    -- scan for testbench
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
-    instr : out std_logic_vector(31 downto 0);
-    a3 : out std_logic_vector(4 downto 0);
-    dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
-    rs, rt : out std_logic_vector(31 downto 0);
-    rt_imm : out std_logic_vector(31 downto 0);
-    aluout : out std_logic_vector(31 downto 0);
-    rdata : out std_logic_vector(31 downto 0)
-      );
+    addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
+    reg_wa : out std_logic_vector(4 downto 0);
+    reg_wd : out std_logic_vector(31 downto 0);
+    rds, rdt, immext : out std_logic_vector(31 downto 0);
+    ja : out std_logic_vector(27 downto 0);
+    alures : out std_logic_vector(31 downto 0)
+  );
 end entity;
 
 architecture behavior of mips is
   component datapath
     port (
-      clk, reset : in std_logic;
-      addr : in std_logic_vector(31 downto 0);
+      clk, rst : in std_logic;
 
-      -- from controller
-      -- write enable
-      reg_we3, dmem_we : in std_logic;
-      -- multiplex selector
-      rt_rd_s, rt_imm_s, calc_rdata_s : in std_logic;
-      -- alu
-      alu_func : in std_logic_vector(2 downto 0);
-      -- branch
-      is_branch : in std_logic;
-      -- jump, branch, pc
-      pcn_jmp_s : in std_logic;
-
-      -- for testbench
+      -- controller
+      opcode, funct : out std_logic_vector(5 downto 0);
+      -- for memadr
+      pc_aluout_s : in std_logic;
+      pc0_br_s : in std_logic_vector(1 downto 0);
+      pc_en : in std_logic;
+      -- for memwrite
+      mem_we: in std_logic;
+      -- for writeback
+      instr_en, reg_we : in std_logic;
+      memrd_aluout_s : in std_logic; -- for lw or addi
+      rt_rd_s : in std_logic; -- Itype or Rtype
+      -- for calc
+      alucont : in std_logic_vector(2 downto 0);
+      rdt_immext_s : in std_logic;
+      aluzero : out std_logic;
+      
+      -- scan for testbench
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0);
-      instr : out std_logic_vector(31 downto 0);
-      a3 : out std_logic_vector(4 downto 0);
-      dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
-      rs, rt : out std_logic_vector(31 downto 0);
-      rt_imm : out std_logic_vector(31 downto 0);
-      aluout : out std_logic_vector(31 downto 0);
-      rdata : out std_logic_vector(31 downto 0)
-        );
+      addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
+      reg_wa : out std_logic_vector(4 downto 0);
+      reg_wd : out std_logic_vector(31 downto 0);
+      rds, rdt, immext : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0);
+      alures : out std_logic_vector(31 downto 0)
+    );
   end component;
 
   component controller
     port (
-      opcode : in std_logic_vector(5 downto 0);
-      funct : in std_logic_vector(5 downto 0);
-      -- write enable
-      reg_we3, dmem_we : out std_logic;
-      -- multiplex selector
-      rt_rd_s, rt_imm_s, calc_rdata_s : out std_logic;
-      -- alu
-      alu_func : out std_logic_vector(2 downto 0);
-      -- branch
-      is_branch : out std_logic;
-      -- jump, branch, pc
-      pcn_jmp_s : out std_logic
+      clk, rst : in std_logic;
+      opcode, funct : in std_logic_vector(5 downto 0);
+      aluzero : in std_logic;
+      -- for memadr
+      pc_aluout_s : out std_logic;
+      pc0_br_s : out std_logic_vector(1 downto 0);
+      pc_en : out std_logic;
+      -- for memwrite
+      mem_we: out std_logic;
+      -- for writeback
+      instr_en, reg_we : out std_logic;
+      memrd_aluout_s : out std_logic; -- for lw or addi
+      rt_rd_s : out std_logic; -- Itype or Rtype
+      -- for calc
+      alucont : out std_logic_vector(2 downto 0);
+      rdt_immext_s : out std_logic
     );
   end component;
 
-  signal instr0 : std_logic_vector(31 downto 0);
+  -- controller
+  signal opcode, funct : std_logic_vector(5 downto 0);
+  -- for memwrite
+  signal mem_we: std_logic;
+  -- for decode, writeback
+  signal instr_en, reg_we : std_logic;
+  signal memrd_aluout_s : std_logic;
+  signal rt_rd_s : std_logic;
+  -- for calc
+  signal alucont : std_logic_vector(2 downto 0);
+  signal rdt_immext_s : std_logic;
+  signal aluzero : std_logic;
 
-  signal reg_we3, dmem_we : std_logic;
-  signal rt_rd_s ,rt_imm_s, calc_rdata_s : std_logic;
-  signal alu_func : std_logic_vector(2 downto 0);
-  signal is_branch : std_logic;
-  signal pcn_jmp_s : std_logic;
+  -- for memadr
+  signal pc_aluout_s : std_logic;
+  signal pc0_br_s : std_logic_vector(1 downto 0);
+  signal pc_en : std_logic;
 
 begin
   datapath0 : datapath port map (
-    clk => clk, reset => reset,
-    addr => addr,
-    -- from controller
-    reg_we3 => reg_we3, dmem_we => dmem_we,
-    rt_rd_s => rt_rd_s, rt_imm_s => rt_imm_s, calc_rdata_s => calc_rdata_s,
-    alu_func => alu_func,
-    is_branch => is_branch,
-    pcn_jmp_s => pcn_jmp_s,
+    clk => clk, rst => rst,
 
-    pc => pc,
-    pcnext => pcnext,
-    instr => instr0,
-    a3 => a3,
-    dmem_wd => dmem_wd, reg_wd => reg_wd,
-    rs => rs, rt => rt,
-    rt_imm => rt_imm,
-    aluout => aluout,
-    rdata => rdata
+    -- controller
+    opcode => opcode, funct => funct,
+    -- for memadr
+    pc_aluout_s => pc_aluout_s,
+    pc0_br_s => pc0_br_s,
+    pc_en => pc_en,
+    -- for memwrite
+    mem_we => mem_we,
+    -- for writeback
+    instr_en => instr_en, reg_we => reg_we,
+    memrd_aluout_s => memrd_aluout_s,
+    rt_rd_s => rt_rd_s,
+    -- for calc
+    alucont => alucont,
+    rdt_immext_s => rdt_immext_s,
+    aluzero => aluzero,
+    
+    -- scan for testbench
+    pc => pc, pcnext => pcnext,
+    addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,
+    reg_wa => reg_wa,
+    reg_wd => reg_wd,
+    rds => rds, rdt => rdt, immext => immext,
+    ja => ja,
+    alures => alures
   );
 
   controller0 : controller port map (
-    opcode => instr0(31 downto 26),
-    funct => instr0(5 downto 0),
-    -- decode
-    reg_we3 => reg_we3, dmem_we => dmem_we,
-    rt_rd_s => rt_rd_s, rt_imm_s => rt_imm_s, calc_rdata_s => calc_rdata_s,
-    alu_func => alu_func,
-    is_branch => is_branch,
-    pcn_jmp_s => pcn_jmp_s
+    clk => clk, rst => rst,
+    opcode => opcode, funct => funct,
+    aluzero => aluzero,
+    -- out
+    -- for memadr
+    pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
+    pc_en => pc_en,
+    -- for memwrite
+    mem_we => mem_we,
+    -- for writeback
+    instr_en => instr_en, reg_we => reg_we,
+    memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
+    -- for memadr
+    alucont => alucont,
+    rdt_immext_s => rdt_immext_s
   );
-
-  instr <= instr0;
 end architecture;

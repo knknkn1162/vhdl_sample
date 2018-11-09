@@ -8,48 +8,41 @@ end entity;
 architecture behavior of mips_tb is
   component mips
     port (
-      clk, reset : in std_logic;
-      addr : in std_logic_vector(31 downto 0);
-      -- for testbench
+      clk, rst : in std_logic;
+      -- scan for testbench
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0);
-      instr : out std_logic_vector(31 downto 0);
-      a3 : out std_logic_vector(4 downto 0);
-      dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
-      rs, rt : out std_logic_vector(31 downto 0);
-      rt_imm : out std_logic_vector(31 downto 0);
-      aluout : out std_logic_vector(31 downto 0);
-      rdata : out std_logic_vector(31 downto 0)
-        );
+      addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
+      reg_wa : out std_logic_vector(4 downto 0);
+      reg_wd : out std_logic_vector(31 downto 0);
+      rds, rdt, immext : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0);
+      alures : out std_logic_vector(31 downto 0)
+    );
   end component;
 
-  signal clk, reset : std_logic;
-  signal addr : std_logic_vector(31 downto 0);
+  signal clk, rst : std_logic;
   signal pc, pcnext : std_logic_vector(31 downto 0);
-  signal a3 : std_logic_vector(4 downto 0);
-  signal instr : std_logic_vector(31 downto 0);
-  signal dmem_wd, reg_wd : std_logic_vector(31 downto 0);
-  signal rs, rt, rt_imm : std_logic_vector(31 downto 0);
-  signal aluout : std_logic_vector(31 downto 0);
-  signal rdata : std_logic_vector(31 downto 0);
+  signal addr, mem_rd, mem_wd : std_logic_vector(31 downto 0);
+  signal reg_wa : std_logic_vector(4 downto 0);
+  signal reg_wd : std_logic_vector(31 downto 0);
+  signal rds, rdt, immext : std_logic_vector(31 downto 0);
+  signal ja : std_logic_vector(27 downto 0);
+  signal alures : std_logic_vector(31 downto 0);
 
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
   uut: mips port map (
-    clk => clk, reset => reset,
-    addr => addr,
-    pc => pc,
-    -- for testbench
-    pcnext => pcnext,
-    instr => instr,
-    a3 => a3,
-    dmem_wd => dmem_wd, reg_wd => reg_wd,
-    rs => rs, rt => rt,
-    rt_imm => rt_imm,
-    aluout => aluout,
-    rdata => rdata
+    clk => clk, rst => rst,
+    pc => pc, pcnext => pcnext,
+    addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,
+    reg_wa => reg_wa,
+    reg_wd => reg_wd,
+    rds => rds, rdt => rdt, immext => immext,
+    ja => ja,
+    alures => alures
   );
 
   clk_process: process
@@ -64,193 +57,345 @@ begin
   stim_proc: process
   begin
     -- wait until rising_edge
+    wait for clk_period;
+    -- InitS
+    rst <= '1'; wait for 1 ns; rst <= '0';
     wait for clk_period/2;
-    reset <= '1';
-    addr <= X"00000000";
-    wait for 1 ns; reset <= '0';
-
-    -- addi $rt, $rs, imm
+    --         addi $rt, $rs, imm
     -- main:   addi $2, $0, 5      # initialize $2 = 5  0       20020005
-    wait for clk_period/2;
-    assert pc = X"00000000";
-    assert instr = X"20020005";
-    assert rs = X"00000000";
-    assert rt_imm = X"00000005";
-    assert aluout = X"00000005";
-    assert a3 = "00010";
-    assert reg_wd = X"00000005";
+    -- 0010/00 00/000 0/0010/ X0005
+    -- FetchS
+    assert pc = X"00000000"; assert pcnext = X"00000004";
+    assert mem_rd = X"20020005";
+    -- (not yet)
+    assert rds = X"00000000"; assert immext = X"00000000";
+    wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000000"; assert pcnext = X"00000004";
+    assert mem_rd = X"20020005";
+    assert rds = X"00000000"; assert immext = X"00000005";
+    wait for clk_period;
+    -- AddiCalcS
+    assert pc = X"00000000"; assert pcnext = X"00000004";
+    assert mem_rd = X"20020005";
+    assert alures = X"00000005";
+    wait for clk_period;
+    -- AddiWritebackS
+    assert pc = X"00000000"; assert pcnext = X"00000004";
+    assert reg_wa = "00010"; assert reg_wd = X"00000005";
+    wait for clk_period;
 
     -- addi $rt, $rs, imm
     -- addi $3, $0, 12     # initialize $3 = 12 4       2003000c
+    -- 0010/00 00/000 0/0011/ X000C
+    -- FetchS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"2003000C";
     wait for clk_period;
-    assert pc = X"00000004";
-    assert instr = X"2003000c";
-    assert rs = X"00000000";
-    assert rt_imm = X"0000000c";
-    assert aluout = X"0000000c";
-    assert a3 = "00011";
-    assert reg_wd = X"0000000c";
+    -- DecodeS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"2003000C";
+    assert rds = X"00000000"; assert immext = X"0000000C";
+    wait for clk_period;
+    -- AddiCalcS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"2003000C";
+    assert alures = X"0000000C";
+    wait for clk_period;
+    -- AddiWritebackS
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert reg_wa = "00011"; assert reg_wd = X"0000000C";
+    wait for clk_period;
 
-    --addi $rt, $rs, imm
+    -- addi $rt, $rs, imm
     -- addi $7, $3, -9     # initialize $7 = 3  8       2067fff7
+    -- 0010/00 00/011 0/0111/ XFFF7
+    -- FetchS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert mem_rd = X"2067FFF7";
     wait for clk_period;
-    assert pc = X"00000008";
-    assert instr = X"2067fff7";
-    assert rs = X"0000000c";
-    assert rt_imm = X"FFFFFFF7";
-    assert aluout = X"00000003";
-    assert a3 = "00111";
-    assert reg_wd = X"00000003";
+    -- DecodeS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert mem_rd = X"2067FFF7";
+    assert rds = X"0000000C"; assert immext = X"FFFFFFF7";
+    wait for clk_period;
+    -- AddiCalcS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert mem_rd = X"2067FFF7";
+    assert alures = X"00000003";
+    wait for clk_period;
+    -- AddiWritebackS
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert reg_wa = "00111"; assert reg_wd = X"00000003";
+    wait for clk_period;
 
     -- or $rd, $rs, $rt
     -- or   $4, $7, $2     # $4 <= 3 or 5 = 7   c       00e22025
+    -- 0000/00 00/111 0/0010/ 0010/0 000/00 10/0101
+    -- FetchS
+    assert pc = X"0000000C"; assert pcnext = X"00000010";
+    assert mem_rd = X"00E22025";
     wait for clk_period;
-    assert pc = X"0000000c";
-    assert instr = X"00e22025";
-    assert rs = X"00000003"; -- $7
-    assert rt_imm = X"00000005"; -- $2
-    assert aluout = X"00000007";
-    assert a3 = "00100"; -- $4
-    assert reg_wd = X"00000007";
+    -- DecodeS
+    assert pc = X"0000000C"; assert pcnext = X"00000010";
+    assert mem_rd = X"00E22025";
+    assert rds = X"00000003"; assert rdt = X"00000005";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"0000000C"; assert pcnext = X"00000010";
+    assert mem_rd = X"00E22025";
+    assert alures = X"00000007";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"0000000C"; assert pcnext = X"00000010";
+    assert reg_wa = "00100"; assert reg_wd = X"00000007";
+    wait for clk_period;
+
 
     -- and $rd, $rs, $rt
     -- and $5,  $3, $4     # $5 <= 12 and 7 = 4 10      00642824
+    -- FetchS
+    assert pc = x"00000010"; assert pcnext = x"00000014";
+    assert mem_rd = X"00642824";
     wait for clk_period;
-    assert pc = X"00000010";
-    assert instr = X"00642824";
-    assert rs = X"0000000c"; -- $3
-    assert rt_imm = X"00000007"; -- $4
-    assert aluout = X"00000004";
-    assert a3 = "00101"; -- $5
-    assert reg_wd = X"00000004";
+    -- DecodeS
+    assert pc = X"00000010"; assert pcnext = X"00000014";
+    assert mem_rd = X"00642824";
+    assert rds = X"0000000C"; assert rdt = X"00000007";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = x"00000010"; assert pcnext = x"00000014";
+    assert mem_rd = X"00642824";
+    assert alures = X"00000004";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = x"00000010"; assert pcnext = x"00000014";
+    assert reg_wa = "00101"; assert reg_wd = X"00000004";
+    wait for clk_period;
+
+
+
 
     -- add $rd, $rs, $rt
     -- add $5,  $5, $4     # $5 = 4 + 7 = 11    14      00a42820
+    -- FetchS
+    assert pc = X"00000014"; assert pcnext = X"00000018";
+    assert mem_rd = X"00a42820";
     wait for clk_period;
-    assert pc = X"00000014";
-    assert instr = X"00a42820";
-    assert rs = X"00000004"; -- $5
-    assert rt_imm = X"00000007"; -- $4
-    assert aluout = X"0000000b";
-    assert a3 = "00101"; -- $5
-    assert reg_wd = X"0000000b";
+    -- DecodeS
+    assert pc = X"00000014"; assert pcnext = X"00000018";
+    assert mem_rd = X"00a42820";
+    assert rds = X"00000004"; assert rdt = X"00000007";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"00000014"; assert pcnext = X"00000018";
+    assert mem_rd = X"00a42820";
+    assert alures = X"0000000B";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"00000014"; assert pcnext = X"00000018";
+    assert reg_wa = "00101"; assert reg_wd = X"0000000B";
+    wait for clk_period;
 
     -- beq $rs, $rt, imm
     -- beq $5,  $7, end    # shouldnt be taken 18      10a7000a
+    -- 0001/00 00/100 0/0000 X"0001"
+    -- FetchS
+    assert pc = X"00000018"; assert pcnext = X"0000001C";
+    assert mem_rd = X"10a7000a";
     wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000018"; assert pcnext = X"0000001C";
+    assert mem_rd = X"10a7000a";
+    assert rds = X"0000000B"; assert rdt = X"00000003"; assert immext = X"0000000A";
+    wait for clk_period;
+    -- BranchS
     assert pc = X"00000018";
-    assert instr = X"10a7000a";
-    assert rs = X"0000000b"; -- $5
-    assert rt_imm = X"00000003"; -- $7
-    assert pcnext = X"0000001c";
+    assert pcnext = X"0000001C";
+    wait for clk_period;
 
     -- slt $rd, $rs, $rt
     -- slt $4,  $3, $4     # $4 = 12 < 7 = 0    1c      0064202a
+    -- FetchS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert mem_rd = X"0064202a";
     wait for clk_period;
-    assert pc = X"0000001c";
-    assert instr = X"0064202a";
-    assert rs = X"0000000c"; -- $3
-    assert rt_imm = X"00000007"; -- $4
-    assert aluout = X"00000000";
-    assert a3 = "00100"; -- $4
-    assert reg_wd = X"00000000";
+    -- DecodeS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert mem_rd = X"0064202a";
+    assert rds = X"0000000C"; assert rdt = X"00000007";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert mem_rd = X"0064202a";
+    assert alures = X"00000000";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert reg_wa = "00100"; assert reg_wd = X"00000000";
+    wait for clk_period;
 
     -- beq $rs, $rt, imm
     -- beq $4,  $0, around # should be taken    20      10800001
+    -- FetchS
+    assert pc = X"00000020"; assert pcnext = X"00000024";
+    assert mem_rd = X"10800001";
     wait for clk_period;
+    -- DecodeS
+    assert pc = X"00000020"; assert pcnext = X"00000024";
+    assert mem_rd = X"10800001";
+    assert rds = X"00000000"; assert rdt = X"00000000"; assert immext = X"00000001";
+    wait for clk_period;
+    -- BranchS
     assert pc = X"00000020";
-    assert instr = X"10800001";
-    assert rs = X"00000000"; -- $4
-    assert rt_imm = X"00000000"; -- $0
-    assert pcnext = X"00000028"; -- pc + 4 + (imm<<2)
+    assert pcnext = X"00000028";
+    wait for clk_period;
 
     -- slt $rd, $rs, $rt
     -- around: slt $4,  $7, $2     # $4 = 3 < 5 = 1     28      00e2202a
+    -- FetchS
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert mem_rd = X"00e2202A";
     wait for clk_period;
-    assert pc = X"00000028";
-    assert instr = X"00e2202a";
-    assert rs = X"00000003"; -- $4
-    assert rt_imm = X"00000005"; -- $7
-    assert aluout = X"00000001";
-    assert a3 = "00100"; -- $4
-    assert reg_wd = X"00000001";
+    -- DecodeS
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert mem_rd = X"00e2202A";
+    assert rds = X"00000003"; assert rdt = X"00000005";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert mem_rd = X"00e2202A";
+    assert alures = X"00000001";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert reg_wa = "00100"; assert reg_wd = X"00000001";
+    wait for clk_period;
 
     -- add $rd, $rs, $rt
     -- add $7,  $4, $5     # $7 = 1 + 11 = 12   2c      00853820
+    -- FetchS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert mem_rd = X"00853820";
     wait for clk_period;
-    assert pc = X"0000002c";
-    assert instr = X"00853820";
-    assert rs = X"00000001"; -- $4
-    assert rt_imm = X"0000000b"; -- $5
-    assert aluout = X"0000000c";
-    assert a3 = "00111"; -- $7
-    assert reg_wd = X"0000000c";
+    -- DecodeS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert mem_rd = X"00853820";
+    assert rds = X"00000001"; assert rdt = X"0000000B";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert mem_rd = X"00853820";
+    assert alures = X"0000000C";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert reg_wa = "00111"; assert reg_wd = X"0000000C";
+    wait for clk_period;
 
     -- sub $rd, $rs, $rt
     -- sub $7,  $7, $2     # $7 = 12 - 5 = 7    30      00e23822
+    -- FetchS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert mem_rd = X"00E23822";
     wait for clk_period;
-    assert pc = X"00000030";
-    assert instr = X"00e23822";
-    assert rs = X"0000000c"; -- $7
-    assert rt_imm = X"00000005"; -- $2
-    assert aluout = X"00000007";
-    assert a3 = "00111"; -- $7
-    assert reg_wd = X"00000007";
+    -- DecodeS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert mem_rd = X"00E23822";
+    assert rds = X"0000000C"; assert rdt = X"00000005";
+    wait for clk_period;
+    -- RtypeCalcS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert mem_rd = X"00E23822";
+    assert alures = X"00000007";
+    wait for clk_period;
+    -- ALUWriteBackS
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert reg_wa = "00111"; assert reg_wd = X"00000007";
+    wait for clk_period;
 
     -- sw $rt, imm($rs)
     -- sw   $7, 68($3)     # [80] = 7           34      ac670044
+    -- FetchS
+    assert pc = X"00000034"; assert pcnext = X"00000038";
+    assert mem_rd = X"AC670044";
     wait for clk_period;
-    assert pc = X"00000034";
-    assert instr = X"ac670044";
-    assert rs = X"0000000c"; -- $3
-    assert rt = X"00000007"; -- $7
-    assert rt_imm = X"00000044"; -- 68
-    assert aluout = X"00000050"; -- rs+imm
-    assert dmem_wd = X"00000007";
+    -- DecodeS
+    assert pc = X"00000034"; assert pcnext = X"00000038";
+    assert mem_rd = X"AC670044";
+    assert rds = X"0000000C"; assert rdt = X"00000007"; assert immext = X"00000044";
+    wait for clk_period;
+    -- AdrCalcS
+    assert pc = X"00000034"; assert pcnext = X"00000038";
+    assert mem_rd = X"AC670044";
+    assert alures = X"00000050";
+    wait for clk_period;
+    -- MemWriteS
+    assert pc = X"00000034"; assert pcnext = X"00000038";
+    assert addr = X"00000050"; assert mem_wd = X"00000007";
+    wait for clk_period;
 
     -- lw $rt, imm($rs)
     -- lw   $2, 80($0)     # $2 = [80] = 7      38      8c020050
+    -- FetchS
+    assert pc = X"00000038"; assert pcnext = X"0000003C";
+    assert mem_rd = X"8c020050";
     wait for clk_period;
-    assert pc = X"00000038";
-    assert instr = X"8c020050";
-    assert rs = X"00000000"; -- $0
-    assert rt_imm = X"00000050"; -- 80
-    assert aluout = X"00000050"; -- rs+imm
-    assert rdata = X"00000007"; -- [0x50] = 7
-    assert a3 = "00010"; -- $2
-    assert reg_wd = X"00000007";
+    -- DecodeS
+    assert pc = X"00000038"; assert pcnext = X"0000003C";
+    assert mem_rd = X"8c020050";
+    assert rds = X"00000000"; assert immext = X"00000050";
+    wait for clk_period;
+    -- AdrCalcS
+    assert pc = X"00000038"; assert pcnext = X"0000003C";
+    assert mem_rd = X"8c020050";
+    assert alures = X"00000050";
+    wait for clk_period;
+    -- MemReadS
+    assert pc = X"00000038"; assert pcnext = X"0000003C";
+    assert addr = X"00000050"; assert mem_rd = X"00000007";
+    wait for clk_period;
+    -- MemWriteBackS
+    assert pc = X"00000038"; assert pcnext = X"0000003C";
+    assert reg_wa = "00010"; assert reg_wd = X"00000007";
+    wait for clk_period;
 
     -- j target
     -- j    end            # should be taken    3c      08000011
+    -- FetchS
+    assert pc = X"0000003C"; assert pcnext = X"00000040";
+    assert mem_rd = X"08000011";
     wait for clk_period;
-    assert pc = X"0000003c";
-    assert instr = X"08000011";
-    assert pcnext =X"00000044";
+    -- DecodeS
+    assert pc = X"0000003C"; assert pcnext = X"00000040";
+    assert mem_rd = X"08000011";
+    wait for clk_period;
+    -- JumpS
+    assert pc = X"0000003C"; assert pcnext = X"00000044";
+    wait for clk_period;
 
     -- sw $rt, imm($rs)
     -- end:    sw   $2, 84($0)     # write adr 84 = 7   44      ac020054
+    -- FetchS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert mem_rd = X"AC020054";
     wait for clk_period;
-    assert pc = X"00000044";
-    assert instr = X"ac020054";
-    assert rs = X"00000000"; -- $0
-    assert rt = X"00000007"; -- $2
-    assert rt_imm = X"00000054"; -- 84
-    assert aluout = X"00000054";
-    assert dmem_wd = X"00000007";
+    -- DecodeS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert mem_rd = X"AC020054";
+    assert rds = X"00000000"; assert rdt = X"00000007"; assert immext = X"00000054";
+    wait for clk_period;
+    -- AdrCalcS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert mem_rd = X"AC020054";
+    assert alures = X"00000054";
+    wait for clk_period;
+    -- MemWriteS
+    assert pc = X"00000044"; assert pcnext = X"00000048";
+    assert addr = X"00000054"; assert mem_wd = X"00000007";
+    wait for clk_period;
 
-    -- clk, reset : in std_logic;
-    -- addr : in std_logic_vector(31 downto 0);
-    -- -- for testbench
-    -- pc : out std_logic_vector(31 downto 0);
-    -- pcnext : out std_logic_vector(31 downto 0);
-    -- instr : out std_logic_vector(31 downto 0);
-    -- a3 : out std_logic_vector(4 downto 0);
-    -- reg_wd : out std_logic_vector(31 downto 0);
-    -- rs, rt : out std_logic_vector(31 downto 0);
-    -- rt_imm : out std_logic_vector(31 downto 0);
-    -- aluout : out std_logic_vector(31 downto 0);
-    -- rdata : out std_logic_vector(31 downto 0)
-    -- success message
+
     assert false report "end of test" severity note;
     stop <= TRUE;
     wait;

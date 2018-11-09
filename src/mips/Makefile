@@ -16,11 +16,42 @@ er:
 	make e
 	make r
 all:
-	make a
-	ghdl -a ${F}_tb.$(VHDL)
+	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-mips:
-	make clean
-	ghdl -a alu.vhdl mux2.vhdl sltn.vhdl flopr.vhdl imem.vhdl sgnext.vhdl regfile.vhdl dmem.vhdl datapath.vhdl controller.vhdl mips.vhdl mips_tb.vhdl
-	make er F=mips
+mips : datapath controller
+	make all F=mips
+datapath: memrw decode regrw calc memadr
+	ghdl -a datapath.vhdl
+controller:
+	ghdl -a controller.vhdl
+memrw: mem
+	make all F=memrw
+decode: flopr_en
+	make all F=decode
+regrw: regfile sgnext mux2
+	make all F=regrw
+calc: flopr_en alu mux2 slt2
+	make all F=calc
+memadr: flopr_en mux4
+	make all F=memadr
+flopr:
+	make all F=flopr
+flopr_en:
+	make all F=flopr_en
+slt2:
+	make all F=slt2
+sltn:
+	make all F=sltn
+alu:
+	make all F=alu
+mux2:
+	make all F=mux2
+mux4:
+	make all F=mux4
+sgnext:
+	make all F=sgnext
+mem:
+	make all F=mem
+regfile:
+	make all F=regfile
