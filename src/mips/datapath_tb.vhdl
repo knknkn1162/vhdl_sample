@@ -2,11 +2,11 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity mips_tb is
+entity datapath_tb is
 end entity;
 
-architecture behavior of mips_tb is
-  component mips
+architecture behavior of datapath_tb is
+  component datapath
     port (
       clk, rst : in std_logic;
       -- scan for testbench
@@ -34,7 +34,7 @@ architecture behavior of mips_tb is
   signal stop : boolean;
 
 begin
-  uut: mips port map (
+  uut: datapath port map (
     clk => clk, rst => rst,
     pc => pc, pcnext => pcnext,
     addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,

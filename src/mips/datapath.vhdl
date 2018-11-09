@@ -4,267 +4,230 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity datapath is
   port (
-    clk, reset : in std_logic;
-    addr : in std_logic_vector(31 downto 0);
-
-    -- from controller
-    -- write enable
-    reg_we3, dmem_we : in std_logic;
-    -- multiplex selector
-    rt_rd_s, rt_imm_s, calc_rdata_s : in std_logic;
-    -- alu
-    alu_func : in std_logic_vector(2 downto 0);
-    -- branch
-    is_branch : in std_logic;
-    -- jump, branch, pc
-    pcn_jmp_s : in std_logic;
-
+    clk, rst : in std_logic;
     -- scan for testbench
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
-    instr : out std_logic_vector(31 downto 0);
-    a3 : out std_logic_vector(4 downto 0);
-    dmem_wd, reg_wd : out std_logic_vector(31 downto 0);
-    rs, rt : out std_logic_vector(31 downto 0);
-    rt_imm : out std_logic_vector(31 downto 0);
-    aluout : out std_logic_vector(31 downto 0);
-    rdata : out std_logic_vector(31 downto 0)
-       );
+    addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
+    reg_wa : out std_logic_vector(4 downto 0);
+    reg_wd : out std_logic_vector(31 downto 0);
+    rds, rdt, immext : out std_logic_vector(31 downto 0);
+    ja : out std_logic_vector(27 downto 0);
+    alures : out std_logic_vector(31 downto 0)
+  );
 end entity;
 
 architecture behavior of datapath is
-  component mux2
-    generic(N : integer);
+  component memrw
     port (
-      d0 : in std_logic_vector(N-1 downto 0);
-      d1 : in std_logic_vector(N-1 downto 0);
-      s : in std_logic;
-      y : out std_logic_vector(N-1 downto 0)
-        );
-  end component;
-
-  component flopr
-    port (
-      clk, reset: in std_logic;
-      a : in std_logic_vector(31 downto 0);
-      y : out std_logic_vector(31 downto 0)
-        );
-  end component;
-
-  component imem
-    port (
-      idx : in std_logic_vector(5 downto 0);
-      rd : out std_logic_vector(31 downto 0)
-    );
-  end component;
-
-  component regfile
-    port (
-      clk : in std_logic;
-      -- 25:21(read)
-      a1 : in std_logic_vector(4 downto 0);
-      rd1 : out std_logic_vector(31 downto 0);
-      -- 20:16(read)
-      a2 : in std_logic_vector(4 downto 0);
-      rd2 : out std_logic_vector(31 downto 0);
-
-      -- 20:16(write)
-      a3 : in std_logic_vector(4 downto 0);
-      wd3 : in std_logic_vector(31 downto 0);
-      we3 : in std_logic
-    );
-  end component;
-
-  component sgnext
-    port (
-      a : in std_logic_vector(15 downto 0);
-      y : out std_logic_vector(31 downto 0)
-        );
-  end component;
-
-  component sltn
-    port (
-      a : in std_logic_vector(31 downto 0);
-      -- shamt
-      n : in std_logic_vector(4 downto 0);
-      y : out std_logic_vector(31 downto 0)
-        );
-  end component;
-
-  component alu
-    port (
-      a, b : in std_logic_vector(31 downto 0);
-      f : in std_logic_vector(2 downto 0);
-      y : out std_logic_vector(31 downto 0);
-      zero : out std_logic
-        );
-  end component;
-
-  component dmem
-    port (
-      clk : in std_logic;
-      -- write enable
-      we : in std_logic;
-      -- write data
+      clk, rst: in std_logic;
+      addr : in std_logic_vector(31 downto 0);
       wd : in std_logic_vector(31 downto 0);
-      addr: in std_logic_vector(31 downto 0);
-      -- read data
-      rd : out std_logic_vector(31 downto 0)
+      rd : out std_logic_vector(31 downto 0);
+      -- controller
+      we : in std_logic
     );
   end component;
 
-  -- jump, branch, pc
-  signal br4, jmp4, pcn4, pcn, br_addr, jmp_addr : std_logic_vector(31 downto 0);
-  signal pcnext0, pc0 : std_logic_vector(31 downto 0);
-  signal pcn4_br_s : std_logic;
-  signal target : std_logic_vector(31 downto 0);
+  component decode
+    port (
+      clk, rst : in std_logic;
+      mem_rd : in std_logic_vector(31 downto 0);
+      rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
+      imm : out std_logic_vector(15 downto 0);
+      target : out std_logic_vector(25 downto 0);
+      reg_memrd : out std_logic_vector(31 downto 0);
+      -- controller
+      opcode, funct : out std_logic_vector(5 downto 0);
+      instr_en : in std_logic
+    );
+  end component;
 
-  -- imem, regfile
-  signal a30 : std_logic_vector(4 downto 0);
-  signal instr0, rs0, rt0, dmem_wd0, reg_wd0, rt_imm0 : std_logic_vector(31 downto 0);
+  component regrw
+    port (
+      clk, rst : in std_logic;
+      rs, rt, rd : in std_logic_vector(4 downto 0);
+      mem_rd, aluout : in std_logic_vector(31 downto 0);
+      imm : in std_logic_vector(15 downto 0);
 
-  -- alu, dmem
-  signal aluout0, calc0, rdata0 : std_logic_vector(31 downto 0);
-  signal immext : std_logic_vector(31 downto 0);
+      rds, rdt, immext : out std_logic_vector(31 downto 0);
+      -- controller
+      we : in std_logic;
+      memrd_aluout_s , rt_rd_s: in std_logic;
+      -- scan
+      wa : out std_logic_vector(4 downto 0);
+      wd : out std_logic_vector(31 downto 0)
+    );
+  end component;
 
-  -- -- alu, dmem
-  signal alu_sgn, alu_zero : std_logic;
+  component calc
+    port (
+      clk, rst : in std_logic;
+      rds, rdt, immext : in std_logic_vector(31 downto 0);
+      target : in std_logic_vector(25 downto 0);
+      alures : out std_logic_vector(31 downto 0);
+      aluzero : out std_logic;
+      brplus : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0);
+      -- controller
+      alucont : in std_logic_vector(2 downto 0);
+      rdt_immext_s : in std_logic
+    );
+  end component;
+
+  component memadr
+    port (
+      clk, rst : in std_logic;
+      alures : in std_logic_vector(31 downto 0);
+      ja : in std_logic_vector(27 downto 0);
+      brplus : in std_logic_vector(31 downto 0);
+      addr : out std_logic_vector(31 downto 0);
+      reg_aluout : out std_logic_vector(31 downto 0);
+      -- controller
+      pc_aluout_s : in std_logic;
+      pc0_br_s : in std_logic_vector(1 downto 0);
+      pc_en : in std_logic;
+      -- scan
+      pc : out std_logic_vector(31 downto 0);
+      pcnext : out std_logic_vector(31 downto 0)
+    );
+  end component;
+
+  component controller
+    port (
+      clk, rst : in std_logic;
+      opcode, funct : in std_logic_vector(5 downto 0);
+      aluzero : in std_logic;
+      -- for memadr
+      pc_aluout_s : out std_logic;
+      pc0_br_s : out std_logic_vector(1 downto 0);
+      pc_en : out std_logic;
+      -- for memwrite
+      mem_we: out std_logic;
+      -- for writeback
+      instr_en, reg_we : out std_logic;
+      memrd_aluout_s : out std_logic; -- for lw or addi
+      rt_rd_s : out std_logic; -- Itype or Rtype
+      -- for calc
+      alucont : out std_logic_vector(2 downto 0);
+      rdt_immext_s : out std_logic
+    );
+  end component;
+
+  signal mem_rd0, mem_wd0, mem_addr0 : std_logic_vector(31 downto 0);
+  signal rs0, rt0, rd0, shamt0 : std_logic_vector(4 downto 0);
+  signal imm0 : std_logic_vector(15 downto 0);
+  signal target0 : std_logic_vector(25 downto 0);
+  signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
+  signal ja0 : std_logic_vector(27 downto 0);
+  signal reg_aluout0, reg_memrd0 : std_logic_vector(31 downto 0);
+  signal reg_wa0 : std_logic_vector(4 downto 0);
+  signal reg_wd0 : std_logic_vector(31 downto 0);
+  signal alures0 : std_logic_vector(31 downto 0);
+  signal aluzero0 : std_logic;
+  signal brplus0 : std_logic_vector(31 downto 0);
+
+  -- controller
+  signal opcode, funct : std_logic_vector(5 downto 0);
+  -- for memwrite
+  signal mem_we: std_logic;
+  -- for decode, writeback
+  signal instr_en, reg_we : std_logic;
+  signal memrd_aluout_s : std_logic;
+  signal rt_rd_s : std_logic;
+  -- for calc
+  signal alucont : std_logic_vector(2 downto 0);
+  signal rdt_immext_s : std_logic;
+  -- for memadr
+  signal pc_aluout_s : std_logic;
+  signal pc0_br_s : std_logic_vector(1 downto 0);
+  signal pc_en : std_logic;
 
 begin
-  -- choose dynamically
-  pcn4_br_s <= alu_zero and is_branch;
 
-  branch_mux2 : mux2 generic map (N => 32)
-    port map (
-      d0 => pcn4,
-      d1 => br_addr,
-      s => pcn4_br_s,
-      y => pcn
+  mem_wd0 <= rdt0;
+  memrw0 : memrw port map (
+    clk => clk, rst => rst,
+    addr => mem_addr0, wd => mem_wd0, rd => mem_rd0,
+    -- controller
+    we => mem_we
+  );
+  addr <= mem_addr0;
+  mem_wd <= mem_wd0;
+  mem_rd <= mem_rd0;
+
+  decode0 : decode port map (
+    clk => clk, rst => rst,
+    mem_rd => mem_rd0,
+    rs => rs0, rt => rt0, rd => rd0, shamt => shamt0,
+    imm => imm0,
+    target => target0,
+    reg_memrd => reg_memrd0,
+    -- controller
+    opcode => opcode, funct => funct,
+    instr_en => instr_en
   );
 
-  jump_mux2 : mux2 generic map (N => 32)
-    port map (
-      d0 => pcn,
-      d1 => jmp_addr,
-      s => pcn_jmp_s,
-      y => pcnext0
+  regrw0 : regrw port map (
+    clk => clk, rst => rst,
+    rs => rs0, rt => rt0, rd => rd0,
+    mem_rd => reg_memrd0, aluout => reg_aluout0,
+    imm => imm0,
+    rds => rds0, rdt => rdt0, immext => immext0,
+    -- controller
+    we => reg_we,
+    memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
+    -- scan
+    wa => reg_wa0,
+    wd => reg_wd0
   );
 
-  pcnext <= pcnext0;
-
-  pcreg: flopr port map(clk, reset, pcnext0, pc0);
-  pc <= pc0;
-
-  pcn4 <= std_logic_vector(unsigned(pc0) + 4);
-
-  imem0: imem port map (
-    -- every instruction is 4 byte size
-    idx => pc0(7 downto 2),
-    rd => instr0
-  );
-  instr <= instr0;
-  target <= "000000" & instr0(25 downto 0);
-
-  jmp_slt2 : sltn port map (
-    a => target,
-    n => "00010",
-    y => jmp4
-  );
-  jmp_addr <= pcn4(31 downto 28) & jmp4(27 downto 0);
-
-  reg0 : regfile port map (
-    clk => clk,
-    a1 => instr0(25 downto 21),
-    rd1 => rs0, -- out
-    a2 => instr0(20 downto 16),
-    rd2 => rt0,
-    a3 => a30,
-    wd3 => reg_wd0,
-    we3 => reg_we3
-  );
-  rs <= rs0;
-  rt <= rt0;
+  reg_wa <= reg_wa0;
   reg_wd <= reg_wd0;
+  rds <= rds0; rdt <= rdt0; immext <= immext0;
 
-  rt_rd_mux2 : mux2 generic map (N => 5)
-    port map (
-      d0 => instr0(20 downto 16),
-      d1 => instr0(15 downto 11),
-      s => rt_rd_s,
-      y => a30 
-  );
-  a3 <= a30;
-
-  -- sltn0: sltn port map (
-  --   a : rt0,
-  --   n : instr0(10 downto 6),
-  --   y : shamt
-  -- );
-
-  sgnext0 : sgnext port map (
-    a => instr0(15 downto 0),
-    y => immext
+  calc0 : calc port map (
+    clk => clk, rst => rst,
+    rds => rds0, rdt => rdt0, immext => immext0,
+    target => target0,
+    alures => alures0, aluzero => aluzero0,
+    brplus => brplus0,
+    ja => ja0,
+    -- controller
+    alucont => alucont,
+    rdt_immext_s => rdt_immext_s
   );
 
-  sigext_slt2 : sltn port map (
-    a => immext,
-    n => "00010",
-    y => br4
+  memadr0 : memadr port map (
+    clk => clk, rst => rst,
+    alures => alures0,
+    ja => ja0,
+    brplus => brplus0,
+    addr => mem_addr0,
+    reg_aluout => reg_aluout0,
+    -- controller
+    pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
+    pc_en => pc_en,
+    -- scan
+    pc => pc, pcnext => pcnext
   );
-  br_addr <= std_logic_vector(unsigned(br4) + unsigned(pcn4));
+  alures <= alures0;
 
-  rt_imm_mux2 : mux2 generic map (N => 32)
-    port map (
-      d0 => rt0,
-      d1 => immext,
-      s => rt_imm_s,
-      y => rt_imm0
+  controller0 : controller port map (
+    clk => clk, rst => rst,
+    opcode => opcode, funct => funct,
+    aluzero => aluzero0,
+    -- out
+    -- for memadr
+    pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
+    pc_en => pc_en,
+    -- for memwrite
+    mem_we => mem_we,
+    -- for writeback
+    instr_en => instr_en, reg_we => reg_we,
+    memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
+    -- for memadr
+    alucont => alucont,
+    rdt_immext_s => rdt_immext_s
   );
-  rt_imm <= rt_imm0;
-
-  alu0: alu port map (
-    a => rs0,
-    b => rt_imm0,
-    f => alu_func,
-    y => aluout0, -- zero port is ignored
-    -- if a === b
-    zero => alu_zero
-  );
-  aluout <= aluout0;
-  dmem_wd0 <= rt0;
-
-  -- for lw, sw instruction
-  dmem0 : dmem port map (
-    clk => clk,
-    -- write enable
-    we => dmem_we,
-    -- write data
-    wd => dmem_wd0,
-    addr => aluout0,
-    -- read data
-    rd => rdata0
-  );
-
-  dmem_wd <= dmem_wd0;
-  rdata <= rdata0;
-
-  -- TODO: aluout_shamt_s
-
-  -- aluout_sltn_mux2 : mux2 port map (
-  --   d0 : aluout0,
-  --   d1 : shamt,
-  --   s : aluout_shamt_s,
-  --   y : calc_data0
-  -- );
-  -- calc <= calc0;
-
-  calc_rdata_mux2 : mux2 generic map (N => 32)
-    port map (
-      d0 => aluout0,
-      d1 => rdata0,
-      s => calc_rdata_s,
-      y => reg_wd0
-  );
-  reg_wd <= reg_wd0;
-
 end architecture;

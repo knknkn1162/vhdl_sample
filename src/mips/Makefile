@@ -19,9 +19,9 @@ all:
 	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-mips: memrw decode regrw calc memadr controller
-	ghdl -a mips.vhdl mips_tb.vhdl
-	make er F=mips
+datapath: memrw decode regrw calc memadr controller
+	ghdl -a datapath.vhdl datapath_tb.vhdl
+	make er F=datapath
 controller:
 	ghdl -a controller.vhdl
 memrw: mem
