@@ -24,7 +24,7 @@ mips : datapath controller
 datapath: memrw decode regrw calc memadr
 	ghdl -a datapath.vhdl
 controller:
-	ghdl -a controller.vhdl
+	ghdl -a controller_pkg.vhdl controller.vhdl
 memrw: mem
 	make all F=memrw
 decode: flopr_en
