@@ -160,35 +160,52 @@ begin
     end case;
   end process;
 
-  -- for combinatorial logic
-  process(state, aluzero)
-    -- for memadr
-    variable pc_aluout_s0 : std_logic;
-    variable rdt_immext_s0 : std_logic;
-    -- for regwriteback
-    variable memrd_aluout_s0 : std_logic;
-    variable rt_rd_s0 : std_logic;
-
+  -- Writeback
+  process(state)
     -- write in the end of the clk process
     -- for memwrite
     variable mem_we0: std_logic;
     -- for writeback
     variable reg_we0 : std_logic;
   begin
+    reg_we0 := '0';
+    mem_we0 := '0';
+    case state is
+      when MemWriteS =>
+        mem_we0 := '1';
+      when RegWriteBackS | AddiWritebackS | ALUWriteBackS =>
+        reg_we0 := '1';
+      when MemReadS =>
+        -- mem_we0 := '0';
+      when DecodeS =>
+        -- reg_we0 := '0';
+      when BranchS | Jumps =>
+        -- do nothing
+      when others =>
+        -- do nothing
+    end case;
+    mem_we <= mem_we0;
+    reg_we <= reg_we0;
+  end process;
+
+
+  -- multiplexer select signal
+  process(state)
+    -- for memadr
+    variable pc_aluout_s0 : std_logic;
+    variable rdt_immext_s0 : std_logic;
+    -- for regwriteback
+    variable memrd_aluout_s0 : std_logic;
+    variable rt_rd_s0 : std_logic;
+  begin
     pc_aluout_s0 := '0';
     rdt_immext_s0 := '0';
     memrd_aluout_s0 := '0';
     rt_rd_s0 := '0';
-    reg_we0 := '0';
-    mem_we0 := '0';
     case state is
-      when InitS =>
-        -- do nothing
       when FetchS =>
         -- for decoding
         -- pc_aluout_s0 := '0';
-      when DecodeS =>
-        -- reg_we0 := '0';
       when AdrCalcS =>
         rdt_immext_s0 := '1';
       when RtypeCalcS =>
@@ -198,20 +215,18 @@ begin
       when MemReadS =>
         pc_aluout_s0 := '1';
       when MemWriteS =>
-        mem_we0 := '1';
         pc_aluout_s0 := '1';
       when RegWriteBackS =>
-        reg_we0 := '1';
         -- memrd_aluout_s := '0';
       when AddiWritebackS =>
-        reg_we0 := '1';
-        -- rt_rd_s0 := '1';
+        -- rt_rd_s0 := '0';
         memrd_aluout_s0 := '1';
       when ALUWriteBackS =>
-        reg_we0 := '1';
         rt_rd_s0 := '1';
         memrd_aluout_s0 := '1';
       when BranchS | Jumps =>
+        -- do nothing
+      when InitS | DecodeS =>
         -- do nothing
       when others =>
         -- do nothing
@@ -220,8 +235,6 @@ begin
     rdt_immext_s <= rdt_immext_s0;
     memrd_aluout_s <= memrd_aluout_s0;
     rt_rd_s <= rt_rd_s0;
-    mem_we <= mem_we0;
-    reg_we <= reg_we0;
   end process;
 
   -- alucontroller
