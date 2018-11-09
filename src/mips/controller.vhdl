@@ -145,12 +145,25 @@ begin
     instr_en <= instr_en0;
   end process;
 
+  -- deside pcnext
+  process(state, aluzero)
+    variable pc0_br_s0 : std_logic_vector(1 downto 0);
+  begin
+    case state is
+      when BranchS =>
+        pc0_br_s <= "0" & aluzero;
+      when JumpS =>
+        pc0_br_s <= "10";
+      when others =>
+        -- pc+4
+        pc0_br_s <= "00";
+    end case;
+  end process;
+
   -- for combinatorial logic
   process(state, aluzero)
     -- for memadr
     variable pc_aluout_s0 : std_logic;
-    variable pc0_br_s0 : std_logic_vector(1 downto 0);
-
     variable rdt_immext_s0 : std_logic;
     -- for regwriteback
     variable memrd_aluout_s0 : std_logic;
@@ -163,7 +176,6 @@ begin
     variable reg_we0 : std_logic;
   begin
     pc_aluout_s0 := '0';
-    pc0_br_s0 := "00";
     rdt_immext_s0 := '0';
     memrd_aluout_s0 := '0';
     rt_rd_s0 := '0';
@@ -183,10 +195,6 @@ begin
         -- rdt_immext_s0 := '0';
       when AddiCalcS =>
         rdt_immext_s0 := '1';
-      when BranchS =>
-        pc0_br_s0 := '0' & aluzero;
-      when JumpS =>
-        pc0_br_s0 := "10";
       when MemReadS =>
         pc_aluout_s0 := '1';
       when MemWriteS =>
@@ -197,16 +205,18 @@ begin
         -- memrd_aluout_s := '0';
       when AddiWritebackS =>
         reg_we0 := '1';
+        -- rt_rd_s0 := '1';
         memrd_aluout_s0 := '1';
       when ALUWriteBackS =>
         reg_we0 := '1';
         rt_rd_s0 := '1';
         memrd_aluout_s0 := '1';
+      when BranchS | Jumps =>
+        -- do nothing
       when others =>
         -- do nothing
     end case;
     pc_aluout_s <= pc_aluout_s0;
-    pc0_br_s <= pc0_br_s0;
     rdt_immext_s <= rdt_immext_s0;
     memrd_aluout_s <= memrd_aluout_s0;
     rt_rd_s <= rt_rd_s0;
