@@ -47,7 +47,7 @@ begin
 
     addr <= X"00000000"; wait for clk_period/2; assert rd /= X"00000000";
     addr <= X"00000004"; wait for clk_period; assert rd /= X"00000000";
-    addr <= X"00000008"; wait for clk_period; assert rd /= X"00000000";
+    -- addr <= X"00000008"; wait for clk_period; assert rd /= X"00000000";
 
     -- mem writeback
     addr <= X"00000004"; we <= '1'; wd <= X"0000000A"; wait for clk_period;

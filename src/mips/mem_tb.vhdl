@@ -48,7 +48,7 @@ begin
     -- read test
     a <= b"00" & X"0000000"; wait for 1 ns; assert rd /= X"00000000";
     a <= b"00" & X"0000001"; wait for 1 ns; assert rd /= X"00000000";
-    a <= b"00" & X"0000002"; wait for 1 ns; assert rd /= X"00000000";
+    -- a <= b"00" & X"0000002"; wait for 1 ns; assert rd /= X"00000000";
 
     wait until falling_edge(clk);
     -- write in ram
