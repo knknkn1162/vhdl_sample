@@ -147,10 +147,9 @@ package body controller_pkg is
     case state is
       when RegWriteBackS | AddiWritebackS | ALUWriteBackS =>
         ret := '1';
-      when DecodeS =>
-        ret := '0';
       when others =>
-        -- do nothing
+        -- required : DecodeS
+        ret := '0';
     end case;
     return ret;
   end function;
@@ -162,10 +161,9 @@ package body controller_pkg is
     case state is
       when MemWriteS =>
         ret := '1';
-      when MemReadS =>
-        ret := '0';
       when others =>
-        -- do nothing
+        -- required : MemReadS
+        ret := '0';
     end case;
     return ret;
   end function;
@@ -192,12 +190,12 @@ package body controller_pkg is
           when FUNCT_OR =>
             ret := "001";
           when others =>
-            -- do nothing
+            ret := "000";
         end case;
       when AddiCalcS =>
         ret := "010";
       when others =>
-        -- do nothing
+        ret := "000";
     end case;
     return ret;
   end function;
@@ -206,12 +204,11 @@ package body controller_pkg is
     variable ret : std_logic;
   begin
     case state is
-      when FetchS =>
-        ret := '0';
       when MemReadS | MemWriteS =>
         ret := '1';
       when others =>
-        -- do nothing
+        -- required : FetchS
+        ret := '0';
     end case;
     return ret;
   end function;
@@ -222,10 +219,9 @@ package body controller_pkg is
     case state is
       when AdrCalcS | AddiCalcS =>
         ret := '1';
-      when RtypeCalcS =>
-        ret := '0';
       when others =>
-        -- do nothing
+        -- required : RtypeCalcS
+        ret := '0';
     end case;
     return ret;
   end function;
@@ -234,12 +230,11 @@ package body controller_pkg is
     variable ret : std_logic;
   begin
     case state is
-      when RegWriteBackS =>
-        ret := '0';
       when AddiWritebackS | ALUWriteBackS =>
         ret := '1';
       when others =>
-        -- do nothing
+        -- required : RegWriteBackS
+        ret := '0';
     end case;
     return ret;
   end function;
@@ -248,12 +243,11 @@ package body controller_pkg is
     variable ret : std_logic;
   begin
     case state is
-      when AddiWritebackS =>
-        ret := '0';
       when ALUWriteBackS =>
         ret := '1';
       when others =>
-        -- do nothing
+        -- required : AddiWritebackS
+        ret := '0';
     end case;
     return ret;
   end function;
