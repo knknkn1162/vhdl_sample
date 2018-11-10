@@ -24,12 +24,16 @@ architecture behavior of mips is
 
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
+      rs, rt, rd : out std_logic_vector(4 downto 0);
       -- for memadr
       pc_aluout_s : in std_logic;
       pc0_br_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
       -- for memwrite
       mem_we: in std_logic;
+      -- for decode
+      -- forwarding for pipeline
+      rd1_aluforward_s, rd2_aluforward_s : in std_logic;
       -- for writeback
       instr_en, reg_we : in std_logic;
       memrd_aluout_s : in std_logic; -- for lw or addi
@@ -55,6 +59,7 @@ architecture behavior of mips is
     port (
       clk, rst : in std_logic;
       opcode, funct : in std_logic_vector(5 downto 0);
+      rs, rt, rd : in std_logic_vector(4 downto 0);
       aluzero : in std_logic;
       -- for memadr
       pc_aluout_s : out std_logic;
@@ -62,6 +67,9 @@ architecture behavior of mips is
       pc_en : out std_logic;
       -- for memwrite
       mem_we: out std_logic;
+      -- for decode
+      -- -- forwarding for pipeline
+      rd1_aluforward_s, rd2_aluforward_s : out std_logic;
       -- for writeback
       instr_en, reg_we : out std_logic;
       memrd_aluout_s : out std_logic; -- for lw or addi
@@ -74,9 +82,13 @@ architecture behavior of mips is
 
   -- controller
   signal opcode, funct : std_logic_vector(5 downto 0);
+  signal rs, rt, rd : std_logic_vector(4 downto 0);
   -- for memwrite
   signal mem_we: std_logic;
-  -- for decode, writeback
+  -- for decode
+  -- forwarding for pipeline
+  signal rd1_aluforward_s, rd2_aluforward_s : std_logic;
+  -- for writeback
   signal instr_en, reg_we : std_logic;
   signal memrd_aluout_s : std_logic;
   signal rt_rd_s : std_logic;
@@ -96,12 +108,15 @@ begin
 
     -- controller
     opcode => opcode, funct => funct,
+    rs => rs, rt => rt, rd => rd,
     -- for memadr
     pc_aluout_s => pc_aluout_s,
     pc0_br_s => pc0_br_s,
     pc_en => pc_en,
     -- for memwrite
     mem_we => mem_we,
+    -- forwarding for pipeline
+    rd1_aluforward_s => rd1_aluforward_s, rd2_aluforward_s => rd2_aluforward_s,
     -- for writeback
     instr_en => instr_en, reg_we => reg_we,
     memrd_aluout_s => memrd_aluout_s,
@@ -124,6 +139,7 @@ begin
   controller0 : controller port map (
     clk => clk, rst => rst,
     opcode => opcode, funct => funct,
+    rs => rs, rt => rt, rd => rd,
     aluzero => aluzero,
     -- out
     -- for memadr
@@ -131,6 +147,9 @@ begin
     pc_en => pc_en,
     -- for memwrite
     mem_we => mem_we,
+    -- for decode
+    -- forwarding for pipeline
+    rd1_aluforward_s => rd1_aluforward_s, rd2_aluforward_s => rd2_aluforward_s,
     -- for writeback
     instr_en => instr_en, reg_we => reg_we,
     memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,

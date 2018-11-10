@@ -17,7 +17,7 @@ entity controller is
     mem_we: out std_logic;
     -- for decode
     -- -- forwarding for pipeline
-    rd1_aluout_s, rd2_aluout_s : out std_logic;
+    rd1_aluforward_s, rd2_aluforward_s : out std_logic;
     -- for writeback
     instr_en, reg_we : out std_logic;
     memrd_aluout_s : out std_logic; -- for lw or addi
@@ -87,8 +87,8 @@ begin
     variable mem_weA, mem_weB: std_logic;
     -- for decode
     -- -- forwarding for pipeline
-    variable rd1_aluout_s0 : std_logic;
-    variable rd2_aluout_s0 : std_logic;
+    variable rd1_aluforward_s0 : std_logic;
+    variable rd2_aluforward_s0 : std_logic;
     -- for writeback
     variable instr_enA, instr_enB : std_logic;
     variable reg_weA, reg_weB : std_logic;
@@ -112,20 +112,20 @@ begin
 
     -- for decode
     -- forwarding for pipeline
-    rd1_aluout_s0 := '0'; rd2_aluout_s0 := '0';
+    rd1_aluforward_s0 := '0'; rd2_aluforward_s0 := '0';
     case stateA is
       when AddiCalcS =>
         if stateB = DecodeS then
           -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
           -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
           if calcs_rt = rs then
-            rd1_aluout_s0 := '1';
+            rd1_aluforward_s0 := '1';
           end if;
 
           -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
           -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
           if calcs_rt = rt then
-            rd2_aluout_s0 := '1';
+            rd2_aluforward_s0 := '1';
           end if;
         end if;
       when RtypeCalcS =>
@@ -133,19 +133,19 @@ begin
           -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
           -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
           if calcs_rd = rs then
-            rd1_aluout_s0 := '1';
+            rd1_aluforward_s0 := '1';
           end if;
 
           -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
           -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
           if calcs_rd = rt then
-            rd2_aluout_s0 := '1';
+            rd2_aluforward_s0 := '1';
           end if;
         end if;
       when others =>
         -- do nothing
     end case;
-    rd1_aluout_s <= rd1_aluout_s0; rd2_aluout_s <= rd2_aluout_s0;
+    rd1_aluforward_s <= rd1_aluforward_s0; rd2_aluforward_s <= rd2_aluforward_s0;
 
     -- for writeback
     instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);

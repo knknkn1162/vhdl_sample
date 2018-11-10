@@ -8,12 +8,16 @@ entity datapath is
 
     -- controller
     opcode, funct : out std_logic_vector(5 downto 0);
+    rs, rt, rd : out std_logic_vector(4 downto 0);
     -- for memadr
     pc_aluout_s : in std_logic;
     pc0_br_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
     -- for memwrite
     mem_we: in std_logic;
+    -- for decode
+    -- forwarding for pipeline
+    rd1_aluforward_s, rd2_aluforward_s : in std_logic;
     -- for writeback
     instr_en, reg_we : in std_logic;
     memrd_aluout_s : in std_logic; -- for lw or addi
@@ -65,13 +69,20 @@ architecture behavior of datapath is
     port (
       clk, rst : in std_logic;
       rs, rt, rd : in std_logic_vector(4 downto 0);
-      mem_rd, aluout : in std_logic_vector(31 downto 0);
+      mem_rd : in std_logic_vector(31 downto 0);
+      aluout : in std_logic_vector(31 downto 0);
       imm : in std_logic_vector(15 downto 0);
 
       rds, rdt, immext : out std_logic_vector(31 downto 0);
+      -- forwarding for pipeline
+      aluforward : in std_logic_vector(31 downto 0);
       -- controller
       we : in std_logic;
-      memrd_aluout_s , rt_rd_s: in std_logic;
+      memrd_aluout_s : in std_logic;
+      rt_rd_s : in std_logic;
+      -- forwarding for pipeline
+      rd1_aluforward_s : in std_logic;
+      rd2_aluforward_s : in std_logic;
       -- scan
       wa : out std_logic_vector(4 downto 0);
       wd : out std_logic_vector(31 downto 0)
@@ -123,6 +134,9 @@ architecture behavior of datapath is
   signal alures0 : std_logic_vector(31 downto 0);
   signal brplus0 : std_logic_vector(31 downto 0);
 
+  -- pipeline
+  signal aluforward0 : std_logic_vector(31 downto 0);
+
 begin
 
   mem_wd0 <= rdt0;
@@ -147,6 +161,7 @@ begin
     opcode => opcode, funct => funct,
     instr_en => instr_en
   );
+  rs <= rs0; rt <= rt0; rd <= rd0;
 
   regrw0 : regrw port map (
     clk => clk, rst => rst,
@@ -154,9 +169,13 @@ begin
     mem_rd => reg_memrd0, aluout => reg_aluout0,
     imm => imm0,
     rds => rds0, rdt => rdt0, immext => immext0,
+    -- forwarding for pipeline
+    aluforward => aluforward0,
     -- controller
     we => reg_we,
     memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
+    -- forwarding for pipeline
+    rd1_aluforward_s => rd1_aluforward_s, rd2_aluforward_s => rd2_aluforward_s,
     -- scan
     wa => reg_wa0,
     wd => reg_wd0
@@ -177,6 +196,7 @@ begin
     alucont => alucont,
     rdt_immext_s => rdt_immext_s
   );
+  aluforward0 <= alures0; -- forwarding for pipeline
 
   memadr0 : memadr port map (
     clk => clk, rst => rst,
