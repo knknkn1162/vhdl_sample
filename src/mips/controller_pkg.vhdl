@@ -17,7 +17,11 @@ package controller_pkg is
 
   constant OP_LW : optype := "100011";
   constant OP_SW : optype := "101011";
-  constant OP_ADDI : optype := "001000";
+  constant OP_ADDI : optype := "001000"; -- 0x08
+  constant OP_ADDIU : optype := "001001"; -- 0x09
+  constant OP_ANDI : optype := "001100"; -- 0x0C
+  constant OP_SLTI : optype := "001010"; -- 0x0A
+
   constant OP_RTYPE : optype := "000000";
   constant OP_BEQ : optype := "000100";
   constant OP_J : optype := "000010"; -- 0x02

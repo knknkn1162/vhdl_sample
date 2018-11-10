@@ -32,6 +32,9 @@ begin
       -- add $s1, $s0, $s0
       -- 0000/00 10/000 1/0000 /1000/1 000/00 10/0000
       ram(1) <= X"02108820";
+      -- addi $rt, $rs, imm
+      --    main:   addi $s1, $s1, 5
+      -- 0010/00 00/000 1/0000 0x0005
 
       -- initialize with zeros
       ram(2 to SIZE-2) <= (others => (others => '0'));

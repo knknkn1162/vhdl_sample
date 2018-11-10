@@ -87,7 +87,7 @@ begin
   );
 
   -- forwarding for pipeline
-  process(stateA, stateB, rs, rt)
+  process(stateA, stateB, rs, rt, rd)
     variable rd1_aluforward_s0, rd2_aluforward_s0 : std_logic;
   begin
     rd1_aluforward_s0 := '0';
@@ -101,6 +101,9 @@ begin
       when RtypeCalcS =>
         -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
         -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+        -- or
+        -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+        -- addi $s1, $s1, 5 -- addi $rt, $rs, imm
         if stateB = DecodeS and calcs_rd = rs then
           rd1_aluforward_s0 := '1';
         end if;
@@ -109,6 +112,7 @@ begin
     end case;
     rd1_aluforward_s <= rd1_aluforward_s0;
 
+    rd2_aluforward_s0 := '0';
     case stateA is
       when AddiCalcS =>
         -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
@@ -120,7 +124,13 @@ begin
         -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
         -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
         if stateB = DecodeS and calcs_rd = rt then
-          rd2_aluforward_s0 := '1';
+          case calcs_funct is
+            -- rt register is writable
+            when OP_SW | OP_RTYPE =>
+              rd2_aluforward_s0 := '1';
+            when others =>
+              -- do nothing
+          end case;
         end if;
       when others =>
         -- do nothing
