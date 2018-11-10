@@ -34,10 +34,11 @@ begin
       ram(1) <= X"02108820";
       -- addi $rt, $rs, imm
       --    main:   addi $s1, $s1, 5
-      -- 0010/00 00/000 1/0000 0x0005
+      -- 0010/00 10/001 1/0001 0x0005
+      ram(2) <= X"22310005";
 
       -- initialize with zeros
-      ram(2 to SIZE-2) <= (others => (others => '0'));
+      ram(3 to SIZE-2) <= (others => (others => '0'));
     -- write
     elsif rising_edge(clk) then
       if we = '1' then
