@@ -105,7 +105,13 @@ package body controller_pkg is
   function get_pc_en(state: statetype) return std_logic is
     variable ret : std_logic;
   begin
-    return '1';
+    case state is
+      when initS | waitS =>
+        ret := '0';
+      when others =>
+        ret := '1';
+    end case;
+    return ret;
   end function;
 
   function get_instr_en(state: statetype) return std_logic is

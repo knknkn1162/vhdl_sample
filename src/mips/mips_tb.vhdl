@@ -58,57 +58,24 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period;
-    -- InitS
+    -- (InitS, WaitS)
     rst <= '1'; wait for 1 ns; rst <= '0';
     wait for clk_period/2;
     -- addi $rt, $rs, imm
     --    main:   addi $s0, $0, 5
     -- 0010/00 00/000 1/0000 0x0005
-    -- FetchS
+    -- (FetchS, InitS)
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"20100005";
     -- (not yet)
     assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
-    -- DecodeS
-    assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"20100005";
-    assert rds = X"00000000"; assert immext = X"00000005";
-    wait for clk_period;
-    -- AddiCalcS
-    assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"20100005";
-    assert alures = X"00000005";
-    wait for clk_period;
-    -- AddiWritebackS
-    assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert reg_wa = "10000"; assert reg_wd = X"00000005";
-    wait for clk_period;
-
-
-    -- add $rd, $rs, $rt
     -- add $s1, $s0, $s0
     -- 0000/00 10/000 1/0000 /1000/1 000/00 10/0000
     -- ram(1) <= X"02108820";
-    -- FetchS
+    -- (DecodeS, FetchS)
     assert pc = X"00000004"; assert pcnext = X"00000008";
     assert mem_rd = X"02108820";
-    wait for clk_period;
-    -- DecodeS
-    assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"02108820";
-    assert rds = X"00000005"; assert rdt = X"00000005";
-    wait for clk_period;
-    -- RtypeCalcS
-    assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"02108820";
-    assert alures = X"0000000A";
-    wait for clk_period;
-    -- ALUWriteBackS
-    assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"02108820";
-    assert reg_wa = "10001"; assert reg_wd = X"0000000A";
-    wait for clk_period;
 
     assert false report "end of test" severity note;
     stop <= TRUE;
