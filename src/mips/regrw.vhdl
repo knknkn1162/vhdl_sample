@@ -88,7 +88,7 @@ begin
   );
   wa <= wa0; wd <= wd0;
 
-  rd1_aluout_mux : mux2 generic map(N=>32)
+  rd1_aluforward_mux : mux2 generic map(N=>32)
   port map (
     d0 => rd1,
     d1 => aluforward,
@@ -96,7 +96,7 @@ begin
     y => rds
   );
 
-  rd2_aluout_mux : mux2 generic map (N=>32)
+  rd2_aluforward_mux : mux2 generic map (N=>32)
   port map (
     d0 => rd2,
     d1 => aluforward,
