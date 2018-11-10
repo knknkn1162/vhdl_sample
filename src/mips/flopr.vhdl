@@ -2,10 +2,11 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity flopr is
+  generic(N : natural := 32);
   port (
     clk, rst: in std_logic;
-    a : in std_logic_vector(31 downto 0);
-    y : out std_logic_vector(31 downto 0)
+    a : in std_logic_vector(N-1 downto 0);
+    y : out std_logic_vector(N-1 downto 0)
        );
 end entity;
 
