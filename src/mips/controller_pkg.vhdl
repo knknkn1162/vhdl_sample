@@ -37,6 +37,7 @@ package controller_pkg is
   constant FUNCT_SUB : functtype := "100010"; -- 0x22
   constant FUNCT_SUBU : functtype := "100011"; -- 0x23
 
+  function decode_state(state: statetype) return std_logic_vector;
   function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0)) return statetype;
   function get_pc_en(state: statetype) return std_logic;
   function get_instr_en(state: statetype) return std_logic;
@@ -51,6 +52,31 @@ package controller_pkg is
 end package;
 
 package body controller_pkg is
+  -- for debug
+  function decode_state(state: statetype) return std_logic_vector is
+    variable ret : std_logic_vector(6 downto 0);
+  begin
+    case state is
+      when InitS =>
+        ret := "0000000";
+      when WaitS =>
+        ret := "0000010";
+      when FetchS =>
+        ret := "0000100";
+      when DecodeS =>
+        ret := "0001000";
+      when AdrCalcS | RtypeCalcS | AddiCalcS | BranchS | JumpS =>
+        ret := "0010000";
+      when MemReadS =>
+        ret := "0100000";
+      when RegWriteBackS | ALUWriteBackS | AddiWriteBackS =>
+        ret := "1000000";
+      when others =>
+        -- do nothing
+    end case;
+    return ret;
+  end function;
+
   function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0)) return statetype is
     variable nextstate : statetype;
   begin

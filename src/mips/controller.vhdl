@@ -30,10 +30,12 @@ end entity;
 
 architecture behavior of controller is
   signal stateA, nextstateA : statetype;
+  signal dec_sa, dec_sb : std_logic_vector(6 downto 0);
   signal stateB, nextstateB : statetype;
   signal instr_shift_en : std_logic;
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
+
 
   component instr_shift_register
     port (
@@ -56,13 +58,19 @@ begin
     end if;
   end process;
 
+  process(stateA, stateB)
+  begin
+    dec_sa <= decode_state(stateA);
+    dec_sb <= decode_state(stateB);
+  end process;
+
   -- State Machine
   process(clk, rst, opcode, funct)
     variable stateA0, nextstateA0 : statetype;
     variable stateB0, nextstateB0 : statetype;
   begin
-    nextstateA0 := get_nextstate(stateA0, opcode);
-    nextstateB0 := get_nextstate(stateB0, opcode);
+    nextstateA0 := get_nextstate(stateA, opcode);
+    nextstateB0 := get_nextstate(stateB, opcode);
     -- todo : additional expr
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;
