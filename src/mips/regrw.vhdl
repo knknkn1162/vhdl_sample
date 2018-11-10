@@ -10,10 +10,15 @@ entity regrw is
     imm : in std_logic_vector(15 downto 0);
 
     rds, rdt, immext : out std_logic_vector(31 downto 0);
+    -- forwarding for pipeline
+    aluforward : in std_logic_vector(31 downto 0);
     -- controller
     we : in std_logic;
     memrd_aluout_s : in std_logic;
     rt_rd_s : in std_logic;
+    -- forwarding for pipeline
+    rd1_aluforward_s : in std_logic;
+    rd2_aluforward_s : in std_logic;
     -- scan
     wa : out std_logic_vector(4 downto 0);
     wd : out std_logic_vector(31 downto 0)
@@ -56,6 +61,7 @@ architecture behavior of regrw is
 
   signal wa0 : std_logic_vector(4 downto 0);
   signal wd0 : std_logic_vector(31 downto 0);
+  signal rd1, rd2 : std_logic_vector(31 downto 0);
 
 begin
   memrd_aluout_mux : mux2 generic map(N=>32)
@@ -76,11 +82,28 @@ begin
 
   regfile0 : regfile port map (
     clk => clk, rst => rst,
-    a1 => rs, rd1 => rds,
-    a2 => rt, rd2 => rdt,
+    a1 => rs, rd1 => rd1,
+    a2 => rt, rd2 => rd2,
     a3 => wa0, wd3 => wd0, we3 => we
   );
   wa <= wa0; wd <= wd0;
+
+  rd1_aluout_mux : mux2 generic map(N=>32)
+  port map (
+    d0 => rd1,
+    d1 => aluforward,
+    s => rd1_aluforward_s,
+    y => rds
+  );
+
+  rd2_aluout_mux : mux2 generic map (N=>32)
+  port map (
+    d0 => rd2,
+    d1 => aluforward,
+    s => rd2_aluforward_s,
+    y => rdt
+  );
+
 
   sgnext0 : sgnext port map (
     a => imm,
