@@ -196,6 +196,7 @@ begin
     alucont => alucont,
     rdt_immext_s => rdt_immext_s
   );
+  alures <= alures0;
   aluforward0 <= alures0; -- forwarding for pipeline
 
   memadr0 : memadr port map (
@@ -211,5 +212,4 @@ begin
     -- scan
     pc => pc, pcnext => pcnext
   );
-  alures <= alures0;
 end architecture;

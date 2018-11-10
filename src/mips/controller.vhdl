@@ -168,15 +168,17 @@ begin
     rt_rd_sA := get_rt_rd_s(stateA); rt_rd_sB := get_rt_rd_s(stateB);
     rt_rd_s <= rt_rd_sA or rt_rd_sB;
 
+    rdt_immext_sA := get_rdt_immext_s(stateA); rdt_immext_sB := get_rdt_immext_s(stateB);
+    rdt_immext_s <= rdt_immext_sA or rdt_immext_sB;
+  end process;
+
+  -- depending on funct
+  process(stateA, stateB, funct)
+    variable alucontA, alucontB : std_logic_vector(2 downto 0);
+  begin
     -- for calc
     alucontA := get_alucont(stateA, funct); alucontB := get_alucont(stateB, funct);
     alucont <= alucontA or alucontB;
-
-    rdt_immext_sA := get_rdt_immext_s(stateA); rdt_immext_sB := get_rdt_immext_s(stateB);
-    rdt_immext_s <= rdt_immext_sA or rdt_immext_sB;
-
-    -- 
-
   end process;
 
   -- depend on aluzero

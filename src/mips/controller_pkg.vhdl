@@ -198,9 +198,6 @@ package body controller_pkg is
     variable ret : std_logic_vector(2 downto 0);
   begin
     case state is
-      when InitS =>
-      when FetchS =>
-      when DecodeS =>
       when AdrCalcS =>
         ret := "010";
       when RtypeCalcS =>
