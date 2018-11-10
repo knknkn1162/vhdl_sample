@@ -6,6 +6,7 @@ entity controller is
   port (
     clk, rst : in std_logic;
     opcode, funct : in std_logic_vector(5 downto 0);
+    rs, rt, rd : std_logic_vector(4 downto 0);
     aluzero : in std_logic;
     -- for memadr
     pc_aluout_s : out std_logic;
@@ -30,6 +31,19 @@ end entity;
 architecture behavior of controller is
   signal stateA, nextstateA : statetype;
   signal stateB, nextstateB : statetype;
+  signal instr_shift_en : std_logic;
+  signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
+  signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
+
+  component instr_shift_register
+    port (
+      clk, rst, en : in std_logic;
+      nxt_opcode, nxt_funct : in std_logic_vector(5 downto 0);
+      nxt_rs, nxt_rt, nxt_rd : in std_logic_vector(4 downto 0);
+      cur_opcode, cur_funct : out std_logic_vector(5 downto 0);
+      cur_rs, cur_rt, cur_rd : out std_logic_vector(4 downto 0)
+    );
+  end component;
 
 begin
   process(clk, rst) begin
@@ -54,8 +68,16 @@ begin
     nextstateB <= nextstateB0;
   end process;
 
-  -- for sequential logic
-  -- ex) D-flipflop enable signal should be turned on before rising_edge(clk)
+
+  instr_shift_en <= '1';
+  instr_shift_register0 : instr_shift_register port map (
+    clk => clk, rst => rst, en => instr_shift_en,
+    nxt_opcode => opcode, nxt_funct => funct,
+    nxt_rs => rs, nxt_rt => rt, nxt_rd => rd,
+    cur_opcode => calcs_opcode, cur_funct => calcs_funct,
+    cur_rs => calcs_rs, cur_rt => calcs_rt, cur_rd => calcs_rd
+  );
+
   process(stateA, stateB)
     -- for memadr
     variable pc_aluout_sA, pc_aluout_sB : std_logic;
@@ -65,8 +87,8 @@ begin
     variable mem_weA, mem_weB: std_logic;
     -- for decode
     -- -- forwarding for pipeline
-    variable rd1_aluout_s : std_logic;
-    variable rd2_aluout_s : std_logic;
+    variable rd1_aluout_s0 : std_logic;
+    variable rd2_aluout_s0 : std_logic;
     -- for writeback
     variable instr_enA, instr_enB : std_logic;
     variable reg_weA, reg_weB : std_logic;
@@ -76,6 +98,7 @@ begin
     variable alucontA, alucontB : std_logic_vector(2 downto 0);
     variable rdt_immext_sA, rdt_immext_sB : std_logic;
   begin
+
     -- for memadr
     pc_aluout_sA := get_pc_aluout_s(stateA); pc_aluout_sB := get_pc_aluout_s(stateB);
     pc_aluout_s <= pc_aluout_sA or pc_aluout_sB;
@@ -88,6 +111,41 @@ begin
     mem_we <= mem_weA or mem_weB;
 
     -- for decode
+    -- forwarding for pipeline
+    rd1_aluout_s0 := '0'; rd2_aluout_s0 := '0';
+    case stateA is
+      when AddiCalcS =>
+        if stateB = DecodeS then
+          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          if calcs_rt = rs then
+            rd1_aluout_s0 := '1';
+          end if;
+
+          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if calcs_rt = rt then
+            rd2_aluout_s0 := '1';
+          end if;
+        end if;
+      when RtypeCalcS =>
+        if stateB = DecodeS then
+          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          if calcs_rd = rs then
+            rd1_aluout_s0 := '1';
+          end if;
+
+          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if calcs_rd = rt then
+            rd2_aluout_s0 := '1';
+          end if;
+        end if;
+      when others =>
+        -- do nothing
+    end case;
+    rd1_aluout_s <= rd1_aluout_s0; rd2_aluout_s <= rd2_aluout_s0;
 
     -- for writeback
     instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);
