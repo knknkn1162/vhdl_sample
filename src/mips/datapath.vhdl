@@ -3,8 +3,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity datapath is
+  generic(memfile : string);
   port (
-    clk, rst : in std_logic;
+    clk, rst, load : in std_logic;
 
     -- controller
     opcode, funct : out std_logic_vector(5 downto 0);
@@ -41,8 +42,9 @@ end entity;
 
 architecture behavior of datapath is
   component memrw
+    generic(memfile : string);
     port (
-      clk, rst: in std_logic;
+      clk, rst, load: in std_logic;
       addr : in std_logic_vector(31 downto 0);
       wd : in std_logic_vector(31 downto 0);
       rd : out std_logic_vector(31 downto 0);
@@ -138,10 +140,10 @@ architecture behavior of datapath is
   signal aluforward0 : std_logic_vector(31 downto 0);
 
 begin
-
   mem_wd0 <= rdt0;
-  memrw0 : memrw port map (
-    clk => clk, rst => rst,
+  memrw0 : memrw generic map (memfile=>memfile)
+  port map (
+    clk => clk, rst => rst, load => load,
     addr => mem_addr0, wd => mem_wd0, rd => mem_rd0,
     -- controller
     we => mem_we

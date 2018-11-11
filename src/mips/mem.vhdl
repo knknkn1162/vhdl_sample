@@ -36,7 +36,7 @@ architecture behavior of mem is
 
 begin
   process(clk, rst, a)
-    file memfile : text;
+    file memfile : text open READ_MODE is filename;
     variable idx : integer;
     variable lin : line;
     variable ch : character;
@@ -46,7 +46,6 @@ begin
     if rst = '1' then
       -- initialize with zeros
       ram <= (others => (others => '0'));
-      file_open(memfile, filename, READ_MODE);
       idx := 0;
     elsif rising_edge(clk) then
       if load = '1' then

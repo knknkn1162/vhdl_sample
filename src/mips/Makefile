@@ -1,5 +1,6 @@
 F=dummy
 VHDL=vhdl
+MEM=dummy
 
 clean:
 	rm -f work-obj93.cf *.o *.vcd
@@ -20,10 +21,15 @@ all:
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
 mips : datapath controller
-	make all F=mips
+	ghdl -a mips.vhdl mips_${MEM}_tb.vhdl
+	make er F=mips_${MEM}
+forwarding_addi_add : datapath controller
+	ghdl -a mips.vhdl mips_forwarding_addi_add_tb.vhdl
+	make er F=mips_forwarding_addi_add
+
 datapath: memrw decode regrw calc memadr
-	ghdl -a datapath.vhdl
-controller:
+	make all F=datapath
+controller: instr_shift_register
 	ghdl -a controller_pkg.vhdl controller.vhdl
 memrw: mem
 	make all F=memrw

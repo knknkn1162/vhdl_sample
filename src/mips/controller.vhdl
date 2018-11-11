@@ -4,7 +4,7 @@ use work.controller_pkg.ALL;
 
 entity controller is
   port (
-    clk, rst : in std_logic;
+    clk, rst, load : in std_logic;
     opcode, funct : in std_logic_vector(5 downto 0);
     rs, rt, rd : std_logic_vector(4 downto 0);
     aluzero : in std_logic;
@@ -51,7 +51,7 @@ begin
   process(clk, rst) begin
     if rst = '1' then
       stateA <= InitS;
-      stateB <= WaitS;
+      stateB <= Wait2S;
     elsif rising_edge(clk) then
       stateA <= nextStateA;
       stateB <= nextStateB;
@@ -69,8 +69,8 @@ begin
     variable stateA0, nextstateA0 : statetype;
     variable stateB0, nextstateB0 : statetype;
   begin
-    nextstateA0 := get_nextstate(stateA, opcode);
-    nextstateB0 := get_nextstate(stateB, opcode);
+    nextstateA0 := get_nextstate(stateA, opcode, load);
+    nextstateB0 := get_nextstate(stateB, opcode, load);
     -- todo : additional expr
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;

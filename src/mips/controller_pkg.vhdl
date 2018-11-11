@@ -4,7 +4,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 package controller_pkg is
   type statetype is (
     -- soon after the initialization
-    InitS, WaitS,
+    Wait2S, WaitS,
+    InitS, LoadS,
     FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
     MemWriteS,
     RtypeCalcS, ALUWriteBackS,
@@ -42,7 +43,7 @@ package controller_pkg is
   constant FUNCT_SUBU : functtype := "100011"; -- 0x23
 
   function decode_state(state: statetype) return std_logic_vector;
-  function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0)) return statetype;
+  function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0); load : std_logic) return statetype;
   function get_pc_en(state: statetype) return std_logic;
   function get_instr_en(state: statetype) return std_logic;
   function get_pc0_br_s(state : statetype; aluzero : std_logic) return std_logic_vector;
@@ -61,10 +62,12 @@ package body controller_pkg is
     variable ret : std_logic_vector(6 downto 0);
   begin
     case state is
-      when InitS =>
+      when WaitS | Wait2S =>
         ret := "0000000";
-      when WaitS =>
+      when InitS =>
         ret := "0000010";
+      when LoadS =>
+        ret := "0000011";
       when FetchS =>
         ret := "0000100";
       when DecodeS =>
@@ -81,13 +84,21 @@ package body controller_pkg is
     return ret;
   end function;
 
-  function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0)) return statetype is
+  function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0); load : std_logic) return statetype is
     variable nextstate : statetype;
   begin
     case state is
+      when Wait2S =>
+        nextstate := WaitS;
       when WaitS =>
         nextState := InitS;
       when InitS =>
+        if load = '1' then
+          nextstate := LoadS;
+        else
+          nextState := FetchS;
+        end if;
+      when LoadS =>
         nextState := FetchS;
       when FetchS =>
         nextState := DecodeS;
@@ -136,7 +147,7 @@ package body controller_pkg is
     variable ret : std_logic;
   begin
     case state is
-      when initS | waitS =>
+      when InitS | LoadS | WaitS | Wait2S =>
         ret := '0';
       when others =>
         ret := '1';

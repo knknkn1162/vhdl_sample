@@ -2,13 +2,14 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity mips_tb is
+entity mips_forwarding_addi_add_tb is
 end entity;
 
-architecture behavior of mips_tb is
+architecture testbench of mips_forwarding_addi_add_tb is
   component mips
+    generic(memfile : string);
     port (
-      clk, rst : in std_logic;
+      clk, rst, load : in std_logic;
       -- scan for testbench
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0);
@@ -21,7 +22,7 @@ architecture behavior of mips_tb is
     );
   end component;
 
-  signal clk, rst : std_logic;
+  signal clk, rst, load : std_logic;
   signal pc, pcnext : std_logic_vector(31 downto 0);
   signal addr, mem_rd, mem_wd : std_logic_vector(31 downto 0);
   signal reg_wa : std_logic_vector(4 downto 0);
@@ -30,12 +31,14 @@ architecture behavior of mips_tb is
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
 
+  constant memfile : string := "./assets/forwarding_addi_add.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
-  uut: mips port map (
-    clk => clk, rst => rst,
+  uut : mips generic map (memfile=>memfile)
+  port map (
+    clk => clk, rst => rst, load => load,
     pc => pc, pcnext => pcnext,
     addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,
     reg_wa => reg_wa,
@@ -58,9 +61,12 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period;
-    -- (InitS, WaitS)
+    -- (InitS, Wait2S)
     rst <= '1'; wait for 1 ns; rst <= '0';
-    wait for clk_period/2;
+    -- syncronous reset
+    load <= '1'; wait for clk_period/2; load <= '0';
+    -- (LoadS, WaitS)
+    wait for clk_period;
 
     -- (FetchS, InitS)
     -- -- FetchS : addi $s0, $0, 5
@@ -70,9 +76,6 @@ begin
     assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
 
-    -- add $s1, $s0, $s0
-    -- 0000/00 10/000 1/0000 /1000/1 000/00 10/0000
-    -- ram(1) <= X"02108820";
     -- (DecodeS, FetchS)
     -- -- DecodeS : addi $s0, $0, 5
     assert rds = X"00000000"; assert immext = X"00000005";

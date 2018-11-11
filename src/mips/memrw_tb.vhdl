@@ -21,11 +21,12 @@ architecture testbench of memrw_tb is
   signal rd, wd : std_logic_vector(31 downto 0);
   signal we : std_logic;
   signal addr : std_logic_vector(31 downto 0);
+  constant memfile : string := "./assets/memfile.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
-  uut : memrw generic map (memfile=>"./assets/memfile.hex")
+  uut : memrw generic map (memfile=>memfile)
   port map (
     clk => clk, rst => rst, load => load,
     addr => addr,

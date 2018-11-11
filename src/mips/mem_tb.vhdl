@@ -23,9 +23,10 @@ architecture testbench of mem_tb is
   signal wd, rd : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
   signal stop : boolean;
+  constant filename : string := "./assets/memfile.hex";
 
 begin
-  uut : mem generic map (filename=>"./assets/memfile.hex")
+  uut : mem generic map (filename=>filename)
   port map (
     clk => clk, rst => rst, load => load,
     we => we,
