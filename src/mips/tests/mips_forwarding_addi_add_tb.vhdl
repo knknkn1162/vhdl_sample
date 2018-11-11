@@ -31,7 +31,7 @@ architecture testbench of mips_forwarding_addi_add_tb is
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
 
-  constant memfile : string := "./assets/forwarding_addi_add.hex";
+  constant memfile : string := "./assets/mem/forwarding_addi_add.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
