@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity mips is
-  generic(memfile : string; regfile : string := "./assets/dummy.hex");
+  generic(memfile : string; regfile : string := "./assets/reg/dummy.hex");
   port (
     clk, rst, load : in std_logic;
     -- scan for testbench

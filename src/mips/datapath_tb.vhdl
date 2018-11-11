@@ -6,7 +6,7 @@ end entity;
 
 architecture testbench of datapath_tb is
   component datapath
-    generic(memfile : string; regfile : string := "./assets/dummy.hex");
+    generic(memfile : string; regfile : string := "./assets/reg/dummy.hex");
     port (
       clk, rst, load : in std_logic;
 
@@ -75,7 +75,7 @@ architecture testbench of datapath_tb is
   signal rds, rdt, immext :  std_logic_vector(31 downto 0);
   signal ja :  std_logic_vector(27 downto 0);
   signal alures :  std_logic_vector(31 downto 0);
-  constant memfile : string := "./assets/memfile.hex";
+  constant memfile : string := "./assets/mem/memfile.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 

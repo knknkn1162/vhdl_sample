@@ -6,7 +6,7 @@ end entity;
 
 architecture behavior of reg_tb is
   component reg
-    generic(filename : string := "./assets/dummy.hex");
+    generic(filename : string := "./assets/reg/dummy.hex");
     port (
       clk, rst, load : in std_logic;
       -- 25:21(read)

@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity regrw is
-  generic(regfile : string := "./assets/dummy.hex");
+  generic(regfile : string := "./assets/reg/dummy.hex");
   port (
     clk, rst, load : in std_logic;
     rs, rt, rd : in std_logic_vector(4 downto 0);

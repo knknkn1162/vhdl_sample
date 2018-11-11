@@ -5,7 +5,7 @@ use STD.TEXTIO.ALL;
 use work.tools_pkg.ALL;
 
 entity reg is
-  generic(filename : string := "./assets/dummy.hex");
+  generic(filename : string := "./assets/reg/dummy.hex");
   port (
     clk, rst, load : in std_logic;
     -- 25:21(read)

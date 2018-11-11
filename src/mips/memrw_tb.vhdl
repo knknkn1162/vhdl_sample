@@ -21,7 +21,7 @@ architecture testbench of memrw_tb is
   signal rd, wd : std_logic_vector(31 downto 0);
   signal we : std_logic;
   signal addr : std_logic_vector(31 downto 0);
-  constant memfile : string := "./assets/memfile.hex";
+  constant memfile : string := "./assets/mem/memfile.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
