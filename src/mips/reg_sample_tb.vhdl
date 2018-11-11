@@ -27,7 +27,7 @@ architecture behavior of reg_sample_tb is
   signal a1, a2, a3 : std_logic_vector(4 downto 0);
   signal rd1, rd2, wd3 : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
-  constant filename : string := "./assets/regfile_sample.hex";
+  constant filename : string := "./assets/reg_sample.hex";
 
 begin
   uut : reg generic map (filename=>filename)
