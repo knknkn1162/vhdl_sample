@@ -6,8 +6,9 @@ end entity;
 
 architecture testbench of regrw_tb is
   component regrw
+    generic(regfile : string := "./assets/dummy.hex");
     port (
-      clk, rst : in std_logic;
+      clk, rst, load : in std_logic;
       rs, rt, rd : in std_logic_vector(4 downto 0);
       mem_rd, aluout : in std_logic_vector(31 downto 0);
       imm : in std_logic_vector(15 downto 0);
@@ -26,7 +27,7 @@ architecture testbench of regrw_tb is
     );
   end component;
 
-  signal clk, rst : std_logic;
+  signal clk, rst, load : std_logic;
   signal rs, rt, rd : std_logic_vector(4 downto 0);
   signal mem_rd, aluout : std_logic_vector(31 downto 0);
   signal imm : std_logic_vector(15 downto 0);
@@ -47,7 +48,7 @@ architecture testbench of regrw_tb is
 
 begin
   uut : regrw port map (
-    clk => clk, rst => rst,
+    clk => clk, rst => rst, load => load,
     rs => rs, rt => rt, rd => rd,
     mem_rd => mem_rd, aluout => aluout,
     imm => imm,

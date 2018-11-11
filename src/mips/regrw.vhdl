@@ -2,8 +2,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity regrw is
+  generic(regfile : string := "./assets/dummy.hex");
   port (
-    clk, rst : in std_logic;
+    clk, rst, load : in std_logic;
     rs, rt, rd : in std_logic_vector(4 downto 0);
     mem_rd : in std_logic_vector(31 downto 0);
     aluout : in std_logic_vector(31 downto 0);
@@ -27,8 +28,9 @@ end entity;
 
 architecture behavior of regrw is
   component reg
+    generic(filename : string);
     port (
-      clk, rst : in std_logic;
+      clk, rst, load : in std_logic;
       -- 25:21(read)
       a1 : in std_logic_vector(4 downto 0);
       rd1 : out std_logic_vector(31 downto 0);
@@ -80,8 +82,9 @@ begin
     y => wa0
   );
 
-  reg0 : reg port map (
-    clk => clk, rst => rst,
+  reg0 : reg generic map(filename=>regfile)
+  port map (
+    clk => clk, rst => rst, load => load,
     a1 => rs, rd1 => rd1,
     a2 => rt, rd2 => rd2,
     a3 => wa0, wd3 => wd0, we3 => we
