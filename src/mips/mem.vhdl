@@ -2,6 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use STD.TEXTIO.ALL;
+use work.tools_pkg.ALL;
 
 entity mem is
   generic(filename : string);
@@ -20,20 +21,6 @@ architecture behavior of mem is
   type ramtype is array(natural range<>) of std_logic_vector(31 downto 0);
   signal ram : ramtype(0 to SIZE-1);
 
-  function char2int(ch : character) return natural is
-    variable ret : natural range 0 to 15;
-  begin
-    if '0' <= ch and ch <= '9' then
-      -- ?? - 0x30
-      ret := character'pos(ch) - character'pos('0');
-    elsif 'a' <= ch and ch <= 'f' then
-      ret := character'pos(ch) - character'pos('a') + 10;
-    else
-      ret := 0;
-    end if;
-    return ret;
-  end function;
-
 begin
   process(clk, rst, a)
     file memfile : text open READ_MODE is filename;
@@ -46,9 +33,9 @@ begin
     if rst = '1' then
       -- initialize with zeros
       ram <= (others => (others => '0'));
-      idx := 0;
     elsif rising_edge(clk) then
       if load = '1' then
+        idx := 0;
         while not endfile(memfile) loop
           readline(memfile, lin);
           for i in 0 to 7 loop

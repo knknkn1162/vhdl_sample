@@ -1,10 +1,13 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use STD.TEXTIO.ALL;
+use work.tools_pkg.ALL;
 
 entity regfile is
+  generic(filename : string := "./assets/dummy.hex");
   port (
-    clk, rst : in std_logic;
+    clk, rst, load : in std_logic;
     -- 25:21(read)
     a1 : in std_logic_vector(4 downto 0);
     rd1 : out std_logic_vector(31 downto 0);
@@ -24,12 +27,36 @@ architecture behavior of regfile is
   constant SIZE: natural := 32;
   signal mem : ramtype(SIZE-1 downto 0);
 begin
-  process(clk) begin
+  process(clk)
+    file regfile : text open READ_MODE is filename;
+    variable idx : std_logic_vector(7 downto 0);
+    variable lin : line;
+    variable ch : character;
+    variable result : natural range 0 to 15; -- hex
+  begin
     if rst = '1' then
       mem <= (others => (others => '0'));
     elsif rising_edge(clk) then
+      if load = '1' then
+        while not endfile(regfile) loop
+          readline(regfile, lin);
+          -- check idx
+          for i in 0 to 1 loop
+            read(lin, ch);
+            result := char2int(ch);
+            idx(7-i*4 downto 4-i*4) := std_logic_vector(to_unsigned(result, 4));
+          end loop;
+          read(lin, ch); -- space
+
+          for i in 0 to 7 loop
+            read(lin, ch);
+            result := char2int(ch);
+            mem(to_integer(unsigned(idx)))(31-i*4 downto 28-i*4) <= std_logic_vector(to_unsigned(result, 4));
+          end loop;
+        end loop;
+        file_close(regfile);
       -- if write enables
-      if we3='1' then
+      elsif we3='1' then
         -- avoid $zero register
         if a3/="00000" then
           if not is_X(a3) then
