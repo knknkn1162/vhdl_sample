@@ -26,7 +26,7 @@ architecture behavior of mips is
       opcode, funct : out std_logic_vector(5 downto 0);
       -- for memadr
       pc_aluout_s : in std_logic;
-      pc0_br_s : in std_logic_vector(1 downto 0);
+      pc4_br4_ja_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
       -- for memwrite
       mem_we: in std_logic;
@@ -58,7 +58,7 @@ architecture behavior of mips is
       aluzero : in std_logic;
       -- for memadr
       pc_aluout_s : out std_logic;
-      pc0_br_s : out std_logic_vector(1 downto 0);
+      pc4_br4_ja_s : out std_logic_vector(1 downto 0);
       pc_en : out std_logic;
       -- for memwrite
       mem_we: out std_logic;
@@ -87,7 +87,7 @@ architecture behavior of mips is
 
   -- for memadr
   signal pc_aluout_s : std_logic;
-  signal pc0_br_s : std_logic_vector(1 downto 0);
+  signal pc4_br4_ja_s : std_logic_vector(1 downto 0);
   signal pc_en : std_logic;
 
 begin
@@ -98,7 +98,7 @@ begin
     opcode => opcode, funct => funct,
     -- for memadr
     pc_aluout_s => pc_aluout_s,
-    pc0_br_s => pc0_br_s,
+    pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
     -- for memwrite
     mem_we => mem_we,
@@ -127,7 +127,7 @@ begin
     aluzero => aluzero,
     -- out
     -- for memadr
-    pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
+    pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
     -- for memwrite
     mem_we => mem_we,
