@@ -26,7 +26,7 @@ entity regrw is
 end entity;
 
 architecture behavior of regrw is
-  component regfile
+  component reg
     port (
       clk, rst : in std_logic;
       -- 25:21(read)
@@ -80,7 +80,7 @@ begin
     y => wa0
   );
 
-  regfile0 : regfile port map (
+  reg0 : reg port map (
     clk => clk, rst => rst,
     a1 => rs, rd1 => rd1,
     a2 => rt, rd2 => rd2,

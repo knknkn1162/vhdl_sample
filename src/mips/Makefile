@@ -32,7 +32,7 @@ memrw: mem
 	make all F=memrw
 decode: flopr_en
 	make all F=decode
-regrw: regfile sgnext mux2
+regrw: reg sgnext mux2
 	make all F=regrw
 calc: flopr_en alu mux2 slt2
 	make all F=calc
@@ -58,9 +58,9 @@ sgnext:
 	make all F=sgnext
 mem: tools_pkg
 	make all F=mem
-regfile: tools_pkg
-	make all F=regfile
-	ghdl -a regfile_sample_tb.vhdl
-	make er F=regfile_sample
+reg: tools_pkg
+	make all F=reg
+	ghdl -a reg_sample_tb.vhdl
+	make er F=reg_sample
 tools_pkg:
 	ghdl -a tools_pkg.vhdl

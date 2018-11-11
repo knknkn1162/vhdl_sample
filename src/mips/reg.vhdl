@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 use STD.TEXTIO.ALL;
 use work.tools_pkg.ALL;
 
-entity regfile is
+entity reg is
   generic(filename : string := "./assets/dummy.hex");
   port (
     clk, rst, load : in std_logic;
@@ -21,14 +21,14 @@ entity regfile is
   );
 end entity;
 
-architecture behavior of regfile is
+architecture behavior of reg is
   -- $0($zero) ~ $31($ra)
   type ramtype is array(natural range<>) of std_logic_vector(31 downto 0);
   constant SIZE: natural := 32;
   signal mem : ramtype(SIZE-1 downto 0);
 begin
   process(clk)
-    file regfile : text open READ_MODE is filename;
+    file reg : text open READ_MODE is filename;
     variable idx : std_logic_vector(7 downto 0);
     variable lin : line;
     variable ch : character;
@@ -38,8 +38,8 @@ begin
       mem <= (others => (others => '0'));
     elsif rising_edge(clk) then
       if load = '1' then
-        while not endfile(regfile) loop
-          readline(regfile, lin);
+        while not endfile(reg) loop
+          readline(reg, lin);
           -- check idx
           for i in 0 to 1 loop
             read(lin, ch);
@@ -54,7 +54,7 @@ begin
             mem(to_integer(unsigned(idx)))(31-i*4 downto 28-i*4) <= std_logic_vector(to_unsigned(result, 4));
           end loop;
         end loop;
-        file_close(regfile);
+        file_close(reg);
       -- if write enables
       elsif we3='1' then
         -- avoid $zero register
