@@ -20,9 +20,7 @@ all:
 	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-mips : datapath controller
-	ghdl -a mips.vhdl mips_${MEM}_tb.vhdl
-	make er F=mips_${MEM}
+mips : forwarding_addi_add
 forwarding_addi_add : datapath controller
 	ghdl -a mips.vhdl ./tests/mips_forwarding_addi_add_tb.vhdl
 	make er F=mips_forwarding_addi_add

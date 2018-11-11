@@ -15,7 +15,7 @@ architecture testbench of datapath_tb is
       rs, rt, rd : out std_logic_vector(4 downto 0);
       -- for memadr
       pc_aluout_s : in std_logic;
-      pc0_br_s : in std_logic_vector(1 downto 0);
+      pc4_br4_ja_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
       -- for memwrite
       mem_we: in std_logic;
@@ -50,7 +50,7 @@ architecture testbench of datapath_tb is
   signal rs, rt, rd : std_logic_vector(4 downto 0);
   -- for memadr
   signal pc_aluout_s : std_logic;
-  signal pc0_br_s : std_logic_vector(1 downto 0);
+  signal pc4_br4_ja_s : std_logic_vector(1 downto 0);
   signal pc_en : std_logic;
   -- for memwrite
   signal mem_we: std_logic;
@@ -88,7 +88,7 @@ begin
     rs => rs, rt => rt, rd => rd,
     -- for memadr
     pc_aluout_s => pc_aluout_s,
-    pc0_br_s => pc0_br_s,
+    pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
     -- for memwrite
     mem_we => mem_we,

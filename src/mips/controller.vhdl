@@ -10,7 +10,7 @@ entity controller is
     aluzero : in std_logic;
     -- for memadr
     pc_aluout_s : out std_logic;
-    pc0_br_s : out std_logic_vector(1 downto 0);
+    pc4_br4_ja_s : out std_logic_vector(1 downto 0);
     pc_en : out std_logic;
 
     -- for memwrite
@@ -197,9 +197,9 @@ begin
 
   -- depend on aluzero
   process(stateA, stateB, aluzero)
-    variable pc0_br_sA, pc0_br_sB : std_logic_vector(1 downto 0);
+    variable pc4_br4_ja_sA, pc4_br4_ja_sB : std_logic_vector(1 downto 0);
   begin
-    pc0_br_sA := get_pc0_br_s(stateA, aluzero); pc0_br_sB := get_pc0_br_s(stateB, aluzero);
-    pc0_br_s <= pc0_br_sA or pc0_br_sB;
+    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, aluzero); pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, aluzero);
+    pc4_br4_ja_s <= pc4_br4_ja_sA or pc4_br4_ja_sB;
   end process;
 end architecture;
