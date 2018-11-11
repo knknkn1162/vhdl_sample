@@ -35,7 +35,7 @@ begin
       -- addi $rt, $rs, imm
       --    main:   addi $s1, $s1, 5
       -- 0010/00 10/001 1/0001 0x0005
-      ram(2) <= X"22310005";
+      -- ram(2) <= X"22310005";
 
       -- initialize with zeros
       ram(3 to SIZE-2) <= (others => (others => '0'));

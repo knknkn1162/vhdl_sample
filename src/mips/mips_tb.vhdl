@@ -74,20 +74,31 @@ begin
     -- 0000/00 10/000 1/0000 /1000/1 000/00 10/0000
     -- ram(1) <= X"02108820";
     -- (DecodeS, FetchS)
+    -- -- DecodeS : addi $s0, $0, 5
+    assert rds = X"00000000"; assert immext = X"00000005";
     -- -- FetchS : add $s1, $s0, $s0
     assert pc = X"00000004"; assert pcnext = X"00000008";
     assert mem_rd = X"02108820";
-    -- -- DecodeS : addi $s0, $0, 5
-    assert rds = X"00000000"; assert immext = X"00000005";
     wait for clk_period;
 
+    -- (CalcS, DecodeS)
     assert pc = X"00000008"; assert pcnext = X"0000000C";
-    -- DecodeS : add $s1, $s0, $s0
-    assert rds = X"00000005"; assert rdt = X"00000005"; -- forwarding for pipeline
     -- CalcS(AddiCalcS) : addi $s0, $0, 5
     assert alures = X"00000005";
-
+    -- DecodeS : add $s1, $s0, $s0
+    assert rds = X"00000005"; assert rdt = X"00000005"; -- forwarding for pipeline
     wait for clk_period;
+
+    -- (AddiWriteBackS, CalcS(RtypeCalcS))
+    -- AddiWriteBackS : addi $s0, $0, 5
+    assert reg_wa = "10000"; assert reg_wd = X"00000005";
+    -- CalcS : add $s1, $s0, $s0
+    assert alures = X"0000000A";
+    wait for clk_period;
+
+    -- (FetchS, ALUWriteBackS)
+    -- ALUWriteBackS : add $s1, $s0, $s0
+    assert reg_wa = "10001"; assert reg_wd = X"0000000A";
 
     assert false report "end of test" severity note;
     stop <= TRUE;
