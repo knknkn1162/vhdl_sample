@@ -7,8 +7,9 @@ end entity;
 
 architecture testbench of mem_tb is
   component mem
+    generic(filename : string);
     port (
-      clk, rst : in std_logic;
+      clk, rst, load : in std_logic;
       we : in std_logic;
       -- program counter is 4-byte aligned
       a : in std_logic_vector(29 downto 0);
@@ -17,15 +18,16 @@ architecture testbench of mem_tb is
     );
   end component;
 
-  signal clk, rst, we : std_logic;
+  signal clk, rst, load, we : std_logic;
   signal a : std_logic_vector(29 downto 0);
   signal wd, rd : std_logic_vector(31 downto 0);
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
-  uut : mem port map (
-    clk => clk, rst => rst,
+  uut : mem generic map (filename=>"./assets/forwarding_addi_add.hex")
+  port map (
+    clk => clk, rst => rst, load => load,
     we => we,
     a => a,
     wd => wd,
@@ -45,10 +47,15 @@ begin
   begin
     wait for clk_period;
     rst <= '1'; wait for 1 ns; rst <= '0';
+
+    -- sync
+    load <= '1'; wait for 1 ns;
+    wait for clk_period/2;
+    load <= '0';
+    wait until falling_edge(clk);
     -- read test
     a <= b"00" & X"0000000"; wait for 1 ns; assert rd /= X"00000000";
     a <= b"00" & X"0000001"; wait for 1 ns; assert rd /= X"00000000";
-    -- a <= b"00" & X"0000002"; wait for 1 ns; assert rd /= X"00000000";
 
     wait until falling_edge(clk);
     -- write in ram
