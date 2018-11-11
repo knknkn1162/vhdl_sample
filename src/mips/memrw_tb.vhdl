@@ -6,8 +6,9 @@ end entity;
 
 architecture testbench of memrw_tb is
   component memrw
+    generic(memfile : string);
     port (
-      clk, rst: in std_logic;
+      clk, rst, load: in std_logic;
       addr : in std_logic_vector(31 downto 0);
       wd : in std_logic_vector(31 downto 0);
       rd : out std_logic_vector(31 downto 0);
@@ -16,7 +17,7 @@ architecture testbench of memrw_tb is
     );
   end component;
 
-  signal clk, rst : std_logic;
+  signal clk, rst, load : std_logic;
   signal rd, wd : std_logic_vector(31 downto 0);
   signal we : std_logic;
   signal addr : std_logic_vector(31 downto 0);
@@ -24,13 +25,14 @@ architecture testbench of memrw_tb is
   signal stop : boolean;
 
 begin
-
-  uut : memrw port map (
-    clk => clk, rst => rst,
+  uut : memrw generic map (memfile=>"./assets/memfile.hex")
+  port map (
+    clk => clk, rst => rst, load => load,
     addr => addr,
     wd => wd, rd => rd,
     we => we
   );
+
   clk_process: process
   begin
     while not stop loop
@@ -44,13 +46,15 @@ begin
   begin
     wait for clk_period;
     rst <= '1'; we <= '0'; wait for 1 ns; rst <= '0';
+    -- synchronous reset
+    load <= '1'; wait for clk_period/2; load <= '0';
 
-    addr <= X"00000000"; wait for clk_period/2; assert rd /= X"00000000";
-    addr <= X"00000004"; wait for clk_period; assert rd /= X"00000000";
-    -- addr <= X"00000008"; wait for clk_period; assert rd /= X"00000000";
+    addr <= X"00000000"; wait for 1 ns; assert rd /= X"00000000";
+    addr <= X"00000004"; wait for 1 ns; assert rd /= X"00000000";
 
+    wait until falling_edge(clk);
     -- mem writeback
-    addr <= X"00000004"; we <= '1'; wd <= X"0000000A"; wait for clk_period;
+    addr <= X"00000004"; we <= '1'; wd <= X"0000000A"; wait for clk_period/2 + 1 ns;
     -- check whether the data is written
     addr <= X"00000004"; we <= '0'; wait for clk_period;
     assert rd = X"0000000A";

@@ -3,8 +3,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity memrw is
+  generic(memfile : string);
   port (
-    clk, rst: in std_logic;
+    clk, rst, load: in std_logic;
     addr : in std_logic_vector(31 downto 0);
     wd : in std_logic_vector(31 downto 0);
     rd : out std_logic_vector(31 downto 0);
@@ -15,8 +16,9 @@ end entity;
 
 architecture behavior of memrw is
   component mem
+    generic(filename : string);
     port (
-      clk, rst : in std_logic;
+      clk, rst, load : in std_logic;
       we : in std_logic;
       -- program counter is 4-byte aligned
       a : in std_logic_vector(29 downto 0);
@@ -24,10 +26,10 @@ architecture behavior of memrw is
       rd : out std_logic_vector(31 downto 0)
     );
   end component;
-
 begin
-  mem0 : mem port map (
-    clk => clk, rst => rst,
+  mem0 : mem generic map (filename=>memfile)
+  port map (
+    clk => clk, rst => rst, load => load,
     we => we,
     a => addr(31 downto 2),
     wd => wd,
