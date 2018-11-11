@@ -6,7 +6,7 @@ end entity;
 
 architecture testbench of datapath_tb is
   component datapath
-    generic(memfile : string);
+    generic(memfile : string; regfile : string := "./assets/dummy.hex");
     port (
       clk, rst, load : in std_logic;
 

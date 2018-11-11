@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity datapath is
-  generic(memfile : string);
+  generic(memfile : string; regfile : string := "./assets/dummy.hex");
   port (
     clk, rst, load : in std_logic;
 
@@ -67,9 +67,11 @@ architecture behavior of datapath is
     );
   end component;
 
+
   component regrw
+    generic(regfile : string := "./assets/dummy.hex");
     port (
-      clk, rst : in std_logic;
+      clk, rst, load : in std_logic;
       rs, rt, rd : in std_logic_vector(4 downto 0);
       mem_rd : in std_logic_vector(31 downto 0);
       aluout : in std_logic_vector(31 downto 0);
@@ -165,8 +167,9 @@ begin
   );
   rs <= rs0; rt <= rt0; rd <= rd0;
 
-  regrw0 : regrw port map (
-    clk => clk, rst => rst,
+  regrw0 : regrw generic map(regfile=>regfile)
+  port map (
+    clk => clk, rst => rst, load => load,
     rs => rs0, rt => rt0, rd => rd0,
     mem_rd => reg_memrd0, aluout => reg_aluout0,
     imm => imm0,

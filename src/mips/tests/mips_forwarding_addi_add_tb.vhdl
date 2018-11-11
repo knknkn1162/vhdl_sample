@@ -7,7 +7,7 @@ end entity;
 
 architecture testbench of mips_forwarding_addi_add_tb is
   component mips
-    generic(memfile : string);
+    generic(memfile : string; regfile : string := "./assets/dummy.hex");
     port (
       clk, rst, load : in std_logic;
       -- scan for testbench

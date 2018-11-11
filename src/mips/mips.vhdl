@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 entity mips is
-  generic(memfile : string);
+  generic(memfile : string; regfile : string := "./assets/dummy.hex");
   port (
     clk, rst, load : in std_logic;
     -- scan for testbench
@@ -20,7 +20,7 @@ end entity;
 
 architecture behavior of mips is
   component datapath
-    generic(memfile : string);
+    generic(memfile : string; regfile : string);
     port (
       clk, rst, load : in std_logic;
 
@@ -105,7 +105,7 @@ architecture behavior of mips is
   signal pc_en : std_logic;
 
 begin
-  datapath0 : datapath generic map (memfile=>memfile)
+  datapath0 : datapath generic map (memfile=>memfile, regfile=>regfile)
   port map (
     clk => clk, rst => rst, load => load,
 
