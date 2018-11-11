@@ -25,7 +25,7 @@ architecture testbench of mem_tb is
   signal stop : boolean;
 
 begin
-  uut : mem generic map (filename=>"./assets/forwarding_addi_add.hex")
+  uut : mem generic map (filename=>"./assets/memfile.hex")
   port map (
     clk => clk, rst => rst, load => load,
     we => we,
