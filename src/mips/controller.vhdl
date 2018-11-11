@@ -124,13 +124,7 @@ begin
         -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
         -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
         if stateB = DecodeS and calcs_rd = rt then
-          case calcs_funct is
-            -- rt register is writable
-            when OP_SW | OP_RTYPE =>
-              rd2_aluforward_s0 := '1';
-            when others =>
-              -- do nothing
-          end case;
+          rd2_aluforward_s0 := '1';
         end if;
       when others =>
         -- do nothing

@@ -24,6 +24,9 @@ mips : forwarding_addi_add
 forwarding_addi_add : datapath controller
 	ghdl -a mips.vhdl ./tests/mips_forwarding_addi_add_tb.vhdl
 	make er F=mips_forwarding_addi_add
+forwarding_add_add : datapath controller
+	ghdl -a mips.vhdl ./tests/mips_forwarding_add_add_tb.vhdl
+	make er F=mips_forwarding_add_add
 datapath: memrw decode regrw calc memadr
 	make all F=datapath
 controller: instr_shift_register
