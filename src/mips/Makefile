@@ -56,7 +56,11 @@ mux4:
 	make all F=mux4
 sgnext:
 	make all F=sgnext
-mem:
+mem: tools_pkg
 	make all F=mem
-regfile:
+regfile: tools_pkg
 	make all F=regfile
+	ghdl -a regfile_sample_tb.vhdl
+	make er F=regfile_sample
+tools_pkg:
+	ghdl -a tools_pkg.vhdl
