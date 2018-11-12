@@ -88,19 +88,26 @@ begin
     assert rdt = X"0000000E"; rd2_aluforward_s <= '0';
 
     -- reg writeback
-    rt <= "00001"; we <= '1'; mem_rd <= X"0000000A"; memrd_aluout_s <= '0'; wait for clk_period/2;
-    assert wa <= "00001"; assert wd <= X"0000000A";
-    rt <= "00001"; we <= '0'; wait for clk_period; assert rdt = X"0000000A"; -- check
+    rt <= "00010"; we <= '1'; mem_rd <= X"0000000A"; memrd_aluout_s <= '0';
+    wait for clk_period/2 + clk_period*1;
+    -- at the beginning of RegWritebackS
+    assert wa = "00010"; assert wd = X"0000000A";
+    wait for clk_period; -- writeback
+    rt <= "00010"; we <= '0'; wait for clk_period; assert rdt = X"0000000A"; -- check
     
     -- immediate writeback
-    rt <= "00001"; we <= '1'; aluout <= X"0000000B"; memrd_aluout_s <= '1'; wait for clk_period;
-    assert wa <= "00001"; assert wd <= X"0000000B";
-    rt <= "00001"; we <= '0'; wait for clk_period; assert rdt = X"0000000B"; -- check
+    rt <= "00011"; we <= '1'; aluout <= X"0000000B"; memrd_aluout_s <= '1';
+    wait for clk_period*2;
+    assert wa = "00011"; assert wd = X"0000000B";
+    wait for clk_period; -- writeback
+    rt <= "00011"; we <= '0'; wait for clk_period; assert rdt = X"0000000B"; -- check
     
     -- Rtype writeback
-    rd <= "00001"; we <= '1'; aluout <= X"0000000C"; memrd_aluout_s <= '1'; rt_rd_s <= '1'; wait for clk_period;
-    assert wa <= "00001"; assert wd <= X"0000000C";
-    rt <= "00001"; we <= '0'; wait for clk_period; assert rdt = X"0000000C";
+    rd <= "00100"; we <= '1'; aluout <= X"0000000C"; memrd_aluout_s <= '1'; rt_rd_s <= '1';
+    wait for clk_period*2;
+    assert wa = "00100"; assert wd = X"0000000C";
+    wait for clk_period; -- writeback
+    rt <= "00100"; we <= '0'; wait for clk_period; assert rdt = X"0000000C";
 
     -- skip
     stop <= TRUE;

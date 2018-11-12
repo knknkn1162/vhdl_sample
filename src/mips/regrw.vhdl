@@ -61,17 +61,17 @@ architecture behavior of regrw is
         );
   end component;
 
-
-  component flopr_en
-    generic(N : natural := 32);
+  component shift_register2
+    generic(N: natural);
     port (
-      clk, rst, en: in std_logic;
-      a : in std_logic_vector(N-1 downto 0);
-      y : out std_logic_vector(N-1 downto 0)
-        );
+      clk, rst, en : in std_logic;
+      a0 : in std_logic_vector(N-1 downto 0);
+      a1 : out std_logic_vector(N-1 downto 0);
+      a2 : out std_logic_vector(N-1 downto 0)
+    );
   end component;
 
-  signal rt0, rd0, rt01, rd01 : std_logic_vector(4 downto 0);
+  signal rt_rd, dummy10, rt_rd0 : std_logic_vector(9 downto 0);
   signal wa0 : std_logic_vector(4 downto 0);
   signal wd0 : std_logic_vector(31 downto 0);
   signal rd1, rd2 : std_logic_vector(31 downto 0);
@@ -85,36 +85,18 @@ begin
     y => wd0
   );
 
-  -- for decode
-  flopr_rt0 : flopr_en generic map(N=>5)
-  port map(
+  -- To wait for RegWritebackS
+  rt_rd <= rt & rd;
+  rt_rd_shift : shift_register2 generic map(N=>10)
+  port map (
     clk => clk, rst => rst, en => '1',
-    a => rt, y => rt0
-  );
-
-  flopr_rd0 : flopr_en generic map(N=>5)
-  port map(
-    clk => clk, rst => rst, en => '1',
-    a => rd, y => rd0
-  );
-
-  -- for calc
-  flopr_rt1 : flopr_en generic map(N=>5)
-  port map(
-    clk => clk, rst => rst, en => '1',
-    a => rt0, y => rt01
-  );
-
-  flopr_rd1 : flopr_en generic map(N=>5)
-  port map(
-    clk => clk, rst => rst, en => '1',
-    a => rd0, y => rd01
+    a0 => rt_rd, a1 => dummy10, a2 => rt_rd0
   );
 
   rt_rd_mux : mux2 generic map (N=>5)
   port map (
-    d0 => rt01,
-    d1 => rd01,
+    d0 => rt_rd0(9 downto 5),
+    d1 => rt_rd0(4 downto 0),
     s => rt_rd_s,
     y => wa0
   );
