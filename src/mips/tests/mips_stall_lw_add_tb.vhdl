@@ -89,14 +89,14 @@ begin
     -- CalcS(AdrCalcS) : lw $s0, 12($0)
     assert alures = X"0000000C";
     -- DecodeS : add $s1, $s0, $s0
-    assert rds = X"00000005"; assert rdt = X"00000005"; -- forwarding for pipeline
+    assert rds = X"00000000"; assert rdt = X"00000000";
     wait for clk_period;
 
-    -- (MemReadS, DecodeS) [Stall] 
+    -- (MemReadS, DecodeS) [Stall]
     -- MemReadS : lw $s0, 12($0)
-    assert reg_wa = "10000"; assert reg_wd = X"00000005";
+    assert addr = X"0000000C"; assert mem_rd = X"00000048";
     -- DecodeS : add $s1, $s0, $s0
-    assert alures = X"0000000A";
+    assert alures = X"00000090";
     wait for clk_period;
 
     -- (RegWriteBackS, CalcS)
