@@ -67,6 +67,7 @@ begin
     dec_sa0 <= decode_state(stateA);
     dec_sb0 <= decode_state(stateB);
   end process;
+  dec_sa <= dec_sa0; dec_sb <= dec_sb0;
 
   -- State Machine
   process(clk, rst, opcode, funct)
