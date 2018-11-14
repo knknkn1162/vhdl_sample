@@ -14,6 +14,8 @@ package body tools_pkg is
       ret := character'pos(ch) - character'pos('0');
     elsif 'a' <= ch and ch <= 'f' then
       ret := character'pos(ch) - character'pos('a') + 10;
+    elsif 'A' <= ch and ch <= 'F' then
+      ret := character'pos(ch) - character'pos('A') + 10;
     else
       ret := 0;
     end if;
