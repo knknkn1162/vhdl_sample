@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.debug_pkg.state_vector_type;
 
 entity mips is
   generic(memfile : string; regfile : string := "./assets/reg/dummy.hex");
@@ -14,7 +15,9 @@ entity mips is
     reg_wd : out std_logic_vector(31 downto 0);
     rds, rdt, immext : out std_logic_vector(31 downto 0);
     ja : out std_logic_vector(27 downto 0);
-    alures : out std_logic_vector(31 downto 0)
+    alures : out std_logic_vector(31 downto 0);
+    -- for scan
+    dec_sa, dec_sb : out state_vector_type
   );
 end entity;
 
@@ -78,7 +81,8 @@ architecture behavior of mips is
       rt_rd_s : out std_logic; -- Itype or Rtype
       -- for calc
       alucont : out std_logic_vector(2 downto 0);
-      rdt_immext_s : out std_logic
+      rdt_immext_s : out std_logic;
+      dec_sa, dec_sb : out state_vector_type
     );
   end component;
 
@@ -158,6 +162,7 @@ begin
     memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
     -- for memadr
     alucont => alucont,
-    rdt_immext_s => rdt_immext_s
+    rdt_immext_s => rdt_immext_s,
+    dec_sa => dec_sa, dec_sb => dec_sb
   );
 end architecture;

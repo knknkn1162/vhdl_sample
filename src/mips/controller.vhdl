@@ -1,6 +1,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.controller_pkg.ALL;
+use work.state_pkg.ALL;
+use work.debug_pkg.ALL;
 
 entity controller is
   port (
@@ -24,13 +26,15 @@ entity controller is
     rt_rd_s : out std_logic; -- Itype or Rtype
     -- for calc
     alucont : out std_logic_vector(2 downto 0);
-    rdt_immext_s : out std_logic
+    rdt_immext_s : out std_logic;
+    -- for scan
+    dec_sa, dec_sb : out state_vector_type
   );
 end entity;
 
 architecture behavior of controller is
   signal stateA, nextstateA : statetype;
-  signal dec_sa, dec_sb : std_logic_vector(6 downto 0);
+  signal dec_sa0, dec_sb0 : state_vector_type;
   signal stateB, nextstateB : statetype;
   signal instr_shift_en : std_logic;
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
@@ -60,8 +64,8 @@ begin
 
   process(stateA, stateB)
   begin
-    dec_sa <= decode_state(stateA);
-    dec_sb <= decode_state(stateB);
+    dec_sa0 <= decode_state(stateA);
+    dec_sb0 <= decode_state(stateB);
   end process;
 
   -- State Machine

@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.debug_pkg.ALL;
 
 entity mips_stall_lw_add_tb is
 end entity;
@@ -18,7 +19,9 @@ architecture testbench of mips_stall_lw_add_tb is
       reg_wd : out std_logic_vector(31 downto 0);
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       ja : out std_logic_vector(27 downto 0);
-      alures : out std_logic_vector(31 downto 0)
+      alures : out std_logic_vector(31 downto 0);
+      -- for scan
+      dec_sa, dec_sb : out state_vector_type
     );
   end component;
 
@@ -30,6 +33,7 @@ architecture testbench of mips_stall_lw_add_tb is
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
+  signal dec_sa, dec_sb : state_vector_type;
 
   constant memfile : string := "./assets/mem/stall_lw_add.hex";
   constant clk_period : time := 10 ns;
@@ -45,7 +49,8 @@ begin
     reg_wd => reg_wd,
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
-    alures => alures
+    alures => alures,
+    dec_sa => dec_sa, dec_sb => dec_sb
   );
 
   clk_process: process

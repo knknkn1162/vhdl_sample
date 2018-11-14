@@ -21,21 +21,27 @@ all:
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
 mips_all : forwarding_addi_add forwarding_add_add stall_lw_add
-mips: datapath controller mip
+mips_tb: datapath controller mips debug_pkg
 	ghdl -a ./tests/mips_${F}_tb.vhdl
 	make er F=mips_${F}
-mip: 
+mips: debug_pkg
 	ghdl -a mips.vhdl
 forwarding_addi_add:
-	make mips F=forwarding_addi_add
+	make mips_tb F=forwarding_addi_add
 forwarding_add_add:
-	make mips F=forwarding_add_add
+	make mips_tb F=forwarding_add_add
 stall_lw_add:
-	make mips F=stall_lw_add
+	make mips_tb F=stall_lw_add
 datapath: memrw decode regrw calc memadr
 	make all F=datapath
-controller: instr_shift_register
-	ghdl -a controller_pkg.vhdl controller.vhdl
+controller: instr_shift_register controller_pkg debug_pkg
+	ghdl -a controller.vhdl
+debug_pkg: state_pkg
+	ghdl -a debug_pkg.vhdl
+controller_pkg: state_pkg
+	ghdl -a controller_pkg.vhdl
+state_pkg:
+	ghdl -a state_pkg.vhdl
 memrw: mem
 	make all F=memrw
 decode: flopr_en

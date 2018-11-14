@@ -1,18 +1,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.state_pkg.ALL;
 
 package controller_pkg is
-  type statetype is (
-    -- soon after the initialization
-    Wait2S, WaitS,
-    InitS, LoadS,
-    FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
-    MemWriteS,
-    RtypeCalcS, ALUWriteBackS,
-    BranchS,
-    AddiCalcS, AddiWriteBackS,
-    JumpS
-  );
   subtype optype is std_logic_vector(5 downto 0);
   subtype functtype is std_logic_vector(5 downto 0);
 
@@ -42,7 +32,6 @@ package controller_pkg is
   constant FUNCT_SUB : functtype := "100010"; -- 0x22
   constant FUNCT_SUBU : functtype := "100011"; -- 0x23
 
-  function decode_state(state: statetype) return std_logic_vector;
   function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0); load : std_logic) return statetype;
   function get_pc_en(state: statetype) return std_logic;
   function get_instr_en(state: statetype) return std_logic;
@@ -57,33 +46,6 @@ package controller_pkg is
 end package;
 
 package body controller_pkg is
-  -- for debug
-  function decode_state(state: statetype) return std_logic_vector is
-    variable ret : std_logic_vector(6 downto 0);
-  begin
-    case state is
-      when WaitS | Wait2S =>
-        ret := "0000000";
-      when InitS =>
-        ret := "0000010";
-      when LoadS =>
-        ret := "0000011";
-      when FetchS =>
-        ret := "0000100";
-      when DecodeS =>
-        ret := "0001000";
-      when AdrCalcS | RtypeCalcS | AddiCalcS | BranchS | JumpS =>
-        ret := "0010000";
-      when MemReadS =>
-        ret := "0100000";
-      when RegWriteBackS | ALUWriteBackS | AddiWriteBackS =>
-        ret := "1000000";
-      when others =>
-        -- do nothing
-    end case;
-    return ret;
-  end function;
-
   function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0); load : std_logic) return statetype is
     variable nextstate : statetype;
   begin
