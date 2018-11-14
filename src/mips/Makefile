@@ -20,13 +20,18 @@ all:
 	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-mips : forwarding_addi_add
-forwarding_addi_add : datapath controller
-	ghdl -a mips.vhdl ./tests/mips_forwarding_addi_add_tb.vhdl
-	make er F=mips_forwarding_addi_add
-forwarding_add_add : datapath controller
-	ghdl -a mips.vhdl ./tests/mips_forwarding_add_add_tb.vhdl
-	make er F=mips_forwarding_add_add
+mips_all : forwarding_addi_add forwarding_add_add stall_lw_add
+mips: datapath controller mip
+	ghdl -a ./tests/mips_${F}_tb.vhdl
+	make er F=mips_${F}
+mip: 
+	ghdl -a mips.vhdl
+forwarding_addi_add:
+	make mips F=forwarding_addi_add
+forwarding_add_add:
+	make mips F=forwarding_add_add
+stall_lw_add:
+	make mips F=stall_lw_add
 datapath: memrw decode regrw calc memadr
 	make all F=datapath
 controller: instr_shift_register
@@ -35,7 +40,7 @@ memrw: mem
 	make all F=memrw
 decode: flopr_en
 	make all F=decode
-regrw: reg sgnext mux2
+regrw: reg sgnext mux2 shift_register2
 	make all F=regrw
 calc: flopr_en alu mux2 slt2
 	make all F=calc
