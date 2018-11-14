@@ -68,12 +68,17 @@ begin
     wait for clk_period;
     -- (InitS, Wait2S)
     rst <= '1'; wait for 1 ns; rst <= '0';
+    assert dec_sa = CONST_INITS; assert dec_sb = CONST_WAITS;
+
     -- syncronous reset
     load <= '1'; wait for clk_period/2; load <= '0';
+
     -- (LoadS, WaitS)
+    assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS;
     wait for clk_period;
 
     -- (FetchS, InitS)
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_INITS;
     -- -- FetchS : lw $s0, 12($0)
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"8C10000C";
@@ -82,6 +87,7 @@ begin
     wait for clk_period;
 
     -- (DecodeS, FetchS)
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS;
     -- -- DecodeS : lw $s0, 12($0)
     assert rds = X"00000000"; assert immext = X"0000000C";
     -- -- FetchS : add $s1, $s0, $s0
@@ -90,6 +96,7 @@ begin
     wait for clk_period;
 
     -- (CalcS, DecodeS)
+    assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
     assert pc = X"00000008"; assert pcnext = X"0000000C";
     -- CalcS(AdrCalcS) : lw $s0, 12($0)
     assert alures = X"0000000C";
@@ -98,6 +105,7 @@ begin
     wait for clk_period;
 
     -- (MemReadS, DecodeS) [Stall]
+    assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_DECODES;
     -- MemReadS : lw $s0, 12($0)
     assert addr = X"0000000C"; assert mem_rd = X"00000048";
     -- DecodeS : add $s1, $s0, $s0
@@ -105,6 +113,7 @@ begin
     wait for clk_period;
 
     -- (RegWriteBackS, CalcS)
+    assert dec_sa = CONST_REGWBS; assert dec_sb = CONST_CALCS;
     -- -- RegWriteBackS : lw $s0, 12($0)
     assert reg_wa = "10000"; assert reg_wd = X"00000048";
     -- -- CalcS
@@ -112,6 +121,7 @@ begin
     wait for clk_period;
 
     -- (-, ALUWritebackS)
+    assert dec_sb = CONST_REGWBS;
     -- -- ALUWriteBackS : add $s1, $s0, $s0
     assert reg_wa = "10001"; assert reg_wd = X"00000090";
 
