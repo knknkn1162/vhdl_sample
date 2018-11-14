@@ -10,7 +10,7 @@ entity datapath is
     opcode, funct : out std_logic_vector(5 downto 0);
     -- for memadr
     pc_aluout_s : in std_logic;
-    pc4_br4_ja_s : in std_logic_vector(1 downto 0);
+    pc0_br_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
     -- for memwrite
     mem_we: in std_logic;
@@ -103,7 +103,7 @@ architecture behavior of datapath is
       reg_aluout : out std_logic_vector(31 downto 0);
       -- controller
       pc_aluout_s : in std_logic;
-      pc4_br4_ja_s : in std_logic_vector(1 downto 0);
+      pc0_br_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
@@ -186,7 +186,7 @@ begin
     addr => mem_addr0,
     reg_aluout => reg_aluout0,
     -- controller
-    pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
+    pc_aluout_s => pc_aluout_s, pc0_br_s => pc0_br_s,
     pc_en => pc_en,
     -- scan
     pc => pc, pcnext => pcnext

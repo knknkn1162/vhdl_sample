@@ -8,7 +8,7 @@ entity controller is
     aluzero : in std_logic;
     -- for memadr
     pc_aluout_s : out std_logic;
-    pc4_br4_ja_s : out std_logic_vector(1 downto 0);
+    pc0_br_s : out std_logic_vector(1 downto 0);
     pc_en : out std_logic;
 
     -- for memwrite
@@ -147,16 +147,16 @@ begin
 
   -- deside pcnext
   process(state, aluzero)
-    variable pc4_br4_ja_s0 : std_logic_vector(1 downto 0);
+    variable pc0_br_s0 : std_logic_vector(1 downto 0);
   begin
     case state is
       when BranchS =>
-        pc4_br4_ja_s <= "0" & aluzero;
+        pc0_br_s <= "0" & aluzero;
       when JumpS =>
-        pc4_br4_ja_s <= "10";
+        pc0_br_s <= "10";
       when others =>
         -- pc+4
-        pc4_br4_ja_s <= "00";
+        pc0_br_s <= "00";
     end case;
   end process;
 
