@@ -21,7 +21,8 @@ architecture testbench of mips_stall_lw_add_tb is
       ja : out std_logic_vector(27 downto 0);
       alures : out std_logic_vector(31 downto 0);
       -- for scan
-      dec_sa, dec_sb : out state_vector_type
+      dec_sa, dec_sb : out state_vector_type;
+      stall_en : out std_logic
     );
   end component;
 
@@ -34,6 +35,7 @@ architecture testbench of mips_stall_lw_add_tb is
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
   signal dec_sa, dec_sb : state_vector_type;
+  signal stall_en : std_logic;
 
   constant memfile : string := "./assets/mem/stall_lw_add.hex";
   constant clk_period : time := 10 ns;
@@ -50,7 +52,8 @@ begin
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
     alures => alures,
-    dec_sa => dec_sa, dec_sb => dec_sb
+    dec_sa => dec_sa, dec_sb => dec_sb,
+    stall_en => stall_en
   );
 
   clk_process: process
@@ -97,6 +100,7 @@ begin
 
     -- (CalcS, DecodeS)
     assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
+    assert stall_en = '1';
     assert pc = X"00000008"; assert pcnext = X"0000000C";
     -- CalcS(AdrCalcS) : lw $s0, 12($0)
     assert alures = X"0000000C";

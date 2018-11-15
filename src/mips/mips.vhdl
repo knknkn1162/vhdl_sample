@@ -17,7 +17,9 @@ entity mips is
     ja : out std_logic_vector(27 downto 0);
     alures : out std_logic_vector(31 downto 0);
     -- for scan
-    dec_sa, dec_sb : out state_vector_type
+    dec_sa, dec_sb : out state_vector_type;
+    -- -- check stall or not
+    stall_en : out std_logic
   );
 end entity;
 
@@ -171,4 +173,5 @@ begin
     calc_en => calc_en,
     dec_sa => dec_sa, dec_sb => dec_sb
   );
+  stall_en <= not calc_en;
 end architecture;
