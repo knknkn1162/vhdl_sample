@@ -1,6 +1,5 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.controller_pkg.ALL;
 use work.state_pkg.ALL;
 
 package debug_pkg is
