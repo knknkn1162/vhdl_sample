@@ -12,7 +12,8 @@ entity calc is
     ja : out std_logic_vector(27 downto 0);
     -- controller
     alucont : in std_logic_vector(2 downto 0);
-    rdt_immext_s : in std_logic
+    rdt_immext_s : in std_logic;
+    calc_en : in std_logic
   );
 end entity;
 
@@ -61,19 +62,19 @@ architecture behavior of calc is
 
 begin
   reg_rds : flopr_en port map (
-    clk => clk, rst => rst, en => '1',
+    clk => clk, rst => rst, en => calc_en,
     a => rds,
     y => srca
   );
 
   reg_rdt : flopr_en port map (
-    clk => clk, rst => rst, en => '1',
+    clk => clk, rst => rst, en => calc_en,
     a => rdt,
     y => rdt0
   );
 
   reg_immext : flopr_en port map (
-    clk => clk, rst => rst, en => '1',
+    clk => clk, rst => rst, en => calc_en,
     a => immext,
     y => immext0
   );

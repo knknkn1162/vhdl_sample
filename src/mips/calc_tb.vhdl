@@ -17,7 +17,8 @@ architecture testbench of calc_tb is
       ja : out std_logic_vector(27 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
-      rdt_immext_s : in std_logic
+      rdt_immext_s : in std_logic;
+      calc_en : in std_logic
     );
   end component;
 
@@ -28,7 +29,7 @@ architecture testbench of calc_tb is
   signal ja : std_logic_vector(27 downto 0);
   signal aluzero : std_logic;
   signal alucont : std_logic_vector(2 downto 0);
-  signal rdt_immext_s : std_logic;
+  signal rdt_immext_s, calc_en : std_logic;
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
@@ -42,7 +43,8 @@ begin
     ja => ja,
     -- controller
     alucont => alucont,
-    rdt_immext_s => rdt_immext_s
+    rdt_immext_s => rdt_immext_s,
+    calc_en => calc_en
   );
 
   clk_process: process
@@ -57,6 +59,7 @@ begin
   stim_proc : process
   begin
     wait for clk_period;
+    calc_en <= '1';
     rst <= '1'; wait for 1 ns; rst <= '0';
 
     -- for lw or sw instructions
