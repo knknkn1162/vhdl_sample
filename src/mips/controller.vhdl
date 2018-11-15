@@ -27,6 +27,7 @@ entity controller is
     -- for calc
     alucont : out std_logic_vector(2 downto 0);
     rdt_immext_s : out std_logic;
+    calc_en : out std_logic;
     -- for scan
     dec_sa, dec_sb : out state_vector_type
   );
@@ -39,6 +40,7 @@ architecture behavior of controller is
   signal instr_shift_en : std_logic;
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
+  signal ena : std_logic;
 
 
   component instr_shift_register
@@ -57,8 +59,11 @@ begin
       stateA <= InitS;
       stateB <= Wait2S;
     elsif rising_edge(clk) then
-      stateA <= nextStateA;
-      stateB <= nextStateB;
+      -- if stall
+      if ena = '1' then
+        stateA <= nextStateA;
+        stateB <= nextStateB;
+      end if;
     end if;
   end process;
 
@@ -112,6 +117,13 @@ begin
         if stateB = DecodeS and calcs_rd = rs then
           rd1_aluforward_s0 := '1';
         end if;
+
+      -- lw $s0, 20($t2) -- lw $rt, imm($rs)
+      -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
+      when MemReadS =>
+        if stateB = DecodeS and calcs_rt = rs then
+          rd1_aluforward_s0 := '1';
+        end if;
       when others =>
         -- do nothing
     end case;
@@ -131,10 +143,30 @@ begin
         if stateB = DecodeS and calcs_rd = rt then
           rd2_aluforward_s0 := '1';
         end if;
+
+      -- lw $s0, 20($t2) -- lw $rt, imm($rs)
+      -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+      when MemReadS =>
+        if stateB = DecodeS and calcs_rt = rt then
+          rd2_aluforward_s0 := '1';
+        end if;
       when others =>
         -- do nothing
     end case;
     rd2_aluforward_s <= rd2_aluforward_s0;
+  end process;
+
+  -- stall
+  process(stateA, stateB, calcs_opcode, rs, rt)
+    variable ena0 : std_logic;
+  begin
+    ena0 := '1';
+    if stateA = AdrCalcS and calcs_opcode = OP_LW then
+      if calcs_rt = rt or calcs_rt = rs then
+        ena0 := '0';
+      end if;
+    end if;
+    ena <= ena0;
   end process;
 
   process(stateA, stateB)
@@ -160,7 +192,7 @@ begin
     pc_aluout_s <= pc_aluout_sA or pc_aluout_sB;
 
     pc_enA := get_pc_en(stateA); pc_enB := get_pc_en(stateB);
-    pc_en <= pc_enA or pc_enB;
+    pc_en <= (pc_enA or pc_enB) and ena;
 
     -- for memwrite
     mem_weA := get_mem_we(stateA); mem_weB := get_mem_we(stateB);
@@ -168,9 +200,12 @@ begin
 
     -- for decode
 
+    -- for calc
+    calc_en <= ena;
+
     -- for writeback
     instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);
-    instr_en <= instr_enA or instr_enB;
+    instr_en <= (instr_enA or instr_enB) and ena;
 
     reg_weA := get_reg_we(stateA); reg_weB := get_reg_we(stateB);
     reg_we <= reg_weA or reg_weB;

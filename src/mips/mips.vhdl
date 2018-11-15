@@ -46,6 +46,7 @@ architecture behavior of mips is
       -- for calc
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
+      calc_en : in std_logic;
       aluzero : out std_logic;
       
       -- scan for testbench
@@ -82,6 +83,8 @@ architecture behavior of mips is
       -- for calc
       alucont : out std_logic_vector(2 downto 0);
       rdt_immext_s : out std_logic;
+      calc_en : out std_logic;
+      -- scan for debug
       dec_sa, dec_sb : out state_vector_type
     );
   end component;
@@ -101,6 +104,7 @@ architecture behavior of mips is
   -- for calc
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
+  signal calc_en : std_logic;
   signal aluzero : std_logic;
 
   -- for memadr
@@ -132,6 +136,7 @@ begin
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
     aluzero => aluzero,
+    calc_en => calc_en,
     
     -- scan for testbench
     pc => pc, pcnext => pcnext,

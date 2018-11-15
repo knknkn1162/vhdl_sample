@@ -26,6 +26,7 @@ entity datapath is
     -- for calc
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic;
+    calc_en : in std_logic;
     aluzero : out std_logic;
 
     -- scan for testbench
@@ -104,7 +105,8 @@ architecture behavior of datapath is
       ja : out std_logic_vector(27 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
-      rdt_immext_s : in std_logic
+      rdt_immext_s : in std_logic;
+      calc_en : in std_logic
     );
   end component;
 
@@ -199,7 +201,8 @@ begin
     ja => ja0,
     -- controller
     alucont => alucont,
-    rdt_immext_s => rdt_immext_s
+    rdt_immext_s => rdt_immext_s,
+    calc_en => calc_en
   );
   alures <= alures0;
   aluforward0 <= alures0; -- forwarding for pipeline

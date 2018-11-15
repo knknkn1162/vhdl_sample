@@ -29,6 +29,7 @@ architecture testbench of datapath_tb is
       -- for calc
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
+      calc_en : in std_logic;
       aluzero : out std_logic;
 
       -- scan for testbench
@@ -65,6 +66,7 @@ architecture testbench of datapath_tb is
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
   signal aluzero : std_logic;
+  signal calc_en : std_logic;
 
   -- scan for testbench
   signal pc :  std_logic_vector(31 downto 0);
@@ -103,6 +105,7 @@ begin
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
     aluzero => aluzero,
+    calc_en => calc_en,
 
     -- scan for testbench
     pc => pc,

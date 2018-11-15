@@ -109,6 +109,7 @@ package body controller_pkg is
     variable ret : std_logic;
   begin
     case state is
+      -- when initialization
       when InitS | LoadS | WaitS | Wait2S =>
         ret := '0';
       when others =>
