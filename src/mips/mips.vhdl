@@ -168,6 +168,7 @@ begin
     -- for memadr
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
+    calc_en => calc_en,
     dec_sa => dec_sa, dec_sb => dec_sb
   );
 end architecture;

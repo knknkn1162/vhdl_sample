@@ -32,7 +32,7 @@ package controller_pkg is
   constant FUNCT_SUB : functtype := "100010"; -- 0x22
   constant FUNCT_SUBU : functtype := "100011"; -- 0x23
 
-  function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0); load : std_logic) return statetype;
+  function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic) return statetype;
   function get_pc_en(state: statetype) return std_logic;
   function get_instr_en(state: statetype) return std_logic;
   function get_pc4_br4_ja_s(state : statetype; aluzero : std_logic) return std_logic_vector;
@@ -46,7 +46,7 @@ package controller_pkg is
 end package;
 
 package body controller_pkg is
-  function get_nextstate(state: statetype; opcode: std_logic_vector(5 downto 0); load : std_logic) return statetype is
+  function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic) return statetype is
     variable nextstate : statetype;
   begin
     case state is
@@ -63,25 +63,37 @@ package body controller_pkg is
       when LoadS =>
         nextState := FetchS;
       when FetchS =>
-        nextState := DecodeS;
+        -- stall
+        if ena = '1' then
+          nextState := DecodeS;
+        else
+          -- stay the same state
+          nextstate := FetchS;
+        end if;
       when DecodeS =>
-        case opcode is
-          -- lw or sw
-          when OP_LW | OP_SW =>
-            nextState := AdrCalcS;
-          when OP_RTYPE =>
-            nextState := RtypeCalcS;
-          when OP_ADDI =>
-            nextState := AddiCalcS;
-          when OP_BEQ =>
-            nextState := BranchS;
-          when OP_J =>
-            nextstate := JumpS;
-          when others =>
-            nextState := FetchS;
-        end case;
+        -- stall
+        if ena = '1' then
+          case decs_op is
+            -- lw or sw
+            when OP_LW | OP_SW =>
+              nextState := AdrCalcS;
+            when OP_RTYPE =>
+              nextState := RtypeCalcS;
+            when OP_ADDI =>
+              nextState := AddiCalcS;
+            when OP_BEQ =>
+              nextState := BranchS;
+            when OP_J =>
+              nextstate := JumpS;
+            when others =>
+              nextState := FetchS;
+          end case;
+        else
+          -- stay the same state
+          nextState := DecodeS;
+        end if;
       when AdrCalcS =>
-        case opcode is
+        case calcs_op is
           when OP_LW =>
             nextState := MemReadS;
           when OP_SW =>

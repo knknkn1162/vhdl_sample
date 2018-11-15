@@ -59,11 +59,8 @@ begin
       stateA <= InitS;
       stateB <= Wait2S;
     elsif rising_edge(clk) then
-      -- if stall
-      if ena = '1' then
-        stateA <= nextStateA;
-        stateB <= nextStateB;
-      end if;
+      stateA <= nextStateA;
+      stateB <= nextStateB;
     end if;
   end process;
 
@@ -79,8 +76,8 @@ begin
     variable stateA0, nextstateA0 : statetype;
     variable stateB0, nextstateB0 : statetype;
   begin
-    nextstateA0 := get_nextstate(stateA, opcode, load);
-    nextstateB0 := get_nextstate(stateB, opcode, load);
+    nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load, ena);
+    nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load, ena);
     -- todo : additional expr
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;
@@ -169,16 +166,30 @@ begin
     ena <= ena0;
   end process;
 
+  process(stateA, stateB, ena)
+    variable pc_enA, pc_enB : std_logic;
+    variable instr_enA, instr_enB : std_logic;
+  begin
+    -- for memadr
+    pc_enA := get_pc_en(stateA); pc_enB := get_pc_en(stateB);
+    pc_en <= (pc_enA or pc_enB) and ena;
+
+    -- for calc
+    calc_en <= ena;
+
+    -- for writeback
+    instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);
+    instr_en <= (instr_enA or instr_enB) and ena;
+  end process;
+
   process(stateA, stateB)
     -- for memadr
     variable pc_aluout_sA, pc_aluout_sB : std_logic;
-    variable pc_enA, pc_enB : std_logic;
 
     -- for memwrite
     variable mem_weA, mem_weB: std_logic;
     -- for decode
     -- for writeback
-    variable instr_enA, instr_enB : std_logic;
     variable reg_weA, reg_weB : std_logic;
     variable memrd_aluout_sA, memrd_aluout_sB : std_logic; -- for lw or addi
     variable rt_rd_sA, rt_rd_sB : std_logic; -- Itype or Rtype
@@ -191,22 +202,13 @@ begin
     pc_aluout_sA := get_pc_aluout_s(stateA); pc_aluout_sB := get_pc_aluout_s(stateB);
     pc_aluout_s <= pc_aluout_sA or pc_aluout_sB;
 
-    pc_enA := get_pc_en(stateA); pc_enB := get_pc_en(stateB);
-    pc_en <= (pc_enA or pc_enB) and ena;
-
     -- for memwrite
     mem_weA := get_mem_we(stateA); mem_weB := get_mem_we(stateB);
     mem_we <= mem_weA or mem_weB;
 
     -- for decode
 
-    -- for calc
-    calc_en <= ena;
-
     -- for writeback
-    instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);
-    instr_en <= (instr_enA or instr_enB) and ena;
-
     reg_weA := get_reg_we(stateA); reg_weB := get_reg_we(stateB);
     reg_we <= reg_weA or reg_weB;
 
