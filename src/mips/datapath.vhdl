@@ -18,7 +18,7 @@ entity datapath is
     mem_we: in std_logic;
     -- for decode
     -- forwarding for pipeline
-    rd1_aluforward_s, rd2_aluforward_s : in std_logic;
+    rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
     -- for writeback
     instr_en, reg_we : in std_logic;
     memrd_aluout_s : in std_logic; -- for lw or addi
@@ -85,8 +85,7 @@ architecture behavior of datapath is
       memrd_aluout_s : in std_logic;
       rt_rd_s : in std_logic;
       -- forwarding for pipeline
-      rd1_aluforward_s : in std_logic;
-      rd2_aluforward_s : in std_logic;
+      rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
       -- scan
       wa : out std_logic_vector(4 downto 0);
       wd : out std_logic_vector(31 downto 0)
@@ -177,7 +176,7 @@ begin
     we => reg_we,
     memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
     -- forwarding for pipeline
-    rd1_aluforward_s => rd1_aluforward_s, rd2_aluforward_s => rd2_aluforward_s,
+    rd1_aluforward_memrd_s => rd1_aluforward_memrd_s, rd2_aluforward_memrd_s => rd2_aluforward_memrd_s,
     -- scan
     wa => reg_wa0,
     wd => reg_wd0

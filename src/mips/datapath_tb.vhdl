@@ -21,7 +21,7 @@ architecture testbench of datapath_tb is
       mem_we: in std_logic;
       -- for decode
       -- forwarding for pipeline
-      rd1_aluforward_s, rd2_aluforward_s : in std_logic;
+      rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
       -- for writeback
       instr_en, reg_we : in std_logic;
       memrd_aluout_s : in std_logic; -- for lw or addi
@@ -57,7 +57,7 @@ architecture testbench of datapath_tb is
   signal mem_we: std_logic;
   -- for decode
   -- forwardg for pipele
-  signal rd1_aluforward_s, rd2_aluforward_s : std_logic;
+  signal rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : std_logic_vector(1 downto 0);
   -- for writeback
   signal instr_en, reg_we : std_logic;
   signal memrd_aluout_s : std_logic; -- for lw or addi
@@ -96,7 +96,7 @@ begin
     mem_we => mem_we,
     -- for decode
     -- forwarding for pipeline
-    rd1_aluforward_s => rd1_aluforward_s, rd2_aluforward_s => rd2_aluforward_s,
+    rd1_aluforward_memrd_s => rd1_aluforward_memrd_s, rd2_aluforward_memrd_s => rd2_aluforward_memrd_s,
     -- for writeback
     instr_en => instr_en, reg_we => reg_we,
     memrd_aluout_s => memrd_aluout_s,
