@@ -19,7 +19,7 @@ entity controller is
     mem_we: out std_logic;
     -- for decode
     -- -- forwarding for pipeline
-    rd1_aluforward_s, rd2_aluforward_s : out std_logic;
+    rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : out std_logic_vector(1 downto 0);
     -- for writeback
     instr_en, reg_we : out std_logic;
     memrd_aluout_s : out std_logic; -- for lw or addi
@@ -97,62 +97,62 @@ begin
 
   -- forwarding for pipeline
   process(stateA, stateB, rs, rt, rd)
-    variable rd1_aluforward_s0, rd2_aluforward_s0 : std_logic;
+    variable rd1_aluforward_memrd_s0, rd2_aluforward_memrd_s0 : std_logic_vector(1 downto 0);
   begin
-    rd1_aluforward_s0 := '0';
+    rd1_aluforward_memrd_s0 := "00"; rd2_aluforward_memrd_s0 := "00";
     case stateA is
       when AddiCalcS =>
-        -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
-        -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-        if stateB = DecodeS and calcs_rt = rs then
-          rd1_aluforward_s0 := '1';
+        if stateB = DecodeS then
+          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          if stateB = DecodeS and calcs_rt = rs then
+            rd1_aluforward_memrd_s0 := "01";
+          end if;
+
+          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if stateB = DecodeS and calcs_rt = rt then
+            rd2_aluforward_memrd_s0 := "01";
+          end if;
         end if;
+
       when RtypeCalcS =>
-        -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
-        -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-        -- or
-        -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-        -- addi $s1, $s1, 5 -- addi $rt, $rs, imm
-        if stateB = DecodeS and calcs_rd = rs then
-          rd1_aluforward_s0 := '1';
+        if stateB = DecodeS then
+          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          -- or
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          -- addi $s1, $s1, 5 -- addi $rt, $rs, imm
+          if calcs_rd = rs then
+            rd1_aluforward_memrd_s0 := "01";
+          end if;
+
+          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if calcs_rd = rt then
+            rd2_aluforward_memrd_s0 := "01";
+          end if;
         end if;
 
       -- lw $s0, 20($t2) -- lw $rt, imm($rs)
       -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
       when MemReadS =>
-        if stateB = DecodeS and memrw_rt = rs then
-          rd1_aluforward_s0 := '1';
+        if stateB = DecodeS then
+          if memrw_rt = rs then
+            rd1_aluforward_memrd_s0 := "10";
+          end if;
+
+          -- lw $s0, 20($t2) -- lw $rt, imm($rs)
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if memrw_rt = rt then
+            rd2_aluforward_memrd_s0 := "10";
+          end if;
         end if;
       when others =>
         -- do nothing
     end case;
-    rd1_aluforward_s <= rd1_aluforward_s0;
-
-    rd2_aluforward_s0 := '0';
-    case stateA is
-      when AddiCalcS =>
-        -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
-        -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-        if stateB = DecodeS and calcs_rt = rt then
-          rd2_aluforward_s0 := '1';
-        end if;
-      when RtypeCalCS =>
-        -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
-        -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-        if stateB = DecodeS and calcs_rd = rt then
-          rd2_aluforward_s0 := '1';
-        end if;
-
-      -- lw $s0, 20($t2) -- lw $rt, imm($rs)
-      -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-      when MemReadS =>
-        if stateB = DecodeS and memrw_rt = rt then
-          rd2_aluforward_s0 := '1';
-        end if;
-      when others =>
-        -- do nothing
-    end case;
-    rd2_aluforward_s <= rd2_aluforward_s0;
+    rd1_aluforward_memrd_s <= rd1_aluforward_memrd_s0;
+    rd2_aluforward_memrd_s <= rd2_aluforward_memrd_s0;
   end process;
 
   -- stall
