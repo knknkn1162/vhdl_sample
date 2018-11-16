@@ -18,8 +18,7 @@ entity regrw is
     memrd_aluout_s : in std_logic;
     rt_rd_s : in std_logic;
     -- forwarding for pipeline
-    rd1_aluforward_s : in std_logic;
-    rd2_aluforward_s : in std_logic;
+    rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
     -- scan
     wa : out std_logic_vector(4 downto 0);
     wd : out std_logic_vector(31 downto 0)
@@ -80,13 +79,25 @@ architecture behavior of regrw is
         );
   end component;
 
+
+  component mux4
+    generic(N : natural);
+    port (
+      d00 : in std_logic_vector(N-1 downto 0);
+      d01 : in std_logic_vector(N-1 downto 0);
+      d10 : in std_logic_vector(N-1 downto 0);
+      d11 : in std_logic_vector(N-1 downto 0);
+      s : in std_logic_vector(1 downto 0);
+      y : out std_logic_vector(N-1 downto 0)
+    );
+  end component;
+
   signal rt_rd, dummy10, rt_rd0 : std_logic_vector(9 downto 0);
   signal wa0 : std_logic_vector(4 downto 0);
   signal mem_rd0, wd0 : std_logic_vector(31 downto 0);
   signal rd1, rd2 : std_logic_vector(31 downto 0);
 
 begin
-
   reg_wdata : flopr_en port map (
     clk => clk, rst => rst, en => '1',
     a => mem_rd,
@@ -126,22 +137,25 @@ begin
   );
   wa <= wa0; wd <= wd0;
 
-  rd1_aluforward_mux : mux2 generic map(N=>32)
+  rd1_aluforward_memrd_mux : mux4 generic map(N=>32)
   port map (
-    d0 => rd1,
-    d1 => aluforward,
-    s => rd1_aluforward_s,
+    d00 => rd1,
+    d01 => aluforward,
+    d10 => mem_rd0,
+    d11 => rd1, -- dummy
+    s => rd1_aluforward_memrd_s,
     y => rds
   );
 
-  rd2_aluforward_mux : mux2 generic map (N=>32)
+  rd2_aluforward_memrd_mux : mux4 generic map(N=>32)
   port map (
-    d0 => rd2,
-    d1 => aluforward,
-    s => rd2_aluforward_s,
+    d00 => rd2,
+    d01 => aluforward,
+    d10 => mem_rd0,
+    d11 => rd2, -- dummy
+    s => rd2_aluforward_memrd_s,
     y => rdt
   );
-
 
   sgnext0 : sgnext port map (
     a => imm,

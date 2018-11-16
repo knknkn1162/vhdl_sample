@@ -19,8 +19,8 @@ architecture testbench of regrw_tb is
       -- controller
       we : in std_logic;
       memrd_aluout_s , rt_rd_s: in std_logic;
-      -- -- forwarding for pipeline
-      rd1_aluforward_s, rd2_aluforward_s : in std_logic;
+      -- forwarding for pipeline
+      rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
       -- scan
       wa : out std_logic_vector(4 downto 0);
       wd : out std_logic_vector(31 downto 0)
@@ -37,7 +37,7 @@ architecture testbench of regrw_tb is
   signal we : std_logic;
   signal memrd_aluout_s, rt_rd_s : std_logic;
   -- forwarding or pipeline
-  signal rd1_aluforward_s, rd2_aluforward_s : std_logic;
+  signal rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : std_logic_vector(1 downto 0);
 
   -- scan
   signal wa : std_logic_vector(4 downto 0);
@@ -59,7 +59,7 @@ begin
     we => we,
     memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
     -- forwarding for pipeline
-    rd1_aluforward_s => rd1_aluforward_s, rd2_aluforward_s => rd2_aluforward_s,
+    rd1_aluforward_memrd_s => rd1_aluforward_memrd_s, rd2_aluforward_memrd_s => rd2_aluforward_memrd_s,
     -- scan
     wa => wa, wd => wd
   );
@@ -82,10 +82,10 @@ begin
     -- read immediate extended 32 bit
     imm <= X"0020"; wait for 1 ns; assert immext = X"00000020";
     -- read aluforwarding instead of regval
-    rs <= "00001"; aluforward <= X"0000000F"; rd1_aluforward_s <= '1'; wait for 1 ns;
-    assert rds = X"0000000F"; rd1_aluforward_s <= '0';
-    rt <= "00001"; aluforward <= X"0000000E"; rd2_aluforward_s <= '1'; wait for 1 ns;
-    assert rdt = X"0000000E"; rd2_aluforward_s <= '0';
+    rs <= "00001"; aluforward <= X"0000000F"; rd1_aluforward_memrd_s <= "01"; wait for 1 ns;
+    assert rds = X"0000000F"; rd1_aluforward_memrd_s <= "00";
+    rt <= "00001"; aluforward <= X"0000000E"; rd2_aluforward_memrd_s <= "01"; wait for 1 ns;
+    assert rdt = X"0000000E"; rd2_aluforward_memrd_s <= "00";
 
     -- reg writeback
     rt <= "00010"; we <= '1'; mem_rd <= X"0000000A"; memrd_aluout_s <= '0';
