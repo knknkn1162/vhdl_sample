@@ -113,7 +113,7 @@ begin
     -- MemReadS : lw $s0, 12($0)
     assert addr = X"0000000C"; assert mem_rd = X"00000048";
     -- DecodeS : add $s1, $s0, $s0
-    assert alures = X"00000090";
+    assert rds = X"00000048"; assert rdt = X"00000048";
     wait for clk_period;
 
     -- (RegWriteBackS, CalcS)
