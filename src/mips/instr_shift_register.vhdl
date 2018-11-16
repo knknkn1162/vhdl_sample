@@ -4,10 +4,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity instr_shift_register is
   port (
     clk, rst, en : in std_logic;
-    nxt_opcode, nxt_funct : in std_logic_vector(5 downto 0);
-    nxt_rs, nxt_rt, nxt_rd : in std_logic_vector(4 downto 0);
-    cur_opcode, cur_funct : out std_logic_vector(5 downto 0);
-    cur_rs, cur_rt, cur_rd : out std_logic_vector(4 downto 0)
+    opcode0, funct0 : in std_logic_vector(5 downto 0);
+    rs0, rt0, rd0 : in std_logic_vector(4 downto 0);
+    opcode1, funct1 : out std_logic_vector(5 downto 0);
+    rs1, rt1, rd1 : out std_logic_vector(4 downto 0);
+    opcode2, funct2 : out std_logic_vector(5 downto 0);
+    rs2, rt2, rd2 : out std_logic_vector(4 downto 0)
   );
 end entity;
 
@@ -25,20 +27,25 @@ architecture behavior of instr_shift_register is
 
   -- 5*3+6*2=27
   constant N : natural := 27;
-  signal nxt : std_logic_vector(N-1 downto 0);
-  signal cur : std_logic_vector(N-1 downto 0);
+  signal x0 : std_logic_vector(N-1 downto 0);
+  signal x1 : std_logic_vector(N-1 downto 0);
+  signal x2 : std_logic_vector(N-1 downto 0);
 begin
-  nxt <= nxt_opcode & nxt_rs & nxt_rt & nxt_rd & nxt_funct;
+  x0 <= opcode0 & rs0 & rt0 & rd0 & funct0;
 
   flopr_en0 : flopr_en generic map(N=>N)
   port map (
     clk => clk, rst => rst, en => en,
-    a => nxt, y => cur
+    a => x0, y => x1
   );
 
-  cur_opcode <= cur(26 downto 21);
-  cur_rs <= cur(20 downto 16);
-  cur_rt <= cur(15 downto 11);
-  cur_rd <= cur(10 downto 6);
-  cur_funct <= cur(5 downto 0);
+  flopr_en1 : flopr_en generic map(N=>N)
+  port map (
+    clk => clk, rst => rst, en => en,
+    a => x1, y => x2
+  );
+
+  opcode1 <= x1(26 downto 21); rs1 <= x1(20 downto 16); rt1 <= x1(15 downto 11); rd1 <= x1(10 downto 6); funct1 <= x1(5 downto 0);
+  opcode2 <= x2(26 downto 21); rs2 <= x2(20 downto 16); rt2 <= x2(15 downto 11); rd2 <= x2(10 downto 6); funct2 <= x2(5 downto 0);
+
 end architecture;
