@@ -71,15 +71,31 @@ architecture behavior of regrw is
     );
   end component;
 
+  component flopr_en
+    generic(N : natural := 32);
+    port (
+      clk, rst, en: in std_logic;
+      a : in std_logic_vector(N-1 downto 0);
+      y : out std_logic_vector(N-1 downto 0)
+        );
+  end component;
+
   signal rt_rd, dummy10, rt_rd0 : std_logic_vector(9 downto 0);
   signal wa0 : std_logic_vector(4 downto 0);
-  signal wd0 : std_logic_vector(31 downto 0);
+  signal mem_rd0, wd0 : std_logic_vector(31 downto 0);
   signal rd1, rd2 : std_logic_vector(31 downto 0);
 
 begin
+
+  reg_wdata : flopr_en port map (
+    clk => clk, rst => rst, en => '1',
+    a => mem_rd,
+    y => mem_rd0
+  );
+
   memrd_aluout_mux : mux2 generic map(N=>32)
   port map (
-    d0 => mem_rd,
+    d0 => mem_rd0,
     d1 => aluout,
     s => memrd_aluout_s,
     y => wd0

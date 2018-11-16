@@ -12,7 +12,6 @@ architecture testbench of decode_tb is
       rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
       imm : out std_logic_vector(15 downto 0);
       target : out std_logic_vector(25 downto 0);
-      reg_memrd : out std_logic_vector(31 downto 0);
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
       instr_en : in std_logic
@@ -24,7 +23,6 @@ architecture testbench of decode_tb is
   signal rs, rt, rd, shamt : std_logic_vector(4 downto 0);
   signal imm : std_logic_vector(15 downto 0);
   signal target : std_logic_vector(25 downto 0);
-  signal reg_memrd : std_logic_vector(31 downto 0);
   signal opcode, funct : std_logic_vector(5 downto 0);
   signal instr_en : std_logic;
   -- controller
@@ -38,7 +36,6 @@ begin
     rs => rs, rt => rt, rd => rd, shamt => shamt,
     imm => imm,
     target => target,
-    reg_memrd => reg_memrd,
     -- controller
     opcode => opcode, funct => funct,
     instr_en => instr_en
@@ -71,11 +68,6 @@ begin
     -- X"00105100"
     mem_rd <= X"00105100"; instr_en <= '1'; wait for clk_period;
     assert rs = "00000"; assert rt = "10000"; assert rd = "01010"; assert shamt = "00100"; assert opcode = "000000";
-
-    -- write
-    mem_rd <= X"000000FF"; instr_en <= '0'; wait for clk_period;
-    assert rs = "00000"; assert rt = "10000"; assert rd = "01010"; assert shamt = "00100"; assert opcode = "000000";
-    assert reg_memrd = X"000000FF";
 
     -- skip
     stop <= TRUE;

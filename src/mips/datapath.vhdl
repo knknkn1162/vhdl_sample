@@ -61,7 +61,6 @@ architecture behavior of datapath is
       rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
       imm : out std_logic_vector(15 downto 0);
       target : out std_logic_vector(25 downto 0);
-      reg_memrd : out std_logic_vector(31 downto 0);
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
       instr_en : in std_logic
@@ -134,7 +133,7 @@ architecture behavior of datapath is
   signal target0 : std_logic_vector(25 downto 0);
   signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
   signal ja0 : std_logic_vector(27 downto 0);
-  signal reg_aluout0, reg_memrd0 : std_logic_vector(31 downto 0);
+  signal reg_aluout0 : std_logic_vector(31 downto 0);
   signal reg_wa0 : std_logic_vector(4 downto 0);
   signal reg_wd0 : std_logic_vector(31 downto 0);
   signal alures0 : std_logic_vector(31 downto 0);
@@ -162,7 +161,6 @@ begin
     rs => rs0, rt => rt0, rd => rd0, shamt => shamt0,
     imm => imm0,
     target => target0,
-    reg_memrd => reg_memrd0,
     -- controller
     opcode => opcode, funct => funct,
     instr_en => instr_en
@@ -173,7 +171,7 @@ begin
   port map (
     clk => clk, rst => rst, load => load,
     rs => rs0, rt => rt0, rd => rd0,
-    mem_rd => reg_memrd0, aluout => reg_aluout0,
+    mem_rd => mem_rd0, aluout => reg_aluout0,
     imm => imm0,
     rds => rds0, rdt => rdt0, immext => immext0,
     -- forwarding for pipeline

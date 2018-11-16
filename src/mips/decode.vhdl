@@ -9,7 +9,6 @@ entity decode is
     rs, rt, rd, shamt : out std_logic_vector(4 downto 0);
     imm : out std_logic_vector(15 downto 0);
     target : out std_logic_vector(25 downto 0);
-    reg_memrd : out std_logic_vector(31 downto 0);
     -- controller
     opcode, funct : out std_logic_vector(5 downto 0);
     instr_en : in std_logic
@@ -41,10 +40,4 @@ begin
   rd <= instr0(15 downto 11);
   shamt <= instr0(10 downto 6);
   funct <= instr0(5 downto 0);
-
-  reg_wdata : flopr_en port map (
-    clk => clk, rst => rst, en => '1',
-    a => mem_rd,
-    y => reg_memrd
-  );
 end architecture;
