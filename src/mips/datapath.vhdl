@@ -139,9 +139,6 @@ architecture behavior of datapath is
   signal alures0 : std_logic_vector(31 downto 0);
   signal brplus0 : std_logic_vector(31 downto 0);
 
-  -- pipeline
-  signal aluforward0 : std_logic_vector(31 downto 0);
-
 begin
   mem_wd0 <= rdt0;
   memrw0 : memrw generic map (memfile=>memfile)
@@ -175,7 +172,7 @@ begin
     imm => imm0,
     rds => rds0, rdt => rdt0, immext => immext0,
     -- forwarding for pipeline
-    aluforward => aluforward0,
+    aluforward => alures0,
     -- controller
     we => reg_we,
     memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
@@ -203,7 +200,6 @@ begin
     calc_en => calc_en
   );
   alures <= alures0;
-  aluforward0 <= alures0; -- forwarding for pipeline
 
   memadr0 : memadr port map (
     clk => clk, rst => rst,
