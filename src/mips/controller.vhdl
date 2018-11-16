@@ -96,7 +96,7 @@ begin
   );
 
   -- forwarding for pipeline
-  process(stateA, stateB, rs, rt, rd)
+  process(stateA, stateB, rs, rt, rd, memrw_rt)
     variable rd1_aluforward_memrd_s0, rd2_aluforward_memrd_s0 : std_logic_vector(1 downto 0);
   begin
     rd1_aluforward_memrd_s0 := "00"; rd2_aluforward_memrd_s0 := "00";

@@ -141,7 +141,7 @@ begin
   port map (
     d00 => rd1,
     d01 => aluforward,
-    d10 => mem_rd0,
+    d10 => mem_rd, -- from memrw
     d11 => rd1, -- dummy
     s => rd1_aluforward_memrd_s,
     y => rds
@@ -151,7 +151,7 @@ begin
   port map (
     d00 => rd2,
     d01 => aluforward,
-    d10 => mem_rd0,
+    d10 => mem_rd, -- from memrw
     d11 => rd2, -- dummy
     s => rd2_aluforward_memrd_s,
     y => rdt
