@@ -37,19 +37,21 @@ architecture behavior of controller is
   signal stateA, nextstateA : statetype;
   signal dec_sa0, dec_sb0 : state_vector_type;
   signal stateB, nextstateB : statetype;
-  signal instr_shift_en : std_logic;
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
+  signal memrw_opcode, memrw_funct : std_logic_vector(5 downto 0);
+  signal memrw_rs, memrw_rt, memrw_rd : std_logic_vector(4 downto 0);
   signal ena : std_logic;
 
-
-  component instr_shift_register
+  component instr_shift_register is
     port (
       clk, rst, en : in std_logic;
-      nxt_opcode, nxt_funct : in std_logic_vector(5 downto 0);
-      nxt_rs, nxt_rt, nxt_rd : in std_logic_vector(4 downto 0);
-      cur_opcode, cur_funct : out std_logic_vector(5 downto 0);
-      cur_rs, cur_rt, cur_rd : out std_logic_vector(4 downto 0)
+      opcode0, funct0 : in std_logic_vector(5 downto 0);
+      rs0, rt0, rd0 : in std_logic_vector(4 downto 0);
+      opcode1, funct1 : out std_logic_vector(5 downto 0);
+      rs1, rt1, rd1 : out std_logic_vector(4 downto 0);
+      opcode2, funct2 : out std_logic_vector(5 downto 0);
+      rs2, rt2, rd2 : out std_logic_vector(4 downto 0)
     );
   end component;
 
@@ -83,14 +85,14 @@ begin
     nextstateB <= nextstateB0;
   end process;
 
-
-  instr_shift_en <= '1';
   instr_shift_register0 : instr_shift_register port map (
-    clk => clk, rst => rst, en => instr_shift_en,
-    nxt_opcode => opcode, nxt_funct => funct,
-    nxt_rs => rs, nxt_rt => rt, nxt_rd => rd,
-    cur_opcode => calcs_opcode, cur_funct => calcs_funct,
-    cur_rs => calcs_rs, cur_rt => calcs_rt, cur_rd => calcs_rd
+    clk => clk, rst => rst, en => '1',
+    opcode0 => opcode, funct0 => funct,
+    rs0 => rs, rt0 => rt, rd0 => rd,
+    opcode1 => calcs_opcode, funct1 => calcs_funct,
+    rs1 => calcs_rs, rt1 => calcs_rt, rd1 => calcs_rd,
+    opcode2 => memrw_opcode, funct2 => memrw_funct,
+    rs2 => memrw_rs, rt2 => memrw_rt, rd2 => memrw_rd
   );
 
   -- forwarding for pipeline
@@ -118,7 +120,7 @@ begin
       -- lw $s0, 20($t2) -- lw $rt, imm($rs)
       -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
       when MemReadS =>
-        if stateB = DecodeS and calcs_rt = rs then
+        if stateB = DecodeS and memrw_rt = rs then
           rd1_aluforward_s0 := '1';
         end if;
       when others =>
@@ -144,7 +146,7 @@ begin
       -- lw $s0, 20($t2) -- lw $rt, imm($rs)
       -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
       when MemReadS =>
-        if stateB = DecodeS and calcs_rt = rt then
+        if stateB = DecodeS and memrw_rt = rt then
           rd2_aluforward_s0 := '1';
         end if;
       when others =>
