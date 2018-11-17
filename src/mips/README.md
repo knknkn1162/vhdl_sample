@@ -24,7 +24,7 @@ add $s1, $s0, $s0
 
 ```asm
 lw $s0, 12($0)
-addi $s1, $s0, $s0
+addi $s1, $s0, 5
 ```
 
 ### prefetch

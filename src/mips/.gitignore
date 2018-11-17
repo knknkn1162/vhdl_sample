@@ -3,6 +3,7 @@
 *.o
 *.vcd
 work-obj93.cf
+!*/*
 !*.vhdl
 !assets
 !Makefile
