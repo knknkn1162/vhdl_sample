@@ -1,7 +1,7 @@
 F=dummy
 VHDL=vhdl
 MEM=dummy
-TESTBENCHES="forwarding_addi_add forwarding_add_add stall_lw_add stall_lw_addi"
+TESTBENCHES="add_add forwarding_addi_add forwarding_add_add stall_lw_add stall_lw_addi"
 
 clean:
 	rm -f work-obj93.cf *.o *.vcd
@@ -30,6 +30,8 @@ mips: datapath controller debug_pkg
 	ghdl -a mips.vhdl
 forwarding_addi_add:
 	make mips_tb F=forwarding_addi_add
+add_add:
+	make mips_tb F=add_add
 forwarding_add_add:
 	make mips_tb F=forwarding_add_add
 stall_lw_add:
