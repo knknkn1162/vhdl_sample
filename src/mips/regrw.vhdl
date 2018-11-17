@@ -6,6 +6,7 @@ entity regrw is
   port (
     clk, rst, load : in std_logic;
     rs, rt, rd : in std_logic_vector(4 downto 0);
+    memrds_rt, memrds_rd : std_logic_vector(4 downto 0);
     mem_rd : in std_logic_vector(31 downto 0);
     aluout : in std_logic_vector(31 downto 0);
     imm : in std_logic_vector(15 downto 0);
@@ -112,18 +113,10 @@ begin
     y => wd0
   );
 
-  -- To wait for RegWritebackS
-  rt_rd <= rt & rd;
-  rt_rd_shift : shift_register2 generic map(N=>10)
-  port map (
-    clk => clk, rst => rst, en => '1',
-    a0 => rt_rd, a1 => dummy10, a2 => rt_rd0
-  );
-
   rt_rd_mux : mux2 generic map (N=>5)
   port map (
-    d0 => rt_rd0(9 downto 5),
-    d1 => rt_rd0(4 downto 0),
+    d0 => memrds_rt,
+    d1 => memrds_rd,
     s => rt_rd_s,
     y => wa0
   );

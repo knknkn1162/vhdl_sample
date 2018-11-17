@@ -10,6 +10,7 @@ architecture testbench of regrw_tb is
     port (
       clk, rst, load : in std_logic;
       rs, rt, rd : in std_logic_vector(4 downto 0);
+      memrds_rt, memrds_rd : std_logic_vector(4 downto 0);
       mem_rd, aluout : in std_logic_vector(31 downto 0);
       imm : in std_logic_vector(15 downto 0);
 
@@ -28,7 +29,7 @@ architecture testbench of regrw_tb is
   end component;
 
   signal clk, rst, load : std_logic;
-  signal rs, rt, rd : std_logic_vector(4 downto 0);
+  signal rs, rt, rd, memrds_rt, memrds_rd : std_logic_vector(4 downto 0);
   signal mem_rd, aluout : std_logic_vector(31 downto 0);
   signal imm : std_logic_vector(15 downto 0);
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
@@ -50,6 +51,7 @@ begin
   uut : regrw port map (
     clk => clk, rst => rst, load => load,
     rs => rs, rt => rt, rd => rd,
+    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
     mem_rd => mem_rd, aluout => aluout,
     imm => imm,
     rds => rds, rdt => rdt, immext => immext,
@@ -89,25 +91,19 @@ begin
 
     -- reg writeback
     rt <= "00010"; we <= '1'; mem_rd <= X"0000000A"; memrd_aluout_s <= '0';
-    wait for clk_period/2 + clk_period*1;
+    wait for clk_period/2;
     -- at the beginning of RegWritebackS
-    assert wa = "00010"; assert wd = X"0000000A";
-    wait for clk_period; -- writeback
-    rt <= "00010"; we <= '0'; wait for clk_period; assert rdt = X"0000000A"; -- check
+    assert wd = X"0000000A";
     
     -- immediate writeback
     rt <= "00011"; we <= '1'; aluout <= X"0000000B"; memrd_aluout_s <= '1';
-    wait for clk_period*2;
-    assert wa = "00011"; assert wd = X"0000000B";
-    wait for clk_period; -- writeback
-    rt <= "00011"; we <= '0'; wait for clk_period; assert rdt = X"0000000B"; -- check
+    wait for clk_period;
+    assert wd = X"0000000B";
     
     -- Rtype writeback
     rd <= "00100"; we <= '1'; aluout <= X"0000000C"; memrd_aluout_s <= '1'; rt_rd_s <= '1';
-    wait for clk_period*2;
-    assert wa = "00100"; assert wd = X"0000000C";
-    wait for clk_period; -- writeback
-    rt <= "00100"; we <= '0'; wait for clk_period; assert rdt = X"0000000C";
+    wait for clk_period;
+    assert wd = X"0000000C";
 
     -- skip
     stop <= TRUE;
