@@ -140,6 +140,8 @@ package body controller_pkg is
     variable nextstate : statetype;
   begin
     case state is
+      when Wait3S =>
+        nextstate := Wait2S;
       when Wait2S =>
         nextstate := WaitS;
       when WaitS =>

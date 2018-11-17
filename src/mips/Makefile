@@ -40,6 +40,8 @@ stall_lw_add:
 	make mips_tb F=stall_lw_add
 stall_lw_addi:
 	make mips_tb F=stall_lw_addi
+hazard_addi_addi_add:
+	make mips_tb F=hazard_addi_addi_add
 datapath: memrw decode regrw calc memadr
 	make all F=datapath
 controller: instr_shift_register controller_pkg debug_pkg

@@ -110,7 +110,6 @@ begin
   memrds_rt <= memrw_rt0;
   memrds_rd <= memrw_rd0;
 
-
   -- forwarding for pipeline
   process(stateA, stateB, rs, rt, memrw_rt0)
     -- dist=1
@@ -125,16 +124,15 @@ begin
   begin
     -- dist=1
     rd_aluforward_memrd_sAB := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
-    rd_aluforward_memrd_sAC := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
     rd_aluforward_memrd_sBC := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
-    rd_aluforward_memrd_sBA := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
     rd_aluforward_memrd_sCA := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
     -- dist=2
     rd_aluforward_memrd_sBA := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
     rd_aluforward_memrd_sAC := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
-    rd_aluforward_memrd_sBA := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
+    rd_aluforward_memrd_sCB := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
 
-    sel := rd_aluforward_memrd_sAB or rd_aluforward_memrd_sBC or rd_aluforward_memrd_sCA or rd_aluforward_memrd_sAC or rd_aluforward_memrd_sBA or rd_aluforward_memrd_sCB;
+    sel := rd_aluforward_memrd_sAB or rd_aluforward_memrd_sBC or rd_aluforward_memrd_sCA or
+      rd_aluforward_memrd_sAC or rd_aluforward_memrd_sBA or rd_aluforward_memrd_sCB;
 
     rd1_aluforward_memrd_s <= sel(1 downto 0);
     rd2_aluforward_memrd_s <= sel(3 downto 2);

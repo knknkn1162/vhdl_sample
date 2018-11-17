@@ -53,7 +53,7 @@ begin
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
     alures => alures,
-    dec_sa => dec_sa, dec_sb => dec_sb,
+    dec_sa => dec_sa, dec_sb => dec_sb, dec_sc => dec_sc,
     stall_en => stall_en
   );
 
@@ -102,14 +102,14 @@ begin
     -- CalcS(AddiCalcS) : addi $s0, $0, 5
     assert alures = X"00000005";
     -- DecodeS : addi $s1, $s0, 10
-    assert rds = X"00000005"; assert rdt = X"0000000A";
+    assert rds = X"00000005"; assert immext = X"0000000A";
     -- FetchS : add $s2, $s0, $s1
     assert pc = X"00000008"; assert pcnext = X"0000000C";
-    assert mem_rd = X"22119020";
+    assert mem_rd = X"02119020";
     wait for clk_period;
 
     -- (AddiWriteBackS, CalcS(AddiCalcS), DecodeS)
-    assert dec_sa = CONST_REGWBS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_FETCHS;
+    assert dec_sa = CONST_REGWBS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
     assert pc = X"0000000C"; assert pcnext = X"00000010";
     -- AddiWriteBackS : addi $s0, $0, 5
     assert reg_wa = "10000"; assert reg_wd = X"00000005";
@@ -122,14 +122,14 @@ begin
     -- (-, ALUWriteBackS, RtypeCalcS)
     -- ALUWriteBackS : addi $s1, $s0, 10
     assert dec_sb = CONST_REGWBS; assert dec_sc = CONST_CALCS;
-    assert reg_wa = "10001"; assert reg_wd = X"0000000A";
+    assert reg_wa = "10001"; assert reg_wd = X"0000000F";
     -- RtypeCalcS : add $s2, $s0, $s1
     assert alures = X"00000014";
     wait for clk_period;
 
     -- (-, -, RtypeWritebackS)
     -- RtypeWriteBackS : add $s2, $s0, $s1
-    assert dec_sc = CONST_CALCS;
+    assert dec_sc = CONST_REGWBS;
     assert reg_wa = "10010"; assert reg_wd = X"00000014";
 
     assert false report "end of test" severity note;
