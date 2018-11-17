@@ -1,6 +1,7 @@
 F=dummy
 VHDL=vhdl
 MEM=dummy
+TESTBENCHES="forwarding_addi_add forwarding_add_add stall_lw_add"
 
 clean:
 	rm -f work-obj93.cf *.o *.vcd
@@ -11,7 +12,6 @@ e:
 r:
 	ghdl -r ${F}_tb --vcd=out.vcd
 a:
-	make clean
 	ghdl -a ${F}.${VHDL}
 er:
 	make e
@@ -20,11 +20,13 @@ all:
 	ghdl -a $(F).${VHDL} ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
-mips_all : forwarding_addi_add forwarding_add_add stall_lw_add
-mips_tb: datapath controller mips debug_pkg
+mips_all: mips
+	echo ${TESTBENCHES} | xargs -n1 -ITB ghdl -a ./tests/mips_TB_tb.vhdl
+	echo ${TESTBENCHES} | xargs -n1 -ITB make er F=mips_TB
+mips_tb: mips
 	ghdl -a ./tests/mips_${F}_tb.vhdl
 	make er F=mips_${F}
-mips: debug_pkg
+mips: datapath controller debug_pkg
 	ghdl -a mips.vhdl
 forwarding_addi_add:
 	make mips_tb F=forwarding_addi_add
