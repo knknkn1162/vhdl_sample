@@ -8,7 +8,8 @@ architecture testbench of shift_register2_tb is
   component shift_register2
     generic(N: natural);
     port (
-      clk, rst, en : in std_logic;
+      clk, rst : in std_logic;
+      en : in std_logic_vector(1 downto 0);
       a0 : in std_logic_vector(N-1 downto 0);
       a1 : out std_logic_vector(N-1 downto 0);
       a2 : out std_logic_vector(N-1 downto 0)
@@ -16,7 +17,8 @@ architecture testbench of shift_register2_tb is
   end component;
 
   constant N : natural := 8;
-  signal clk, rst, en : std_logic;
+  signal clk, rst : std_logic;
+  signal en : std_logic_vector(1 downto 0);
   signal a0, a1, a2 : std_logic_vector(N-1 downto 0);
   constant clk_period : time := 10 ns;
   signal stop : boolean;
@@ -43,7 +45,7 @@ begin
     rst <= '1'; wait for 1 ns; rst <= '0';
     assert a1 = X"00"; assert a2 = X"00";
 
-    en <= '1'; a0 <= X"E7"; wait for clk_period/2;
+    en <= "11"; a0 <= X"E7"; wait for clk_period/2;
     assert a1 = X"E7"; assert a2 = X"00";
 
     a0 <= X"01"; wait for clk_period;

@@ -4,7 +4,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity shift_register2 is
   generic(N: natural);
   port (
-    clk, rst, en : in std_logic;
+    clk, rst : in std_logic;
+    en : in std_logic_vector(1 downto 0);
     a0 : in std_logic_vector(N-1 downto 0);
     a1 : out std_logic_vector(N-1 downto 0);
     a2 : out std_logic_vector(N-1 downto 0)
@@ -25,14 +26,14 @@ architecture behavior of shift_register2 is
 begin
   flopr_rt0 : flopr_en generic map(N=>N)
   port map(
-    clk => clk, rst => rst, en => en,
+    clk => clk, rst => rst, en => en(0),
     a => a0, y => a10
   );
   a1 <= a10;
 
   flopr_rt1 : flopr_en generic map(N=>N)
   port map(
-    clk => clk, rst => rst, en => en,
+    clk => clk, rst => rst, en => en(1),
     a => a10, y => a2
   );
 end architecture;
