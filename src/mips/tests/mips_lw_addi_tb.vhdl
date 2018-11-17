@@ -126,7 +126,7 @@ begin
 
     -- (-, ALUWritebackS)
     assert dec_sb = CONST_REGWBS;
-    -- -- ALUWriteBackS : add $s1, $s0, $s0
+    -- -- ALUWriteBackS : addi $s1, $0, 5
     assert reg_wa = "01001"; assert reg_wd = X"00000005";
 
 
