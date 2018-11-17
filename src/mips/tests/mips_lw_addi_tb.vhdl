@@ -128,11 +128,8 @@ begin
     -- -- ALUWriteBackS : addi $s1, $0, 5
     assert reg_wa = "01001"; assert reg_wd = X"00000005";
 
-
     assert false report "end of test" severity note;
     stop <= TRUE;
     wait;
   end process;
-  
-
 end architecture;
