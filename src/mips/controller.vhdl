@@ -9,15 +9,15 @@ entity controller is
     clk, rst, load : in std_logic;
     opcode, funct : in std_logic_vector(5 downto 0);
     rs, rt, rd : in std_logic_vector(4 downto 0);
+    mem_rd, alures : in std_logic_vector(31 downto 0);
     aluzero : in std_logic;
-    -- for memadr
+    -- for memread
     pc_aluout_s : out std_logic;
     pc4_br4_ja_s : out std_logic_vector(1 downto 0);
     pc_en : out std_logic;
 
     -- for memwrite
     mem_we: out std_logic;
-    -- for decode
     -- -- forwarding for pipeline
     rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : out std_logic_vector(1 downto 0);
     -- for writeback
@@ -25,6 +25,12 @@ entity controller is
     memrd_aluout_s : out std_logic; -- for lw or addi
     rt_rd_s : out std_logic; -- Itype or Rtype
     memrds_rt, memrds_rd : out std_logic_vector(4 downto 0);
+  
+    reg_wa : out std_logic_vector(4 downto 0);
+    reg_rd : out std_logic_vector(31 downto 0);
+    reg_we : out std_logic;
+    -- forwarding
+    cached_rds, cached_rdt : out std_logic_vector(31 downto 0);
     -- for calc
     alucont : out std_logic_vector(2 downto 0);
     rdt_immext_s : out std_logic;
@@ -44,6 +50,10 @@ architecture behavior of controller is
   signal memrw_rs, memrw_rt0, memrw_rd0 : std_logic_vector(4 downto 0);
   signal instr_shift_en : std_logic_vector(1 downto 0);
   signal ena : std_logic;
+  -- for cache register address and data
+  signal calcs_wa : std_logic_vector(4 downto 0);
+  signal calcs_rt_rd_s, calcs_memrds_s : std_logic;
+  signal alures_we, memrd_we : std_logic;
 
   component instr_shift_register is
     port (
@@ -55,6 +65,29 @@ architecture behavior of controller is
       rs1, rt1, rd1 : out std_logic_vector(4 downto 0);
       opcode2, funct2 : out std_logic_vector(5 downto 0);
       rs2, rt2, rd2 : out std_logic_vector(4 downto 0)
+    );
+  end component;
+
+  component regw_cache
+    port (
+      clk, rst : in std_logic;
+      calcs_wa : in std_logic_vector(4 downto 0);
+      calcs_wd : in std_logic_vector(31 downto 0);
+      calcs_we : in std_logic;
+      memrds_wa : in std_logic_vector(4 downto 0);
+      memrds_wd : in std_logic_vector(31 downto 0);
+      memrds_we : in std_logic;
+      calcs_memrds_s : in std_logic;
+      -- for RegWriteBackS
+      reg_wa : out std_logic(4 downto 0);
+      reg_wd : out std_logic(31 downto 0);
+      reg_we : out std_logic
+
+      -- forwarding
+      rs : in std_logic_vector(4 downto 0);
+      rt : in std_logic_vector(4 downto 0);
+      rds : out std_logic_vector(31 downto 0)
+      rdt : out std_logic_vector(31 downto 0)
     );
   end component;
 
@@ -88,6 +121,46 @@ begin
     nextstateB <= nextstateB0;
   end process;
 
+  -- cache wa & wd
+  case calcs_opcode is
+    when OP_RTYPE =>
+      calcs_rt_rd_s <= '1';
+    when OP_ADDI| =>
+      calcs_rt_rd_s <= '0';
+    when others =>
+      -- do nothing
+  end case;
+
+  calcs_rt_rd_mux : mux2 port map (
+    d0 => calcs_rt,
+    d1 => calcs_rd,
+    s => calcs_rt_rd_s,
+    y => calcs_wa
+  );
+
+  -- get calcs_memrds_s
+  process(stateA)
+  begin
+    calcs_memrds_s <= '1' when (stateA = MemReadS or stateB = MemReadS) else '0';
+  end process;
+
+  regw_cache0 : regw_cache port map (
+    clk => clk, rst => rst,
+    -- cache calcs
+    calcs_wa => calcs_wa, calcs_wd => alures, calcs_we => alures_we,
+    memrds_wa => memrds_rt, memrds_wd => mem_rd, memrds_we => memrd_we,
+    -- selector
+    calcs_memrds_s => calcs_memrds_s,
+
+    -- to regrw
+    reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we
+
+    -- forwarding
+    rs => rs, rds => cached_rds,
+    rd => rd, rdt => cached_rdt
+  );
+
+  -- store old instrs
   instr_shift_en <= "1" & ena;
   instr_shift_register0 : instr_shift_register port map (
     clk => clk, rst => rst, en => instr_shift_en,
