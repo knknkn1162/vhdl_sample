@@ -54,7 +54,7 @@ calc: flopr_en alu mux2 slt2
 	make all F=calc
 memadr: flopr_en mux4
 	make all F=memadr
-instr_shift_register: flopr_en
+instr_shift_register: shift_register2
 	make all F=instr_shift_register
 shift_register2: flopr_en
 	make all F=shift_register2
