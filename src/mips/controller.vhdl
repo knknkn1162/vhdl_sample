@@ -112,13 +112,13 @@ begin
         if stateB = DecodeS then
           -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
           -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-          if stateB = DecodeS and calcs_rt = rs then
+          if calcs_rt = rs then
             rd1_aluforward_memrd_s0 := "01";
           end if;
 
           -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
           -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if stateB = DecodeS and calcs_rt = rt then
+          if calcs_rt = rt then
             rd2_aluforward_memrd_s0 := "01";
           end if;
         end if;
