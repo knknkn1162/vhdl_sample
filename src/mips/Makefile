@@ -34,6 +34,8 @@ add_add:
 	make mips_tb F=add_add
 addi_add:
 	make mips_tb F=addi_add
+lw_addi:
+	make mips_tb F=lw_addi
 forwarding_add_add:
 	make mips_tb F=forwarding_add_add
 stall_lw_add:

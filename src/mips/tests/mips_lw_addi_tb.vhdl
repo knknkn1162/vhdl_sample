@@ -22,7 +22,7 @@ architecture testbench of mips_lw_addi_tb is
       alures : out std_logic_vector(31 downto 0);
       -- for scan
       dec_sa, dec_sb : out state_vector_type;
-      en : out std_logic
+      stall_en : out std_logic
     );
   end component;
 
@@ -35,7 +35,7 @@ architecture testbench of mips_lw_addi_tb is
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
   signal dec_sa, dec_sb : state_vector_type;
-  signal en : std_logic;
+  signal stall_en : std_logic;
 
   constant memfile : string := "./assets/mem/lw_addi.hex";
   constant clk_period : time := 10 ns;
@@ -53,7 +53,7 @@ begin
     ja => ja,
     alures => alures,
     dec_sa => dec_sa, dec_sb => dec_sb,
-    en => en
+    stall_en => stall_en
   );
 
   clk_process: process
@@ -100,7 +100,6 @@ begin
 
     -- (CalcS, DecodeS)
     assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
-    assert en = '1';
     assert pc = X"00000008"; assert pcnext = X"0000000C";
     -- CalcS(AdrCalcS) : lw $s0, 12($0)
     assert alures = X"0000000C";
@@ -109,7 +108,7 @@ begin
     wait for clk_period;
 
     -- (MemReadS, CalcS)
-    assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_DECODES;
+    assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_CALCS;
     -- MemReadS : lw $s0, 12($0)
     assert addr = X"0000000C"; assert mem_rd = X"00000048";
     -- CalcS : addi $t1, $0, 5
