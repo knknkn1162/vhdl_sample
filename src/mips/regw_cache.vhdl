@@ -89,6 +89,8 @@ begin
       rds <= data1(WD_DIM-2 downto 5);
     elsif rs = reg_wa0 then
       rds <= reg_wd0;
+    else
+      rds <= (others => '-');
     end if;
   end process;
 
@@ -100,6 +102,8 @@ begin
       rdt <= data1(WD_DIM-2 downto 5);
     elsif rt = reg_wa0 then
       rdt <= reg_wd0;
+    else
+      rdt <= (others => '-');
     end if;
   end process;
 end architecture;

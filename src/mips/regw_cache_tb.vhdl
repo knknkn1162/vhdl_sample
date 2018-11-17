@@ -66,16 +66,17 @@ begin
     calcs_wa <= "10001"; calcs_wd <= X"00000003"; calcs_we <= '1';
     memrds_wa <= "10000"; memrds_wd <= X"00000005"; memrds_we <= '1'; memrds_load_s <= '1';
 
-    wait for clk_period/2;
+    wait for clk_period/2; memrds_load_s <= '0';
     assert reg_wa = "10000"; assert reg_wd = X"00000005"; assert reg_we = '1';
-    memrds_load_s <= '0';
     calcs_wa <= "10100"; calcs_wd <= X"00000007"; calcs_we <= '1';
     rs <= "10000"; wait for 1 ns; assert rds = X"00000005";
     rt <= "10001"; wait for 1 ns; assert rdt = X"00000003";
 
 
-    wait for clk_period;
+    wait until rising_edge(clk); wait for 1 ns;
     assert reg_wa <= "10001"; assert reg_wd = X"00000003"; assert calcs_we = '1';
+    rt <= "10001"; wait for 1 ns; assert rdt = X"00000003";
+    rt <= "10000"; wait for 1 ns; assert is_X(rdt);
 
     wait for clk_period;
     assert reg_wa = "10100"; assert reg_wd = X"00000007"; assert reg_we = '1';
