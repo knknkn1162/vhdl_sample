@@ -3,7 +3,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity instr_shift_register is
   port (
-    clk, rst, en : in std_logic;
+    clk, rst : in std_logic;
+    en : in std_logic_vector(1 downto 0);
     opcode0, funct0 : in std_logic_vector(5 downto 0);
     rs0, rt0, rd0 : in std_logic_vector(4 downto 0);
     opcode1, funct1 : out std_logic_vector(5 downto 0);
@@ -35,13 +36,13 @@ begin
 
   flopr_en0 : flopr_en generic map(N=>N)
   port map (
-    clk => clk, rst => rst, en => en,
+    clk => clk, rst => rst, en => en(0),
     a => x0, y => x1
   );
 
   flopr_en1 : flopr_en generic map(N=>N)
   port map (
-    clk => clk, rst => rst, en => en,
+    clk => clk, rst => rst, en => en(1),
     a => x1, y => x2
   );
 

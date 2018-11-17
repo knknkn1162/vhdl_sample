@@ -7,7 +7,8 @@ end entity;
 architecture testbench of instr_shift_register_tb is
   component instr_shift_register is
     port (
-      clk, rst, en : in std_logic;
+      clk, rst : in std_logic;
+      en : in std_logic_vector(1 downto 0);
       opcode0, funct0 : in std_logic_vector(5 downto 0);
       rs0, rt0, rd0 : in std_logic_vector(4 downto 0);
       opcode1, funct1 : out std_logic_vector(5 downto 0);
@@ -17,7 +18,8 @@ architecture testbench of instr_shift_register_tb is
     );
   end component;
 
-  signal clk, rst, en : std_logic;
+  signal clk, rst : std_logic;
+  signal en :  std_logic_vector(1 downto 0);
   signal opcode0, funct0 : std_logic_vector(5 downto 0);
   signal rs0, rt0, rd0 : std_logic_vector(4 downto 0);
   signal opcode1, funct1 : std_logic_vector(5 downto 0);
@@ -51,7 +53,7 @@ begin
   stim_proc : process
   begin
     wait for clk_period;
-    rst <= '1'; wait for 1 ns; rst <= '0'; en <= '1'; wait for 1 ns;
+    rst <= '1'; wait for 1 ns; rst <= '0'; en <= "11"; wait for 1 ns;
     -- 0000/00 10/000 1/0000 /1000/1 000/00 10/0000
     opcode0 <= "000000"; funct0 <= "100000";
     rs0 <= "10000"; rt0 <= "10000"; rd0 <= "10001";
