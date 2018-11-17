@@ -110,64 +110,33 @@ begin
   memrds_rt <= memrw_rt0;
   memrds_rd <= memrw_rd0;
 
+
   -- forwarding for pipeline
-  process(stateA, stateB, rs, rt, rd, memrw_rt0)
-    variable rd1_aluforward_memrd_s0, rd2_aluforward_memrd_s0 : std_logic_vector(1 downto 0);
+  process(stateA, stateB, rs, rt, memrw_rt0)
+    -- dist=1
+    variable rd_aluforward_memrd_sAB : std_logic_vector(3 downto 0);
+    variable rd_aluforward_memrd_sBC : std_logic_vector(3 downto 0);
+    variable rd_aluforward_memrd_sCA : std_logic_vector(3 downto 0);
+    -- dist=2
+    variable rd_aluforward_memrd_sAC : std_logic_vector(3 downto 0);
+    variable rd_aluforward_memrd_sBA : std_logic_vector(3 downto 0);
+    variable rd_aluforward_memrd_sCB : std_logic_vector(3 downto 0);
+    variable sel : std_logic_vector(3 downto 0);
   begin
-    rd1_aluforward_memrd_s0 := "00"; rd2_aluforward_memrd_s0 := "00";
-    case stateA is
-      when AddiCalcS =>
-        if stateB = DecodeS then
-          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
-          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-          if calcs_rt = rs then
-            rd1_aluforward_memrd_s0 := "01";
-          end if;
+    rd_aluforward_memrd_sAB := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
+    rd_aluforward_memrd_sAC := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
+    rd_aluforward_memrd_sBC := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
+    rd_aluforward_memrd_sBA := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
+    rd_aluforward_memrd_sCA := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
+    -- dist=2
+    rd_aluforward_memrd_sBA := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
+    rd_aluforward_memrd_sAC := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
+    rd_aluforward_memrd_sBA := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
 
-          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
-          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if calcs_rt = rt then
-            rd2_aluforward_memrd_s0 := "01";
-          end if;
-        end if;
+    sel := rd_aluforward_memrd_sAB or rd_aluforward_memrd_sBC or rd_aluforward_memrd_sCA or rd_aluforward_memrd_sAC or rd_aluforward_memrd_sBA or rd_aluforward_memrd_sCB;
 
-      when RtypeCalcS =>
-        if stateB = DecodeS then
-          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
-          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-          -- or
-          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-          -- addi $s1, $s1, 5 -- addi $rt, $rs, imm
-          if calcs_rd = rs then
-            rd1_aluforward_memrd_s0 := "01";
-          end if;
-
-          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
-          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if calcs_rd = rt then
-            rd2_aluforward_memrd_s0 := "01";
-          end if;
-        end if;
-
-      -- lw $s0, 20($t2) -- lw $rt, imm($rs)
-      -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
-      when MemReadS =>
-        if stateB = DecodeS then
-          if memrw_rt0 = rs then
-            rd1_aluforward_memrd_s0 := "10";
-          end if;
-
-          -- lw $s0, 20($t2) -- lw $rt, imm($rs)
-          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if memrw_rt0 = rt then
-            rd2_aluforward_memrd_s0 := "10";
-          end if;
-        end if;
-      when others =>
-        -- do nothing
-    end case;
-    rd1_aluforward_memrd_s <= rd1_aluforward_memrd_s0;
-    rd2_aluforward_memrd_s <= rd2_aluforward_memrd_s0;
+    rd1_aluforward_memrd_s <= sel(1 downto 0);
+    rd2_aluforward_memrd_s <= sel(3 downto 2);
   end process;
 
   -- stall

@@ -43,9 +43,99 @@ package controller_pkg is
   function get_rdt_immext_s(state : statetype) return std_logic;
   function get_memrd_aluout_s(state : statetype) return std_logic;
   function get_rt_rd_s(state : statetype) return std_logic;
+  -- forwarding
+  function get_rd_aluforward_memrd_s(state1 : statetype; state2 : statetype; rs : std_logic_vector(4 downto 0); rt : std_logic_vector(4 downto 0); calcs_rt: std_logic_vector(4 downto 0); calcs_rd: std_logic_vector(4 downto 0); memrw_rt: std_logic_vector(4 downto 0)) return std_logic_vector;
+  function get_rd_memrd_s(state1: statetype; state2: statetype; rs : std_logic_vector(4 downto 0); rt : std_logic_vector(4 downto 0); memrw_rt : std_logic_vector(4 downto 0)) return std_logic_vector;
 end package;
 
 package body controller_pkg is
+  function get_rd_aluforward_memrd_s(state1 : statetype; state2 : statetype; rs : std_logic_vector(4 downto 0); rt : std_logic_vector(4 downto 0); calcs_rt: std_logic_vector(4 downto 0); calcs_rd: std_logic_vector(4 downto 0); memrw_rt: std_logic_vector(4 downto 0)) return std_logic_vector is
+    -- higher : rd2_**, lower: rd1_**
+    variable rd1_aluforward_memrd_s0, rd2_aluforward_memrd_s0 : std_logic_vector(1 downto 0);
+    variable res : std_logic_vector(3 downto 0);
+  begin
+    rd1_aluforward_memrd_s0 := "00"; rd2_aluforward_memrd_s0 := "00";
+    case state1 is
+      when AddiCalcS =>
+        if state2 = DecodeS then
+          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          if calcs_rt = rs then
+            rd1_aluforward_memrd_s0 := "01";
+          end if;
+
+          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if calcs_rt = rt then
+            rd2_aluforward_memrd_s0 := "01";
+          end if;
+        end if;
+
+      when RtypeCalcS =>
+        if state2 = DecodeS then
+          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          -- or
+          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
+          -- addi $s1, $s1, 5 -- addi $rt, $rs, imm
+          if calcs_rd = rs then
+            rd1_aluforward_memrd_s0 := "01";
+          end if;
+
+          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if calcs_rd = rt then
+            rd2_aluforward_memrd_s0 := "01";
+          end if;
+        end if;
+      -- lw $s0, 20($t2) -- lw $rt, imm($rs)
+      -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
+      when MemReadS =>
+        if state2 = DecodeS then
+          if memrw_rt = rs then
+            rd1_aluforward_memrd_s0 := "10";
+          end if;
+
+          -- lw $s0, 20($t2) -- lw $rt, imm($rs)
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if memrw_rt = rt then
+            rd2_aluforward_memrd_s0 := "10";
+          end if;
+        end if;
+      when others =>
+        -- do nothing
+    end case;
+    res := rd2_aluforward_memrd_s0 & rd1_aluforward_memrd_s0;
+    return res;
+  end function;
+
+  function get_rd_memrd_s(state1: statetype; state2: statetype; rs : std_logic_vector(4 downto 0); rt : std_logic_vector(4 downto 0); memrw_rt : std_logic_vector(4 downto 0)) return std_logic_vector is
+    variable rd1_memrd_s, rd2_memrd_s : std_logic_vector(1 downto 0);
+    variable res : std_logic_vector(3 downto 0);
+   begin
+    rd1_memrd_s := "00"; rd2_memrd_s := "00";
+    case state1 is
+      -- lw $s0, 20($t2) -- lw $rt, imm($rs)
+      -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
+      when MemReadS =>
+        if state2 = DecodeS then
+          if memrw_rt = rs then
+            rd1_memrd_s := "10";
+          end if;
+
+          -- lw $s0, 20($t2) -- lw $rt, imm($rs)
+          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
+          if memrw_rt = rt then
+            rd2_memrd_s := "10";
+          end if;
+        end if;
+      when others =>
+        -- do nothing
+    end case;
+    res := rd2_memrd_s & rd1_memrd_s;
+    return res;
+  end function;
+
   function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic) return statetype is
     variable nextstate : statetype;
   begin
