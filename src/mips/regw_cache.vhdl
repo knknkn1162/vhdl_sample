@@ -10,16 +10,16 @@ entity regw_cache is
     memrds_wa : in std_logic_vector(4 downto 0);
     memrds_wd : in std_logic_vector(31 downto 0);
     memrds_we : in std_logic;
-    calcs_memrds_s : in std_logic;
+    memrds_load_s : in std_logic;
     -- for RegWriteBackS
-    reg_wa : out std_logic(4 downto 0);
-    reg_wd : out std_logic(31 downto 0);
-    reg_we : out std_logic
+    reg_wa : out std_logic_vector(4 downto 0);
+    reg_wd : out std_logic_vector(31 downto 0);
+    reg_we : out std_logic;
 
     -- forwarding
     rs : in std_logic_vector(4 downto 0);
     rt : in std_logic_vector(4 downto 0);
-    rds : out std_logic_vector(31 downto 0)
+    rds : out std_logic_vector(31 downto 0);
     rdt : out std_logic_vector(31 downto 0)
   );
 end entity;
@@ -48,7 +48,9 @@ architecture behavior of regw_cache is
   signal calcd, calcd0 : std_logic_vector(WD_DIM-1 downto 0);
   signal memrd : std_logic_vector(WD_DIM-1 downto 0);
   signal data1, data2 : std_logic_vector(WD_DIM-1 downto 0);
-  signal regwd0 : std_logic_vector(WD_DIM-1 downto 0);
+  signal regd0 : std_logic_vector(WD_DIM-1 downto 0);
+  signal reg_wa0 : std_logic_vector(4 downto 0);
+  signal reg_wd0 : std_logic_vector(31 downto 0);
 begin
   calcd <= calcs_we & calcs_wd & calcs_wa;
   memrd <= memrds_we & memrds_wd & memrds_wa;
@@ -64,39 +66,40 @@ begin
   port map (
     d0 => calcd0,
     d1 => memrd,
-    s => calcs_memrds,
-    y => data1,
+    s => memrds_load_s,
+    y => data1
   );
 
-  flopr_en0 : flopr_en generic map(N=>WD_DIM)
+  flopr_en1 : flopr_en generic map(N=>WD_DIM)
   port map (
     clk => clk, rst => rst, en => '1',
     a => data1,
-    y => regwd0
+    y => regd0
   );
-  reg_wa <= regwd0(4 downto 0);
-  reg_wd <= regwd0(WD_DIM-2 downto 5);
-  reg_we <= regwd0(WD_DIM-1);
+  reg_wa0 <= regd0(4 downto 0); reg_wa <= reg_wa0;
+  reg_wd0 <= regd0(WD_DIM-2 downto 5); reg_wd <= reg_wd0;
+  reg_we <= regd0(WD_DIM-1);
 
   -- search from cache store
-  case rs is
-    when calcs_wa =>
+  process(rs, calcs_wd, data1, reg_wd0, reg_wa0)
+  begin
+    if rs = calcs_wa then
       rds <= calcs_wd;
-    when data1(4 downto 0) =>
+    elsif rs = data1(4 downto 0) then
       rds <= data1(WD_DIM-2 downto 5);
-    when reg_wa =>
-      rds <= reg_wd;
-    when others =>
-      -- do nothing. data is undefined
-  end case;
-  case rt is
-    when calcs_wa =>
+    elsif rs = reg_wa0 then
+      rds <= reg_wd0;
+    end if;
+  end process;
+
+  process(rt, calcs_wd, data1, reg_wd0, reg_wa0)
+  begin
+    if rt = calcs_wa then
       rdt <= calcs_wd;
-    when data1(4 downto 0) =>
+    elsif rt = data1(4 downto 0) then
       rdt <= data1(WD_DIM-2 downto 5);
-    when reg_wa =>
-      rdt <= reg_wd;
-    when others =>
-      -- do nothing. data is undefined
-  end case;
+    elsif rt = reg_wa0 then
+      rdt <= reg_wd0;
+    end if;
+  end process;
 end architecture;
