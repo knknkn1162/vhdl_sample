@@ -1,6 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.debug_pkg.ALL;
 
 entity mips_forwarding_addi_add_tb is
 end entity;
@@ -18,7 +19,11 @@ architecture testbench of mips_forwarding_addi_add_tb is
       reg_wd : out std_logic_vector(31 downto 0);
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       ja : out std_logic_vector(27 downto 0);
-      alures : out std_logic_vector(31 downto 0)
+      alures : out std_logic_vector(31 downto 0);
+      -- for scan
+      dec_sa, dec_sb : out state_vector_type;
+      -- -- check stall or not
+      stall_en : out std_logic
     );
   end component;
 
@@ -30,6 +35,8 @@ architecture testbench of mips_forwarding_addi_add_tb is
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
+  signal dec_sa, dec_sb : state_vector_type;
+  signal stall_en : std_logic;
 
   constant memfile : string := "./assets/mem/forwarding_addi_add.hex";
   constant clk_period : time := 10 ns;
@@ -45,7 +52,9 @@ begin
     reg_wd => reg_wd,
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
-    alures => alures
+    alures => alures,
+    dec_sa => dec_sa, dec_sb => dec_sb,
+    stall_en => stall_en
   );
 
   clk_process: process
@@ -63,13 +72,16 @@ begin
     wait for clk_period;
     -- (InitS, Wait2S)
     rst <= '1'; wait for 1 ns; rst <= '0';
+    assert dec_sa = CONST_INITS; assert dec_sb = CONST_WAITS;
     -- syncronous reset
     load <= '1'; wait for clk_period/2; load <= '0';
     -- (LoadS, WaitS)
+    assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS;
     wait for clk_period;
 
     -- (FetchS, InitS)
     -- -- FetchS : addi $s0, $0, 5
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_INITS;
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"20100005";
     -- (not yet)
@@ -77,6 +89,7 @@ begin
     wait for clk_period;
 
     -- (DecodeS, FetchS)
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS;
     -- -- DecodeS : addi $s0, $0, 5
     assert rds = X"00000000"; assert immext = X"00000005";
     -- -- FetchS : add $s1, $s0, $s0
@@ -85,6 +98,7 @@ begin
     wait for clk_period;
 
     -- (CalcS, DecodeS)
+    assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
     assert pc = X"00000008"; assert pcnext = X"0000000C";
     -- CalcS(AddiCalcS) : addi $s0, $0, 5
     assert alures = X"00000005";
@@ -93,6 +107,7 @@ begin
     wait for clk_period;
 
     -- (AddiWriteBackS, CalcS(RtypeCalcS))
+    assert dec_sa = CONST_REGWBS; assert dec_sb = CONST_CALCS;
     -- AddiWriteBackS : addi $s0, $0, 5
     assert reg_wa = "10000"; assert reg_wd = X"00000005";
     -- CalcS : add $s1, $s0, $s0
@@ -101,6 +116,7 @@ begin
 
     -- (FetchS, ALUWriteBackS)
     -- ALUWriteBackS : add $s1, $s0, $s0
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_REGWBS;
     assert reg_wa = "10001"; assert reg_wd = X"0000000A";
 
     assert false report "end of test" severity note;
