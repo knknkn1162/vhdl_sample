@@ -123,6 +123,7 @@ begin
     variable rd_aluforward_memrd_sCB : std_logic_vector(3 downto 0);
     variable sel : std_logic_vector(3 downto 0);
   begin
+    -- dist=1
     rd_aluforward_memrd_sAB := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
     rd_aluforward_memrd_sAC := get_rd_memrd_s(stateA, stateB, rs, rt, memrw_rt0);
     rd_aluforward_memrd_sBC := get_rd_aluforward_memrd_s(stateA, stateB, rs, rt, calcs_rt, calcs_rd, memrw_rt0);
