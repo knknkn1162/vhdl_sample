@@ -23,6 +23,7 @@ entity datapath is
     instr_en, reg_we : in std_logic;
     memrd_aluout_s : in std_logic; -- for lw or addi
     rt_rd_s : in std_logic; -- Itype or Rtype
+    memrds_rt, memrds_rd : in std_logic_vector(4 downto 0);
     -- for calc
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic;
@@ -73,6 +74,7 @@ architecture behavior of datapath is
     port (
       clk, rst, load : in std_logic;
       rs, rt, rd : in std_logic_vector(4 downto 0);
+      memrds_rt, memrds_rd : in std_logic_vector(4 downto 0);
       mem_rd : in std_logic_vector(31 downto 0);
       aluout : in std_logic_vector(31 downto 0);
       imm : in std_logic_vector(15 downto 0);
@@ -167,6 +169,7 @@ begin
   port map (
     clk => clk, rst => rst, load => load,
     rs => rs0, rt => rt0, rd => rd0,
+    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
     mem_rd => mem_rd0, aluout => reg_aluout0,
     imm => imm0,
     rds => rds0, rdt => rdt0, immext => immext0,

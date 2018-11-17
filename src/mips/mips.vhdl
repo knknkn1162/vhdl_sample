@@ -45,6 +45,7 @@ architecture behavior of mips is
       instr_en, reg_we : in std_logic;
       memrd_aluout_s : in std_logic; -- for lw or addi
       rt_rd_s : in std_logic; -- Itype or Rtype
+      memrds_rt, memrds_rd : in std_logic_vector(4 downto 0);
       -- for calc
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
@@ -82,6 +83,7 @@ architecture behavior of mips is
       instr_en, reg_we : out std_logic;
       memrd_aluout_s : out std_logic; -- for lw or addi
       rt_rd_s : out std_logic; -- Itype or Rtype
+      memrds_rt, memrds_rd : out std_logic_vector(4 downto 0);
       -- for calc
       alucont : out std_logic_vector(2 downto 0);
       rdt_immext_s : out std_logic;
@@ -103,6 +105,7 @@ architecture behavior of mips is
   signal instr_en, reg_we : std_logic;
   signal memrd_aluout_s : std_logic;
   signal rt_rd_s : std_logic;
+  signal memrds_rt, memrds_rd : std_logic_vector(4 downto 0);
   -- for calc
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
@@ -139,6 +142,7 @@ begin
     rdt_immext_s => rdt_immext_s,
     aluzero => aluzero,
     calc_en => calc_en,
+    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
     
     -- scan for testbench
     pc => pc, pcnext => pcnext,
@@ -166,7 +170,9 @@ begin
     rd1_aluforward_memrd_s => rd1_aluforward_memrd_s, rd2_aluforward_memrd_s => rd2_aluforward_memrd_s,
     -- for writeback
     instr_en => instr_en, reg_we => reg_we,
-    memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
+    memrd_aluout_s => memrd_aluout_s,
+    rt_rd_s => rt_rd_s,
+    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
     -- for memadr
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,

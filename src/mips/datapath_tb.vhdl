@@ -26,6 +26,7 @@ architecture testbench of datapath_tb is
       instr_en, reg_we : in std_logic;
       memrd_aluout_s : in std_logic; -- for lw or addi
       rt_rd_s : in std_logic; -- Itype or Rtype
+      memrds_rt, memrds_rd : in std_logic_vector(4 downto 0);
       -- for calc
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
@@ -62,6 +63,7 @@ architecture testbench of datapath_tb is
   signal instr_en, reg_we : std_logic;
   signal memrd_aluout_s : std_logic; -- for lw or addi
   signal rt_rd_s : std_logic; -- Itype or Rtype
+  signal memrds_rt, memrds_rd : std_logic_vector(4 downto 0);
   -- for calc
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
@@ -101,6 +103,7 @@ begin
     instr_en => instr_en, reg_we => reg_we,
     memrd_aluout_s => memrd_aluout_s,
     rt_rd_s => rt_rd_s,
+    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
     -- for calc
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,

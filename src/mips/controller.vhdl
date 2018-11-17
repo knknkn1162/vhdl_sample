@@ -8,7 +8,7 @@ entity controller is
   port (
     clk, rst, load : in std_logic;
     opcode, funct : in std_logic_vector(5 downto 0);
-    rs, rt, rd : std_logic_vector(4 downto 0);
+    rs, rt, rd : in std_logic_vector(4 downto 0);
     aluzero : in std_logic;
     -- for memadr
     pc_aluout_s : out std_logic;
@@ -24,6 +24,7 @@ entity controller is
     instr_en, reg_we : out std_logic;
     memrd_aluout_s : out std_logic; -- for lw or addi
     rt_rd_s : out std_logic; -- Itype or Rtype
+    memrds_rt, memrds_rd : out std_logic_vector(4 downto 0);
     -- for calc
     alucont : out std_logic_vector(2 downto 0);
     rdt_immext_s : out std_logic;
@@ -40,12 +41,14 @@ architecture behavior of controller is
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
   signal memrw_opcode, memrw_funct : std_logic_vector(5 downto 0);
-  signal memrw_rs, memrw_rt, memrw_rd : std_logic_vector(4 downto 0);
+  signal memrw_rs, memrw_rt0, memrw_rd0 : std_logic_vector(4 downto 0);
+  signal instr_shift_en : std_logic_vector(1 downto 0);
   signal ena : std_logic;
 
   component instr_shift_register is
     port (
-      clk, rst, en : in std_logic;
+      clk, rst : in std_logic;
+      en : in std_logic_vector(1 downto 0);
       opcode0, funct0 : in std_logic_vector(5 downto 0);
       rs0, rt0, rd0 : in std_logic_vector(4 downto 0);
       opcode1, funct1 : out std_logic_vector(5 downto 0);
@@ -85,18 +88,22 @@ begin
     nextstateB <= nextstateB0;
   end process;
 
+  instr_shift_en <= "1" & ena;
   instr_shift_register0 : instr_shift_register port map (
-    clk => clk, rst => rst, en => '1',
+    clk => clk, rst => rst, en => instr_shift_en,
     opcode0 => opcode, funct0 => funct,
     rs0 => rs, rt0 => rt, rd0 => rd,
     opcode1 => calcs_opcode, funct1 => calcs_funct,
     rs1 => calcs_rs, rt1 => calcs_rt, rd1 => calcs_rd,
     opcode2 => memrw_opcode, funct2 => memrw_funct,
-    rs2 => memrw_rs, rt2 => memrw_rt, rd2 => memrw_rd
+    rs2 => memrw_rs, rt2 => memrw_rt0, rd2 => memrw_rd0
   );
+  -- for regrw
+  memrds_rt <= memrw_rt0;
+  memrds_rd <= memrw_rd0;
 
   -- forwarding for pipeline
-  process(stateA, stateB, rs, rt, rd, memrw_rt)
+  process(stateA, stateB, rs, rt, rd, memrw_rt0)
     variable rd1_aluforward_memrd_s0, rd2_aluforward_memrd_s0 : std_logic_vector(1 downto 0);
   begin
     rd1_aluforward_memrd_s0 := "00"; rd2_aluforward_memrd_s0 := "00";
@@ -138,13 +145,13 @@ begin
       -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
       when MemReadS =>
         if stateB = DecodeS then
-          if memrw_rt = rs then
+          if memrw_rt0 = rs then
             rd1_aluforward_memrd_s0 := "10";
           end if;
 
           -- lw $s0, 20($t2) -- lw $rt, imm($rs)
           -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if memrw_rt = rt then
+          if memrw_rt0 = rt then
             rd2_aluforward_memrd_s0 := "10";
           end if;
         end if;
