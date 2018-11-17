@@ -17,7 +17,7 @@ entity mips is
     ja : out std_logic_vector(27 downto 0);
     alures : out std_logic_vector(31 downto 0);
     -- for scan
-    dec_sa, dec_sb : out state_vector_type;
+    dec_sa, dec_sb, dec_sc : out state_vector_type;
     -- -- check stall or not
     stall_en : out std_logic
   );
@@ -89,7 +89,7 @@ architecture behavior of mips is
       rdt_immext_s : out std_logic;
       calc_en : out std_logic;
       -- scan for debug
-      dec_sa, dec_sb : out state_vector_type
+      dec_sa, dec_sb, dec_sc : out state_vector_type
     );
   end component;
 
@@ -177,7 +177,7 @@ begin
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
     calc_en => calc_en,
-    dec_sa => dec_sa, dec_sb => dec_sb
+    dec_sa => dec_sa, dec_sb => dec_sb, dec_sc => dec_sc
   );
   stall_en <= not calc_en;
 end architecture;

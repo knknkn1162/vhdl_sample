@@ -30,14 +30,15 @@ entity controller is
     rdt_immext_s : out std_logic;
     calc_en : out std_logic;
     -- for scan
-    dec_sa, dec_sb : out state_vector_type
+    dec_sa, dec_sb, dec_sc : out state_vector_type
   );
 end entity;
 
 architecture behavior of controller is
+  signal dec_sa0, dec_sb0, dec_sc0 : state_vector_type;
   signal stateA, nextstateA : statetype;
-  signal dec_sa0, dec_sb0 : state_vector_type;
   signal stateB, nextstateB : statetype;
+  signal stateC, nextstateC : statetype;
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
   signal memrw_opcode, memrw_funct : std_logic_vector(5 downto 0);
@@ -61,31 +62,38 @@ architecture behavior of controller is
 begin
   process(clk, rst) begin
     if rst = '1' then
+      -- initialization
       stateA <= InitS;
       stateB <= Wait2S;
+      stateC <= Wait3S;
     elsif rising_edge(clk) then
       stateA <= nextStateA;
       stateB <= nextStateB;
+      stateC <= nextStateC;
     end if;
   end process;
 
-  process(stateA, stateB)
+  process(stateA, stateB, stateC)
   begin
     dec_sa0 <= decode_state(stateA);
     dec_sb0 <= decode_state(stateB);
+    dec_sc0 <= decode_state(stateC);
   end process;
-  dec_sa <= dec_sa0; dec_sb <= dec_sb0;
+  dec_sa <= dec_sa0; dec_sb <= dec_sb0; dec_sc <= dec_sc0;
 
   -- State Machine
   process(clk, rst, opcode, funct)
     variable stateA0, nextstateA0 : statetype;
     variable stateB0, nextstateB0 : statetype;
+    variable stateC0, nextstateC0 : statetype;
   begin
     nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load, ena);
     nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load, ena);
+    nextstateC0 := get_nextstate(stateC, opcode, calcs_opcode, load, ena);
     -- todo : additional expr
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;
+    nextstateC <= nextstateC0;
   end process;
 
   instr_shift_en <= "1" & ena;
