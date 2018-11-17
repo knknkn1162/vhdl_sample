@@ -1,7 +1,7 @@
 F=dummy
 VHDL=vhdl
 MEM=dummy
-TESTBENCHES="forwarding_addi_add forwarding_add_add stall_lw_add"
+TESTBENCHES="forwarding_addi_add forwarding_add_add stall_lw_add stall_lw_addi"
 
 clean:
 	rm -f work-obj93.cf *.o *.vcd
@@ -34,6 +34,8 @@ forwarding_add_add:
 	make mips_tb F=forwarding_add_add
 stall_lw_add:
 	make mips_tb F=stall_lw_add
+stall_lw_addi:
+	make mips_tb F=stall_lw_addi
 datapath: memrw decode regrw calc memadr
 	make all F=datapath
 controller: instr_shift_register controller_pkg debug_pkg
