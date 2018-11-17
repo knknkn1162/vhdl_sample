@@ -25,7 +25,6 @@ entity controller is
     memrd_aluout_s : out std_logic; -- for lw or addi
     rt_rd_s : out std_logic; -- Itype or Rtype
     memrds_rt, memrds_rd : out std_logic_vector(4 downto 0);
-  
     reg_wa : out std_logic_vector(4 downto 0);
     reg_rd : out std_logic_vector(31 downto 0);
     reg_we : out std_logic;

@@ -69,7 +69,7 @@ architecture behavior of datapath is
   end component;
 
 
-  component regrw
+  component regrw2
     generic(regfile : string := "./assets/reg/dummy.hex");
     port (
       clk, rst, load : in std_logic;
@@ -165,7 +165,7 @@ begin
   );
   rs <= rs0; rt <= rt0; rd <= rd0;
 
-  regrw0 : regrw generic map(regfile=>regfile)
+  regrw0 : regrw2 generic map(regfile=>regfile)
   port map (
     clk => clk, rst => rst, load => load,
     rs => rs0, rt => rt0, rd => rd0,
