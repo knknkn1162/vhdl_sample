@@ -4,7 +4,7 @@ use IEEE.NUMERIC_STD.ALL;
 use work.debug_pkg.state_vector_type;
 
 entity mips is
-  generic(memfile : string; regfile : string := "./assets/reg/dummy.hex");
+  generic(memfile : string; regfile : string);
   port (
     clk, rst, load : in std_logic;
     -- scan for testbench
@@ -39,19 +39,15 @@ architecture behavior of mips is
       -- for memwrite
       mem_we: in std_logic;
       -- for decode
-      -- forwarding for pipeline
-      rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
+      cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
       -- for writeback
       instr_en, reg_we : in std_logic;
-      memrd_aluout_s : in std_logic; -- for lw or addi
-      rt_rd_s : in std_logic; -- Itype or Rtype
-      memrds_rt, memrds_rd : in std_logic_vector(4 downto 0);
       -- for calc
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
       calc_en : in std_logic;
       aluzero : out std_logic;
-      
+
       -- scan for testbench
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0);
@@ -69,26 +65,27 @@ architecture behavior of mips is
       clk, rst, load : in std_logic;
       opcode, funct : in std_logic_vector(5 downto 0);
       rs, rt, rd : in std_logic_vector(4 downto 0);
+      mem_rd, alures : in std_logic_vector(31 downto 0);
       aluzero : in std_logic;
-      -- for memadr
+      -- for memread
       pc_aluout_s : out std_logic;
       pc4_br4_ja_s : out std_logic_vector(1 downto 0);
       pc_en : out std_logic;
+
       -- for memwrite
       mem_we: out std_logic;
-      -- for decode
-      -- -- forwarding for pipeline
-      rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : out std_logic_vector(1 downto 0);
       -- for writeback
-      instr_en, reg_we : out std_logic;
-      memrd_aluout_s : out std_logic; -- for lw or addi
-      rt_rd_s : out std_logic; -- Itype or Rtype
-      memrds_rt, memrds_rd : out std_logic_vector(4 downto 0);
+      instr_en : out std_logic;
+      reg_wa : out std_logic_vector(4 downto 0);
+      reg_wd : out std_logic_vector(31 downto 0);
+      reg_we : out std_logic;
+      -- forwarding
+      cached_rds, cached_rdt : out std_logic_vector(31 downto 0);
       -- for calc
       alucont : out std_logic_vector(2 downto 0);
       rdt_immext_s : out std_logic;
       calc_en : out std_logic;
-      -- scan for debug
+      -- for scan
       dec_sa, dec_sb : out state_vector_type
     );
   end component;
@@ -99,18 +96,15 @@ architecture behavior of mips is
   -- for memwrite
   signal mem_we: std_logic;
   -- for decode
-  -- forwarding for pipeline
-  signal rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : std_logic_vector(1 downto 0);
+  signal cached_rds, cached_rdt : std_logic_vector(31 downto 0);
   -- for writeback
   signal instr_en, reg_we : std_logic;
-  signal memrd_aluout_s : std_logic;
-  signal rt_rd_s : std_logic;
-  signal memrds_rt, memrds_rd : std_logic_vector(4 downto 0);
   -- for calc
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
   signal calc_en : std_logic;
   signal aluzero : std_logic;
+  signal mem_rd0, alures0 : std_logic_vector(31 downto 0);
 
   -- for memadr
   signal pc_aluout_s : std_logic;
@@ -132,32 +126,30 @@ begin
     -- for memwrite
     mem_we => mem_we,
     -- forwarding for pipeline
-    rd1_aluforward_memrd_s => rd1_aluforward_memrd_s, rd2_aluforward_memrd_s => rd2_aluforward_memrd_s,
+    cached_rds => cached_rds, cached_rdt => cached_rdt,
     -- for writeback
     instr_en => instr_en, reg_we => reg_we,
-    memrd_aluout_s => memrd_aluout_s,
-    rt_rd_s => rt_rd_s,
     -- for calc
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
     aluzero => aluzero,
     calc_en => calc_en,
-    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
     
     -- scan for testbench
     pc => pc, pcnext => pcnext,
-    addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,
+    addr => addr, mem_rd => mem_rd0, mem_wd => mem_wd,
     reg_wa => reg_wa,
     reg_wd => reg_wd,
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
-    alures => alures
+    alures => alures0
   );
 
   controller0 : controller port map (
     clk => clk, rst => rst, load => load,
     opcode => opcode, funct => funct,
     rs => rs, rt => rt, rd => rd,
+    mem_rd => mem_rd0, alures => alures0,
     aluzero => aluzero,
     -- out
     -- for memadr
@@ -166,18 +158,18 @@ begin
     -- for memwrite
     mem_we => mem_we,
     -- for decode
-    -- forwarding for pipeline
-    rd1_aluforward_memrd_s => rd1_aluforward_memrd_s, rd2_aluforward_memrd_s => rd2_aluforward_memrd_s,
     -- for writeback
-    instr_en => instr_en, reg_we => reg_we,
-    memrd_aluout_s => memrd_aluout_s,
-    rt_rd_s => rt_rd_s,
-    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
+    instr_en => instr_en,
+    reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we,
+    -- forwarding
+    cached_rds => cached_rds, cached_rdt => cached_rdt,
     -- for memadr
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
     calc_en => calc_en,
     dec_sa => dec_sa, dec_sb => dec_sb
   );
+  alures <= alures0;
+  mem_rd <= mem_rd0;
   stall_en <= not calc_en;
 end architecture;

@@ -18,13 +18,8 @@ entity controller is
 
     -- for memwrite
     mem_we: out std_logic;
-    -- -- forwarding for pipeline
-    rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : out std_logic_vector(1 downto 0);
     -- for writeback
     instr_en : out std_logic;
-    memrd_aluout_s : out std_logic; -- for lw or addi
-    rt_rd_s : out std_logic; -- Itype or Rtype
-    memrds_rt, memrds_rd : out std_logic_vector(4 downto 0);
     reg_wa : out std_logic_vector(4 downto 0);
     reg_wd : out std_logic_vector(31 downto 0);
     reg_we : out std_logic;
@@ -46,7 +41,7 @@ architecture behavior of controller is
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
   signal memrds_opcode, memrds_funct : std_logic_vector(5 downto 0);
-  signal memrds_rs, memrds_rt0, memrds_rd0 : std_logic_vector(4 downto 0);
+  signal memrds_rs_dummy, memrds_rt, memrds_rd_dummy : std_logic_vector(4 downto 0);
   signal instr_shift_en : std_logic_vector(1 downto 0);
   signal ena : std_logic;
   -- for cache register address and data
@@ -140,11 +135,11 @@ begin
     opcode1 => calcs_opcode, funct1 => calcs_funct,
     rs1 => calcs_rs, rt1 => calcs_rt, rd1 => calcs_rd,
     opcode2 => memrds_opcode, funct2 => memrds_funct,
-    rs2 => memrds_rs, rt2 => memrds_rt0, rd2 => memrds_rd0
+    rs2 => memrds_rs_dummy, -- not used
+    rt2 => memrds_rt,
+    rd2 => memrds_rd_dummy -- not used
   );
   -- for regrw
-  memrds_rt <= memrds_rt0;
-  memrds_rd <= memrds_rd0;
 
   -- cache wa & wd
   process(calcs_opcode)
@@ -199,7 +194,7 @@ begin
     clk => clk, rst => rst,
     -- cache calcs
     calcs_wa => calcs_wa, calcs_wd => alures, calcs_we => alures_we,
-    memrds_wa => memrds_rt0, memrds_wd => mem_rd, memrds_we => memrd_we,
+    memrds_wa => memrds_rt, memrds_wd => mem_rd, memrds_we => memrd_we,
     -- selector
     memrds_load_s => memrds_load_s,
 
@@ -212,66 +207,6 @@ begin
     rt => rt,
     rdt => cached_rdt
   );
-
-  -- forwarding for pipeline
-  process(stateA, stateB, rs, rt, rd, memrds_rt0)
-    variable rd1_aluforward_memrd_s0, rd2_aluforward_memrd_s0 : std_logic_vector(1 downto 0);
-  begin
-    rd1_aluforward_memrd_s0 := "00"; rd2_aluforward_memrd_s0 := "00";
-    case stateA is
-      when AddiCalcS =>
-        if stateB = DecodeS then
-          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
-          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-          if calcs_rt = rs then
-            rd1_aluforward_memrd_s0 := "01";
-          end if;
-
-          -- addi $s0, $t1, $t2 -- addi $rt, $rs, imm
-          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if calcs_rt = rt then
-            rd2_aluforward_memrd_s0 := "01";
-          end if;
-        end if;
-
-      when RtypeCalcS =>
-        if stateB = DecodeS then
-          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
-          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-          -- or
-          -- add $s1, $s0, $t1 -- add $rd, $rs, $rt
-          -- addi $s1, $s1, 5 -- addi $rt, $rs, imm
-          if calcs_rd = rs then
-            rd1_aluforward_memrd_s0 := "01";
-          end if;
-
-          -- add $s0, $t1, $t2 -- add $rd, $rs, $rt
-          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if calcs_rd = rt then
-            rd2_aluforward_memrd_s0 := "01";
-          end if;
-        end if;
-
-      -- lw $s0, 20($t2) -- lw $rt, imm($rs)
-      -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
-      when MemReadS =>
-        if stateB = DecodeS then
-          if memrds_rt0 = rs then
-            rd1_aluforward_memrd_s0 := "10";
-          end if;
-
-          -- lw $s0, 20($t2) -- lw $rt, imm($rs)
-          -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if memrds_rt0 = rt then
-            rd2_aluforward_memrd_s0 := "10";
-          end if;
-        end if;
-      when others =>
-        -- do nothing
-    end case;
-    rd1_aluforward_memrd_s <= rd1_aluforward_memrd_s0;
-    rd2_aluforward_memrd_s <= rd2_aluforward_memrd_s0;
-  end process;
 
   -- stall
   process(stateA, stateB, calcs_opcode, rs, rt)
@@ -311,8 +246,6 @@ begin
     -- for decode
     -- for writeback
     variable reg_weA, reg_weB : std_logic;
-    variable memrd_aluout_sA, memrd_aluout_sB : std_logic; -- for lw or addi
-    variable rt_rd_sA, rt_rd_sB : std_logic; -- Itype or Rtype
     -- for calc
     variable alucontA, alucontB : std_logic_vector(2 downto 0);
     variable rdt_immext_sA, rdt_immext_sB : std_logic;
@@ -331,12 +264,6 @@ begin
     -- for writeback
     reg_weA := get_reg_we(stateA); reg_weB := get_reg_we(stateB);
     reg_we <= reg_weA or reg_weB;
-
-    memrd_aluout_sA := get_memrd_aluout_s(stateA); memrd_aluout_sB := get_memrd_aluout_s(stateB);
-    memrd_aluout_s <= memrd_aluout_sA or memrd_aluout_sB;
-
-    rt_rd_sA := get_rt_rd_s(stateA); rt_rd_sB := get_rt_rd_s(stateB);
-    rt_rd_s <= rt_rd_sA or rt_rd_sB;
 
     rdt_immext_sA := get_rdt_immext_s(stateA); rdt_immext_sB := get_rdt_immext_s(stateB);
     rdt_immext_s <= rdt_immext_sA or rdt_immext_sB;
