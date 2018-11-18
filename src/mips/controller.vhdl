@@ -176,6 +176,25 @@ begin
     end if;
   end process;
 
+  process(calcs_opcode)
+  begin
+    case calcs_opcode is
+      when OP_ADDI | OP_RTYPE =>
+        alures_we <= '1';
+      when others =>
+        alures_we <= '0';
+    end case;
+  end process;
+
+  process(memrds_opcode)
+  begin
+    if memrds_opcode = OP_LW then
+      memrd_we <= '1';
+    else
+      memrd_we <= '0';
+    end if;
+  end process;
+
   regw_cache0 : regw_cache port map (
     clk => clk, rst => rst,
     -- cache calcs
@@ -188,8 +207,10 @@ begin
     reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we,
 
     -- forwarding
-    rs => rs, rds => cached_rds,
-    rt => rt, rdt => cached_rdt
+    rs => rs
+    rds => cached_rds,
+    rt => rt,
+    rdt => cached_rdt
   );
 
   -- forwarding for pipeline
