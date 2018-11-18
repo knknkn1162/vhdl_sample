@@ -207,7 +207,7 @@ begin
     reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we,
 
     -- forwarding
-    rs => rs
+    rs => rs,
     rds => cached_rds,
     rt => rt,
     rdt => cached_rdt
