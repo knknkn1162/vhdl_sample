@@ -44,7 +44,7 @@ stall_lw_addi:
 	make mips_tb F=stall_lw_addi
 datapath: memrw decode regrw calc memadr
 	make all F=datapath
-controller: instr_shift_register controller_pkg debug_pkg
+controller: instr_shift_register controller_pkg debug_pkg mux2
 	ghdl -a controller.vhdl
 debug_pkg: state_pkg
 	ghdl -a debug_pkg.vhdl
@@ -58,6 +58,8 @@ decode: flopr_en
 	make all F=decode
 regrw: reg sgnext mux2 shift_register2
 	make all F=regrw
+regw_cache: flopr_en mux2
+	make all F=regw_cache
 calc: flopr_en alu mux2 slt2
 	make all F=calc
 memadr: flopr_en mux4

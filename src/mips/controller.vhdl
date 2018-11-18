@@ -21,12 +21,12 @@ entity controller is
     -- -- forwarding for pipeline
     rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : out std_logic_vector(1 downto 0);
     -- for writeback
-    instr_en, reg_we : out std_logic;
+    instr_en : out std_logic;
     memrd_aluout_s : out std_logic; -- for lw or addi
     rt_rd_s : out std_logic; -- Itype or Rtype
     memrds_rt, memrds_rd : out std_logic_vector(4 downto 0);
     reg_wa : out std_logic_vector(4 downto 0);
-    reg_rd : out std_logic_vector(31 downto 0);
+    reg_wd : out std_logic_vector(31 downto 0);
     reg_we : out std_logic;
     -- forwarding
     cached_rds, cached_rdt : out std_logic_vector(31 downto 0);
@@ -45,13 +45,13 @@ architecture behavior of controller is
   signal stateB, nextstateB : statetype;
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
-  signal memrw_opcode, memrw_funct : std_logic_vector(5 downto 0);
-  signal memrw_rs, memrw_rt0, memrw_rd0 : std_logic_vector(4 downto 0);
+  signal memrds_opcode, memrds_funct : std_logic_vector(5 downto 0);
+  signal memrds_rs, memrds_rt0, memrds_rd0 : std_logic_vector(4 downto 0);
   signal instr_shift_en : std_logic_vector(1 downto 0);
   signal ena : std_logic;
   -- for cache register address and data
   signal calcs_wa : std_logic_vector(4 downto 0);
-  signal calcs_rt_rd_s, calcs_memrds_s : std_logic;
+  signal calcs_rt_rd_s, memrds_load_s : std_logic;
   signal alures_we, memrd_we : std_logic;
 
   component instr_shift_register is
@@ -76,18 +76,29 @@ architecture behavior of controller is
       memrds_wa : in std_logic_vector(4 downto 0);
       memrds_wd : in std_logic_vector(31 downto 0);
       memrds_we : in std_logic;
-      calcs_memrds_s : in std_logic;
+      memrds_load_s : in std_logic;
       -- for RegWriteBackS
-      reg_wa : out std_logic(4 downto 0);
-      reg_wd : out std_logic(31 downto 0);
-      reg_we : out std_logic
+      reg_wa : out std_logic_vector(4 downto 0);
+      reg_wd : out std_logic_vector(31 downto 0);
+      reg_we : out std_logic;
 
       -- forwarding
       rs : in std_logic_vector(4 downto 0);
       rt : in std_logic_vector(4 downto 0);
-      rds : out std_logic_vector(31 downto 0)
+      rds : out std_logic_vector(31 downto 0);
       rdt : out std_logic_vector(31 downto 0)
     );
+  end component;
+
+
+  component mux2
+    generic(N : integer);
+    port (
+      d0 : in std_logic_vector(N-1 downto 0);
+      d1 : in std_logic_vector(N-1 downto 0);
+      s : in std_logic;
+      y : out std_logic_vector(N-1 downto 0)
+        );
   end component;
 
 begin
@@ -121,42 +132,50 @@ begin
   end process;
 
   -- cache wa & wd
-  case calcs_opcode is
-    when OP_RTYPE =>
-      calcs_rt_rd_s <= '1';
-    when OP_ADDI| =>
-      calcs_rt_rd_s <= '0';
-    when others =>
-      -- do nothing
-  end case;
+  process(calcs_opcode)
+  begin
+    case calcs_opcode is
+      when OP_RTYPE =>
+        calcs_rt_rd_s <= '1';
+      when OP_ADDI =>
+        calcs_rt_rd_s <= '0';
+      when others =>
+        -- do nothing
+    end case;
+  end process;
 
-  calcs_rt_rd_mux : mux2 port map (
+  calcs_rt_rd_mux : mux2 generic map(N=>5)
+  port map (
     d0 => calcs_rt,
     d1 => calcs_rd,
     s => calcs_rt_rd_s,
     y => calcs_wa
   );
 
-  -- get calcs_memrds_s
-  process(stateA)
+  -- get memrds_load_s
+  process(stateA, stateB)
   begin
-    calcs_memrds_s <= '1' when (stateA = MemReadS or stateB = MemReadS) else '0';
+    if(stateA = MemReadS or stateB = MemReadS) then
+      memrds_load_s <= '1';
+    else
+      memrds_load_s <= '0';
+    end if;
   end process;
 
   regw_cache0 : regw_cache port map (
     clk => clk, rst => rst,
     -- cache calcs
     calcs_wa => calcs_wa, calcs_wd => alures, calcs_we => alures_we,
-    memrds_wa => memrds_rt, memrds_wd => mem_rd, memrds_we => memrd_we,
+    memrds_wa => memrds_rt0, memrds_wd => mem_rd, memrds_we => memrd_we,
     -- selector
-    calcs_memrds_s => calcs_memrds_s,
+    memrds_load_s => memrds_load_s,
 
     -- to regrw
-    reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we
+    reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we,
 
     -- forwarding
     rs => rs, rds => cached_rds,
-    rd => rd, rdt => cached_rdt
+    rt => rt, rdt => cached_rdt
   );
 
   -- store old instrs
@@ -167,15 +186,15 @@ begin
     rs0 => rs, rt0 => rt, rd0 => rd,
     opcode1 => calcs_opcode, funct1 => calcs_funct,
     rs1 => calcs_rs, rt1 => calcs_rt, rd1 => calcs_rd,
-    opcode2 => memrw_opcode, funct2 => memrw_funct,
-    rs2 => memrw_rs, rt2 => memrw_rt0, rd2 => memrw_rd0
+    opcode2 => memrds_opcode, funct2 => memrds_funct,
+    rs2 => memrds_rs, rt2 => memrds_rt0, rd2 => memrds_rd0
   );
   -- for regrw
-  memrds_rt <= memrw_rt0;
-  memrds_rd <= memrw_rd0;
+  memrds_rt <= memrds_rt0;
+  memrds_rd <= memrds_rd0;
 
   -- forwarding for pipeline
-  process(stateA, stateB, rs, rt, rd, memrw_rt0)
+  process(stateA, stateB, rs, rt, rd, memrds_rt0)
     variable rd1_aluforward_memrd_s0, rd2_aluforward_memrd_s0 : std_logic_vector(1 downto 0);
   begin
     rd1_aluforward_memrd_s0 := "00"; rd2_aluforward_memrd_s0 := "00";
@@ -217,13 +236,13 @@ begin
       -- add $s1, $t0, $s0 -- add $rd, $rs, $rt
       when MemReadS =>
         if stateB = DecodeS then
-          if memrw_rt0 = rs then
+          if memrds_rt0 = rs then
             rd1_aluforward_memrd_s0 := "10";
           end if;
 
           -- lw $s0, 20($t2) -- lw $rt, imm($rs)
           -- add $s1, $t1, $s0 -- add $rd, $rs, $rt
-          if memrw_rt0 = rt then
+          if memrds_rt0 = rt then
             rd2_aluforward_memrd_s0 := "10";
           end if;
         end if;
