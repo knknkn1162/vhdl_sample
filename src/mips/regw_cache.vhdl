@@ -49,8 +49,9 @@ architecture behavior of regw_cache is
   signal memrd : std_logic_vector(WD_DIM-1 downto 0);
   signal data1, data2 : std_logic_vector(WD_DIM-1 downto 0);
   signal regd0 : std_logic_vector(WD_DIM-1 downto 0);
-  signal reg_wa0 : std_logic_vector(4 downto 0);
-  signal reg_wd0 : std_logic_vector(31 downto 0);
+  signal reg_wa0, memrds_wa0 : std_logic_vector(4 downto 0);
+  signal reg_wd0, memrds_wd0 : std_logic_vector(31 downto 0);
+  signal reg_we0, memrds_we0 : std_logic;
 begin
   calcd <= calcs_we & calcs_wd & calcs_wa;
   memrd <= memrds_we & memrds_wd & memrds_wa;
@@ -69,6 +70,9 @@ begin
     s => memrds_load_s,
     y => data1
   );
+  memrds_wa0 <= data1(4 downto 0);
+  memrds_wd0 <= data1(WD_DIM-2 downto 5);
+  memrds_we0 <= data1(WD_DIM-1);
 
   flopr_en1 : flopr_en generic map(N=>WD_DIM)
   port map (
@@ -78,29 +82,29 @@ begin
   );
   reg_wa0 <= regd0(4 downto 0); reg_wa <= reg_wa0;
   reg_wd0 <= regd0(WD_DIM-2 downto 5); reg_wd <= reg_wd0;
-  reg_we <= regd0(WD_DIM-1);
+  reg_we0 <= regd0(WD_DIM-1); reg_we <= reg_we0;
 
   -- search from cache store
-  process(rs, calcs_wd, data1, reg_wd0, reg_wa0)
+  process(rs, calcs_wd, data1, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
   begin
-    if rs = calcs_wa then
+    if rs = calcs_wa and calcs_we = '1' then
       rds <= calcs_wd;
-    elsif rs = data1(4 downto 0) then
+    elsif rs = data1(4 downto 0) and memrds_we0 = '1' then
       rds <= data1(WD_DIM-2 downto 5);
-    elsif rs = reg_wa0 then
+    elsif rs = reg_wa0 and reg_we0 = '1' then
       rds <= reg_wd0;
     else
       rds <= (others => '-');
     end if;
   end process;
 
-  process(rt, calcs_wd, data1, reg_wd0, reg_wa0)
+  process(rt, calcs_wd, data1, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
   begin
-    if rt = calcs_wa then
+    if rt = calcs_wa and calcs_we = '1' then
       rdt <= calcs_wd;
-    elsif rt = data1(4 downto 0) then
-      rdt <= data1(WD_DIM-2 downto 5);
-    elsif rt = reg_wa0 then
+    elsif rt = memrds_wa0 and memrds_we0 = '1' then
+      rdt <= memrds_wd0;
+    elsif rt = reg_wa0 and reg_we0 = '1' then
       rdt <= reg_wd0;
     else
       rdt <= (others => '-');
