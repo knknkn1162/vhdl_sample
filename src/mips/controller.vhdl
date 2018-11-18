@@ -244,8 +244,6 @@ begin
     -- for memwrite
     variable mem_weA, mem_weB: std_logic;
     -- for decode
-    -- for writeback
-    variable reg_weA, reg_weB : std_logic;
     -- for calc
     variable alucontA, alucontB : std_logic_vector(2 downto 0);
     variable rdt_immext_sA, rdt_immext_sB : std_logic;
@@ -260,10 +258,6 @@ begin
     mem_we <= mem_weA or mem_weB;
 
     -- for decode
-
-    -- for writeback
-    reg_weA := get_reg_we(stateA); reg_weB := get_reg_we(stateB);
-    reg_we <= reg_weA or reg_weB;
 
     rdt_immext_sA := get_rdt_immext_s(stateA); rdt_immext_sB := get_rdt_immext_s(stateB);
     rdt_immext_s <= rdt_immext_sA or rdt_immext_sB;

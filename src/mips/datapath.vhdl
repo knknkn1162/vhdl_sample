@@ -19,7 +19,10 @@ entity datapath is
     -- for decode
     cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
     -- for writeback
-    instr_en, reg_we : in std_logic;
+    instr_en : in std_logic;
+    reg_wa : in std_logic_vector(4 downto 0);
+    reg_wd : in std_logic_vector(31 downto 0);
+    reg_we : in std_logic;
     -- for calc
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic;
@@ -30,8 +33,6 @@ entity datapath is
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
     addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
-    reg_wa : out std_logic_vector(4 downto 0);
-    reg_wd : out std_logic_vector(31 downto 0);
     rds, rdt, immext : out std_logic_vector(31 downto 0);
     ja : out std_logic_vector(27 downto 0);
     alures : out std_logic_vector(31 downto 0)
@@ -122,8 +123,6 @@ architecture behavior of datapath is
   signal rds0, rdt0, immext0 : std_logic_vector(31 downto 0);
   signal ja0 : std_logic_vector(27 downto 0);
   signal reg_aluout0 : std_logic_vector(31 downto 0);
-  signal reg_wa0 : std_logic_vector(4 downto 0);
-  signal reg_wd0 : std_logic_vector(31 downto 0);
   signal alures0 : std_logic_vector(31 downto 0);
   signal brplus0 : std_logic_vector(31 downto 0);
 
@@ -157,14 +156,12 @@ begin
     clk => clk, rst => rst, load => load,
     rs => rs0, rt => rt0, imm => imm0,
     -- from controller
-    wa => reg_wa0, wd => reg_wd0, we => reg_we,
+    wa => reg_wa, wd => reg_wd, we => reg_we,
     cached_rds => cached_rds, cached_rdt => cached_rdt,
     -- out
     rds => rds0, rdt => rdt0, immext => immext0
   );
 
-  reg_wa <= reg_wa0;
-  reg_wd <= reg_wd0;
   rds <= rds0; rdt <= rdt0; immext <= immext0;
 
   calc0 : calc port map (

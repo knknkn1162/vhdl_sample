@@ -11,13 +11,14 @@ entity mips is
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
     addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
-    reg_wa : out std_logic_vector(4 downto 0);
-    reg_wd : out std_logic_vector(31 downto 0);
     rds, rdt, immext : out std_logic_vector(31 downto 0);
     ja : out std_logic_vector(27 downto 0);
     alures : out std_logic_vector(31 downto 0);
     -- for scan
     dec_sa, dec_sb : out state_vector_type;
+    reg_wa : out std_logic_vector(4 downto 0);
+    reg_wd : out std_logic_vector(31 downto 0);
+    reg_we : out std_logic;
     -- -- check stall or not
     stall_en : out std_logic
   );
@@ -41,7 +42,10 @@ architecture behavior of mips is
       -- for decode
       cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
       -- for writeback
-      instr_en, reg_we : in std_logic;
+      instr_en : in std_logic;
+      reg_wa : in std_logic_vector(4 downto 0);
+      reg_wd : in std_logic_vector(31 downto 0);
+      reg_we : in std_logic;
       -- for calc
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
@@ -52,8 +56,6 @@ architecture behavior of mips is
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0);
       addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
-      reg_wa : out std_logic_vector(4 downto 0);
-      reg_wd : out std_logic_vector(31 downto 0);
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       ja : out std_logic_vector(27 downto 0);
       alures : out std_logic_vector(31 downto 0)
@@ -98,7 +100,10 @@ architecture behavior of mips is
   -- for decode
   signal cached_rds, cached_rdt : std_logic_vector(31 downto 0);
   -- for writeback
-  signal instr_en, reg_we : std_logic;
+  signal instr_en : std_logic;
+  signal reg_wa0 : std_logic_vector(4 downto 0);
+  signal reg_we0 : std_logic;
+  signal reg_wd0 : std_logic_vector(31 downto 0);
   -- for calc
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
@@ -128,7 +133,8 @@ begin
     -- forwarding for pipeline
     cached_rds => cached_rds, cached_rdt => cached_rdt,
     -- for writeback
-    instr_en => instr_en, reg_we => reg_we,
+    instr_en => instr_en,
+    reg_wa => reg_wa0, reg_wd => reg_wd0, reg_we => reg_we0,
     -- for calc
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
@@ -138,12 +144,11 @@ begin
     -- scan for testbench
     pc => pc, pcnext => pcnext,
     addr => addr, mem_rd => mem_rd0, mem_wd => mem_wd,
-    reg_wa => reg_wa,
-    reg_wd => reg_wd,
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
     alures => alures0
   );
+  reg_wa <= reg_wa0; reg_wd <= reg_wd0; reg_we <= reg_we0;
 
   controller0 : controller port map (
     clk => clk, rst => rst, load => load,
@@ -160,7 +165,7 @@ begin
     -- for decode
     -- for writeback
     instr_en => instr_en,
-    reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we,
+    reg_wa => reg_wa0, reg_wd => reg_wd0, reg_we => reg_we0,
     -- forwarding
     cached_rds => cached_rds, cached_rdt => cached_rdt,
     -- for memadr
