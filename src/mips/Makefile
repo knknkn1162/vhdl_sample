@@ -58,6 +58,8 @@ decode: flopr_en
 	make all F=decode
 regrw: reg sgnext mux2 shift_register2
 	make all F=regrw
+regrw2: reg sgnext
+	make all F=regrw2
 regw_cache: flopr_en mux2
 	make all F=regw_cache
 calc: flopr_en alu mux2 slt2

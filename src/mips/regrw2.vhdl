@@ -5,22 +5,16 @@ entity regrw2 is
   generic(regfile : string := "./assets/reg/dummy.hex");
   port (
     clk, rst, load : in std_logic;
-    rs, rt, rd : in std_logic_vector(4 downto 0);
-    mem_rd : in std_logic_vector(31 downto 0);
-    aluout : in std_logic_vector(31 downto 0);
+    rs, rt : in std_logic_vector(4 downto 0);
     imm : in std_logic_vector(15 downto 0);
 
-    rds, rdt, immext : out std_logic_vector(31 downto 0);
-    -- forwarding for pipeline
-    aluforward : in std_logic_vector(31 downto 0);
     -- from controller
     wa : in std_logic_vector(4 downto 0);
     wd : in std_logic_vector(31 downto 0);
     we : in std_logic;
     cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
 
-    -- -- forwarding for pipeline
-    rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0)
+    rds, rdt, immext : out std_logic_vector(31 downto 0)
   );
 end entity;
 
@@ -49,48 +43,6 @@ architecture behavior of regrw2 is
         );
   end component;
 
-  component mux2
-    generic(N : integer);
-    port (
-      d0 : in std_logic_vector(N-1 downto 0);
-      d1 : in std_logic_vector(N-1 downto 0);
-      s : in std_logic;
-      y : out std_logic_vector(N-1 downto 0)
-        );
-  end component;
-
-  component shift_register2
-    generic(N: natural);
-    port (
-      clk, rst, en : in std_logic;
-      a0 : in std_logic_vector(N-1 downto 0);
-      a1 : out std_logic_vector(N-1 downto 0);
-      a2 : out std_logic_vector(N-1 downto 0)
-    );
-  end component;
-
-  component flopr_en
-    generic(N : natural := 32);
-    port (
-      clk, rst, en: in std_logic;
-      a : in std_logic_vector(N-1 downto 0);
-      y : out std_logic_vector(N-1 downto 0)
-        );
-  end component;
-
-
-  component mux4
-    generic(N : natural);
-    port (
-      d00 : in std_logic_vector(N-1 downto 0);
-      d01 : in std_logic_vector(N-1 downto 0);
-      d10 : in std_logic_vector(N-1 downto 0);
-      d11 : in std_logic_vector(N-1 downto 0);
-      s : in std_logic_vector(1 downto 0);
-      y : out std_logic_vector(N-1 downto 0)
-    );
-  end component;
-
   signal rd1, rd2 : std_logic_vector(31 downto 0);
 
 begin
@@ -102,25 +54,23 @@ begin
     a3 => wa, wd3 => wd, we3 => we
   );
 
-  rd1_aluforward_memrd_mux : mux4 generic map(N=>32)
-  port map (
-    d00 => rd1,
-    d01 => aluforward,
-    d10 => cached_rds, -- from memrw
-    d11 => rd1, -- dummy
-    s => rd1_aluforward_memrd_s,
-    y => rds
-  );
+  process(cached_rds, rd1)
+  begin
+    if not is_X(cached_rds) then
+      rds <= cached_rds;
+    else
+      rds <= rd1;
+    end if;
+  end process;
 
-  rd2_aluforward_memrd_mux : mux4 generic map(N=>32)
-  port map (
-    d00 => rd2,
-    d01 => aluforward,
-    d10 => cached_rdt, -- from memrw
-    d11 => rd2, -- dummy
-    s => rd2_aluforward_memrd_s,
-    y => rdt
-  );
+  process(cached_rdt, rd2)
+  begin
+    if not is_X(cached_rdt) then
+      rdt <= cached_rdt;
+    else
+      rdt <= rd2;
+    end if;
+  end process;
 
   sgnext0 : sgnext port map (
     a => imm,
