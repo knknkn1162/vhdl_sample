@@ -17,13 +17,9 @@ entity datapath is
     -- for memwrite
     mem_we: in std_logic;
     -- for decode
-    -- forwarding for pipeline
-    rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
+    cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
     -- for writeback
     instr_en, reg_we : in std_logic;
-    memrd_aluout_s : in std_logic; -- for lw or addi
-    rt_rd_s : in std_logic; -- Itype or Rtype
-    memrds_rt, memrds_rd : in std_logic_vector(4 downto 0);
     -- for calc
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic;
@@ -68,29 +64,20 @@ architecture behavior of datapath is
     );
   end component;
 
-
   component regrw2
     generic(regfile : string := "./assets/reg/dummy.hex");
     port (
       clk, rst, load : in std_logic;
-      rs, rt, rd : in std_logic_vector(4 downto 0);
-      memrds_rt, memrds_rd : in std_logic_vector(4 downto 0);
-      mem_rd : in std_logic_vector(31 downto 0);
-      aluout : in std_logic_vector(31 downto 0);
+      rs, rt : in std_logic_vector(4 downto 0);
       imm : in std_logic_vector(15 downto 0);
 
-      rds, rdt, immext : out std_logic_vector(31 downto 0);
-      -- forwarding for pipeline
-      aluforward : in std_logic_vector(31 downto 0);
-      -- controller
+      -- from controller
+      wa : in std_logic_vector(4 downto 0);
+      wd : in std_logic_vector(31 downto 0);
       we : in std_logic;
-      memrd_aluout_s : in std_logic;
-      rt_rd_s : in std_logic;
-      -- forwarding for pipeline
-      rd1_aluforward_memrd_s, rd2_aluforward_memrd_s : in std_logic_vector(1 downto 0);
-      -- scan
-      wa : out std_logic_vector(4 downto 0);
-      wd : out std_logic_vector(31 downto 0)
+      cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
+
+      rds, rdt, immext : out std_logic_vector(31 downto 0)
     );
   end component;
 
@@ -168,21 +155,12 @@ begin
   regrw0 : regrw2 generic map(regfile=>regfile)
   port map (
     clk => clk, rst => rst, load => load,
-    rs => rs0, rt => rt0, rd => rd0,
-    memrds_rt => memrds_rt, memrds_rd => memrds_rd,
-    mem_rd => mem_rd0, aluout => reg_aluout0,
-    imm => imm0,
-    rds => rds0, rdt => rdt0, immext => immext0,
-    -- forwarding for pipeline
-    aluforward => alures0,
-    -- controller
-    we => reg_we,
-    memrd_aluout_s => memrd_aluout_s, rt_rd_s => rt_rd_s,
-    -- forwarding for pipeline
-    rd1_aluforward_memrd_s => rd1_aluforward_memrd_s, rd2_aluforward_memrd_s => rd2_aluforward_memrd_s,
-    -- scan
-    wa => reg_wa0,
-    wd => reg_wd0
+    rs => rs0, rt => rt0, imm => imm0,
+    -- from controller
+    wa => reg_wa0, wd => reg_wd0, we => reg_we,
+    cached_rds => cached_rds, cached_rdt => cached_rdt,
+    -- out
+    rds => rds0, rdt => rdt0, immext => immext0
   );
 
   reg_wa <= reg_wa0;
