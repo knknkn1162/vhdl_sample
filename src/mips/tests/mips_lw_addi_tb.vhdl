@@ -115,19 +115,6 @@ begin
     assert alures = X"00000005";
     wait for clk_period;
 
-    -- (RegWriteBackS, CalcS)
-    assert dec_sa = CONST_REGWBS; assert dec_sb = CONST_CALCS;
-    -- -- RegWriteBackS : lw $s0, 12($0)
-    assert reg_wa = "10000"; assert reg_wd = X"00000048";
-    -- -- CalcS : addi $t1, $0, 5
-    assert alures = X"00000005";
-    wait for clk_period;
-
-    -- (-, ALUWritebackS)
-    assert dec_sb = CONST_REGWBS;
-    -- -- ALUWriteBackS : addi $s1, $0, 5
-    assert reg_wa = "01001"; assert reg_wd = X"00000005";
-
     assert false report "end of test" severity note;
     stop <= TRUE;
     wait;
