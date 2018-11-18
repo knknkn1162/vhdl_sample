@@ -131,6 +131,21 @@ begin
     nextstateB <= nextstateB0;
   end process;
 
+  -- store old instrs
+  instr_shift_en <= "1" & ena;
+  instr_shift_register0 : instr_shift_register port map (
+    clk => clk, rst => rst, en => instr_shift_en,
+    opcode0 => opcode, funct0 => funct,
+    rs0 => rs, rt0 => rt, rd0 => rd,
+    opcode1 => calcs_opcode, funct1 => calcs_funct,
+    rs1 => calcs_rs, rt1 => calcs_rt, rd1 => calcs_rd,
+    opcode2 => memrds_opcode, funct2 => memrds_funct,
+    rs2 => memrds_rs, rt2 => memrds_rt0, rd2 => memrds_rd0
+  );
+  -- for regrw
+  memrds_rt <= memrds_rt0;
+  memrds_rd <= memrds_rd0;
+
   -- cache wa & wd
   process(calcs_opcode)
   begin
@@ -152,7 +167,6 @@ begin
     y => calcs_wa
   );
 
-  -- get memrds_load_s
   process(stateA, stateB)
   begin
     if(stateA = MemReadS or stateB = MemReadS) then
@@ -177,21 +191,6 @@ begin
     rs => rs, rds => cached_rds,
     rt => rt, rdt => cached_rdt
   );
-
-  -- store old instrs
-  instr_shift_en <= "1" & ena;
-  instr_shift_register0 : instr_shift_register port map (
-    clk => clk, rst => rst, en => instr_shift_en,
-    opcode0 => opcode, funct0 => funct,
-    rs0 => rs, rt0 => rt, rd0 => rd,
-    opcode1 => calcs_opcode, funct1 => calcs_funct,
-    rs1 => calcs_rs, rt1 => calcs_rt, rd1 => calcs_rd,
-    opcode2 => memrds_opcode, funct2 => memrds_funct,
-    rs2 => memrds_rs, rt2 => memrds_rt0, rd2 => memrds_rd0
-  );
-  -- for regrw
-  memrds_rt <= memrds_rt0;
-  memrds_rd <= memrds_rd0;
 
   -- forwarding for pipeline
   process(stateA, stateB, rs, rt, rd, memrds_rt0)
