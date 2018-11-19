@@ -113,6 +113,7 @@ begin
 
     -- (MemReadS, DecodeS) [Stall]
     assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_DECODES;
+    assert addr = X"0000000C"; assert mem_rd = X"00000048";
     -- DecodeS : add $s1, $s0, $s0
     assert rds = X"00000048"; assert rdt = X"00000048";
     wait for clk_period;
