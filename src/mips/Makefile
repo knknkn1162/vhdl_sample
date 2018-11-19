@@ -44,7 +44,7 @@ stall_lw_addi:
 	make mips_tb F=stall_lw_addi
 datapath: memrw decode regrw2 calc memadr
 	ghdl -a datapath.vhdl
-controller: instr_shift_register controller_pkg debug_pkg mux2
+controller: instr_shift_register controller_pkg debug_pkg mux2 regw_cache
 	ghdl -a controller.vhdl
 debug_pkg: state_pkg
 	ghdl -a debug_pkg.vhdl
