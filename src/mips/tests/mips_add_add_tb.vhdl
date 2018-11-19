@@ -15,13 +15,14 @@ architecture testbench of mips_add_add_tb is
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0);
       addr, mem_rd, mem_wd : out std_logic_vector(31 downto 0);
-      reg_wa : out std_logic_vector(4 downto 0);
-      reg_wd : out std_logic_vector(31 downto 0);
       rds, rdt, immext : out std_logic_vector(31 downto 0);
       ja : out std_logic_vector(27 downto 0);
       alures : out std_logic_vector(31 downto 0);
       -- for scan
       dec_sa, dec_sb : out state_vector_type;
+      reg_wa : out std_logic_vector(4 downto 0);
+      reg_wd : out std_logic_vector(31 downto 0);
+      reg_we : out std_logic;
       -- -- check stall or not
       stall_en : out std_logic
     );
@@ -32,6 +33,7 @@ architecture testbench of mips_add_add_tb is
   signal addr, mem_rd, mem_wd : std_logic_vector(31 downto 0);
   signal reg_wa : std_logic_vector(4 downto 0);
   signal reg_wd : std_logic_vector(31 downto 0);
+  signal reg_we : std_logic;
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
@@ -49,12 +51,12 @@ begin
     clk => clk, rst => rst, load => load,
     pc => pc, pcnext => pcnext,
     addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,
-    reg_wa => reg_wa,
-    reg_wd => reg_wd,
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
     alures => alures,
+    -- for scan
     dec_sa => dec_sa, dec_sb => dec_sb,
+    reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we,
     stall_en => stall_en
   );
 
@@ -108,17 +110,15 @@ begin
     wait for clk_period;
 
     -- (RtypeWriteBackS, CalcS(RtypeCalcS))
-    assert dec_sa = CONST_REGWBS; assert dec_sb = CONST_CALCS;
-    -- RtypeWriteBackS : add $t0, $s0, $s1
-    assert reg_wa = "01000"; assert reg_wd = X"0000000B";
     -- CalcS : add $t1, $s1, $s2
     assert alures = X"0000000D";
     wait for clk_period;
 
-    -- (FetchS, ALUWriteBackS)
-    -- ALUWriteBackS : add $s2, $s1, $s1
-    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_REGWBS;
-    assert reg_wa = "01001"; assert reg_wd = X"0000000D";
+    assert reg_wa = "01000"; assert reg_wd = X"0000000B"; assert reg_we = '1';
+    wait for clk_period;
+
+    assert reg_wa = "01001"; assert reg_wd = X"0000000D"; assert reg_we = '1';
+    wait for clk_period;
 
     assert false report "end of test" severity note;
     stop <= TRUE;
