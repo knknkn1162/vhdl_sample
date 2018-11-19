@@ -64,12 +64,12 @@ begin
   reg_we0 <= reg_d0(WD_DIM-1); reg_we <= reg_we0;
 
   -- search from cache store
-  process(rs, calcs_wd, memrd_d0, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
+  process(rs, calcs_wd, calcs_wa, calcs_we, memrds_wa0, memrds_we0, memrds_wd0, reg_wa0, reg_wd0, reg_we0)
   begin
     if rs = calcs_wa and calcs_we = '1' then
       rds <= calcs_wd;
-    elsif rs = memrd_d0(4 downto 0) and memrds_we0 = '1' then
-      rds <= memrd_d0(WD_DIM-2 downto 5);
+    elsif rs = memrds_wa0 and memrds_we0 = '1' then
+      rds <= memrds_wd0;
     elsif rs = reg_wa0 and reg_we0 = '1' then
       rds <= reg_wd0;
     else
@@ -77,7 +77,7 @@ begin
     end if;
   end process;
 
-  process(rt, calcs_wd, memrd_d0, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
+  process(rt, calcs_wd, calcs_wa, calcs_we, memrds_wa0, memrds_we0, memrds_wd0, reg_wa0, reg_wd0, reg_we0)
   begin
     if rt = calcs_wa and calcs_we = '1' then
       rdt <= calcs_wd;
