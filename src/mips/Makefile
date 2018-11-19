@@ -68,6 +68,8 @@ memadr: flopr_en mux4
 	make all F=memadr
 instr_shift_register: shift_register2
 	make all F=instr_shift_register
+shift_register2_load: flopr_en mux2
+	make all F=shift_register2_load
 shift_register2: flopr_en
 	make all F=shift_register2
 flopr:
