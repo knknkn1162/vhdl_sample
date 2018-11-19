@@ -39,8 +39,8 @@ architecture behavior of regw_cache is
   constant WD_DIM : natural := 38;
   signal calcd, calcd0 : std_logic_vector(WD_DIM-1 downto 0);
   signal memrd : std_logic_vector(WD_DIM-1 downto 0);
-  signal data1 : std_logic_vector(WD_DIM-1 downto 0);
-  signal regd0 : std_logic_vector(WD_DIM-1 downto 0);
+  signal memrd_d0 : std_logic_vector(WD_DIM-1 downto 0);
+  signal reg_d0 : std_logic_vector(WD_DIM-1 downto 0);
   signal reg_wa0, memrds_wa0 : std_logic_vector(4 downto 0);
   signal reg_wd0, memrds_wd0 : std_logic_vector(31 downto 0);
   signal reg_we0, memrds_we0 : std_logic;
@@ -54,22 +54,22 @@ begin
     clk => clk, rst => rst, en => "11",
     load0 => calcd, load1 => memrd,
     s => memrds_load_s,
-    b1 => data1, b2 => regd0
+    b1 => memrd_d0, b2 => reg_d0
   );
-  memrds_wa0 <= data1(4 downto 0);
-  memrds_wd0 <= data1(WD_DIM-2 downto 5);
-  memrds_we0 <= data1(WD_DIM-1);
-  reg_wa0 <= regd0(4 downto 0); reg_wa <= reg_wa0;
-  reg_wd0 <= regd0(WD_DIM-2 downto 5); reg_wd <= reg_wd0;
-  reg_we0 <= regd0(WD_DIM-1); reg_we <= reg_we0;
+  memrds_wa0 <= memrd_d0(4 downto 0);
+  memrds_wd0 <= memrd_d0(WD_DIM-2 downto 5);
+  memrds_we0 <= memrd_d0(WD_DIM-1);
+  reg_wa0 <= reg_d0(4 downto 0); reg_wa <= reg_wa0;
+  reg_wd0 <= reg_d0(WD_DIM-2 downto 5); reg_wd <= reg_wd0;
+  reg_we0 <= reg_d0(WD_DIM-1); reg_we <= reg_we0;
 
   -- search from cache store
-  process(rs, calcs_wd, data1, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
+  process(rs, calcs_wd, memrd_d0, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
   begin
     if rs = calcs_wa and calcs_we = '1' then
       rds <= calcs_wd;
-    elsif rs = data1(4 downto 0) and memrds_we0 = '1' then
-      rds <= data1(WD_DIM-2 downto 5);
+    elsif rs = memrd_d0(4 downto 0) and memrds_we0 = '1' then
+      rds <= memrd_d0(WD_DIM-2 downto 5);
     elsif rs = reg_wa0 and reg_we0 = '1' then
       rds <= reg_wd0;
     else
@@ -77,7 +77,7 @@ begin
     end if;
   end process;
 
-  process(rt, calcs_wd, data1, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
+  process(rt, calcs_wd, memrd_d0, reg_wd0, reg_wa0, calcs_we, memrds_we0, reg_we0)
   begin
     if rt = calcs_wa and calcs_we = '1' then
       rdt <= calcs_wd;
