@@ -3,10 +3,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.debug_pkg.ALL;
 
-entity mips_forwarding_sw_lw_tb is
+entity mips_sw_lw_tb is
 end entity;
 
-architecture testbench of mips_forwarding_sw_lw_tb is
+architecture testbench of mips_sw_lw_tb is
   component mips
     generic(memfile : string; regfile : string);
     port (
@@ -40,8 +40,8 @@ architecture testbench of mips_forwarding_sw_lw_tb is
   signal dec_sa, dec_sb : state_vector_type;
   signal stall_en : std_logic;
 
-  constant memfile : string := "./assets/mem/forwarding_sw_lw.hex";
-  constant regfile : string := "./assets/reg/forwarding_sw_lw.hex";
+  constant memfile : string := "./assets/mem/sw_lw.hex";
+  constant regfile : string := "./assets/reg/sw_lw.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 

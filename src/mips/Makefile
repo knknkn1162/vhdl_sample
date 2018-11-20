@@ -1,7 +1,7 @@
 F=dummy
 VHDL=vhdl
 MEM=dummy
-TESTBENCHES="lw_addi add_add addi_add forwarding_addi_add forwarding_add_add forwarding_sw_lw stall_lw_add stall_lw_addi"
+TESTBENCHES="lw_addi add_add addi_add forwarding_addi_add forwarding_add_add sw_lw stall_lw_add stall_lw_addi"
 
 clean:
 	rm -f work-obj93.cf *.o *.vcd
@@ -38,8 +38,8 @@ lw_addi:
 	make mips_tb F=lw_addi
 forwarding_add_add:
 	make mips_tb F=forwarding_add_add
-forwarding_sw_lw:
-	make mips_tb F=forwarding_sw_lw
+sw_lw:
+	make mips_tb F=sw_lw
 stall_lw_add:
 	make mips_tb F=stall_lw_add
 stall_lw_addi:
