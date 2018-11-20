@@ -40,15 +40,18 @@ entity datapath is
 end entity;
 
 architecture behavior of datapath is
+
   component memrw
     generic(memfile : string);
     port (
       clk, rst, load: in std_logic;
       addr : in std_logic_vector(31 downto 0);
-      wd : in std_logic_vector(31 downto 0);
+      rdt : in std_logic_vector(31 downto 0);
       rd : out std_logic_vector(31 downto 0);
       -- controller
-      we : in std_logic
+      we : in std_logic;
+      -- scan
+      wd : out std_logic_vector(31 downto 0)
     );
   end component;
 
@@ -116,7 +119,7 @@ architecture behavior of datapath is
     );
   end component;
 
-  signal mem_rd0, mem_wd0, mem_addr0 : std_logic_vector(31 downto 0);
+  signal mem_rd0, mem_addr0 : std_logic_vector(31 downto 0);
   signal rs0, rt0, rd0, shamt0 : std_logic_vector(4 downto 0);
   signal imm0 : std_logic_vector(15 downto 0);
   signal target0 : std_logic_vector(25 downto 0);
@@ -127,14 +130,16 @@ architecture behavior of datapath is
   signal brplus0 : std_logic_vector(31 downto 0);
 
 begin
-  mem_wd0 <= rdt0;
   memrw0 : memrw generic map (memfile=>memfile)
   port map (
     clk => clk, rst => rst, load => load,
-    addr => mem_addr0, wd => mem_wd0,
+    rdt => rdt0,
+    addr => mem_addr0,
     rd => mem_rd0, -- out
     -- controller
-    we => mem_we
+    we => mem_we,
+    -- scan
+    wd => mem_wd
   );
   mem_rd <= mem_rd0;
   addr <= mem_addr0; -- for scan

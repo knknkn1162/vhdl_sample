@@ -12,6 +12,7 @@ entity memrw is
     -- controller
     we : in std_logic;
     -- scan
+    -- delay rdt for 2clks
     wd : out std_logic_vector(31 downto 0)
   );
 end entity;
