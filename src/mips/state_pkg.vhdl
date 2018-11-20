@@ -4,7 +4,7 @@ package state_pkg is
     Wait2S, WaitS,
     InitS, LoadS,
     FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
-    MemWriteS,
+    MemWriteBackS,
     RtypeCalcS, ALUWriteBackS,
     BranchS,
     AddiCalcS, AddiWriteBackS,

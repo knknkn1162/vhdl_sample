@@ -37,7 +37,7 @@ package body debug_pkg is
         ret := CONST_CALCS;
       when MemReadS =>
         ret := CONST_MEMRWS;
-      when MemWriteS =>
+      when MemWriteBackS =>
         ret := CONST_MEMWBS;
       when RegWriteBackS | ALUWriteBackS | AddiWriteBackS =>
         ret := CONST_REGWBS;

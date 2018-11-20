@@ -97,7 +97,7 @@ package body controller_pkg is
           when OP_LW =>
             nextState := MemReadS;
           when OP_SW =>
-            nextState := MemWriteS;
+            nextState := MemWriteBackS;
           when others =>
             nextState := FetchS;
         end case;
@@ -108,7 +108,7 @@ package body controller_pkg is
       when MemReadS =>
         nextState := RegWritebackS;
       -- when final state
-      when RegWriteBackS | MemWriteS | AddiWriteBackS | ALUWriteBackS | BranchS | JumpS =>
+      when RegWriteBackS | MemWriteBackS | AddiWriteBackS | ALUWriteBackS | BranchS | JumpS =>
         nextState := FetchS;
       -- if undefined
       when others =>
@@ -175,7 +175,7 @@ package body controller_pkg is
     variable ret: std_logic;
   begin
     case state is
-      when MemWriteS =>
+      when MemWriteBackS =>
         ret := '1';
       when others =>
         -- required : MemReadS
@@ -217,7 +217,7 @@ package body controller_pkg is
     variable ret : std_logic;
   begin
     case state is
-      when MemReadS | MemWriteS =>
+      when MemReadS | MemWriteBackS =>
         ret := '1';
       when others =>
         -- required : FetchS
