@@ -7,10 +7,12 @@ entity memrw is
   port (
     clk, rst, load: in std_logic;
     addr : in std_logic_vector(31 downto 0);
-    wd : in std_logic_vector(31 downto 0);
+    rdt : in std_logic_vector(31 downto 0);
     rd : out std_logic_vector(31 downto 0);
     -- controller
-    we : in std_logic
+    we : in std_logic;
+    -- scan
+    wd : out std_logic_vector(31 downto 0)
   );
 end entity;
 
@@ -46,7 +48,7 @@ begin
   port map (
     clk => clk, rst => rst,
     en => "11",
-    a0 => wd,
+    a0 => rdt,
     a1 => wd1_dummy,
     a2 => wd2
   );
@@ -59,4 +61,5 @@ begin
     wd => wd2,
     rd => rd
   );
+  wd <= wd2;
 end architecture;

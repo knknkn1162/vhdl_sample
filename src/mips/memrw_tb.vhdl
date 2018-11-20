@@ -10,15 +10,17 @@ architecture testbench of memrw_tb is
     port (
       clk, rst, load: in std_logic;
       addr : in std_logic_vector(31 downto 0);
-      wd : in std_logic_vector(31 downto 0);
+      rdt : in std_logic_vector(31 downto 0);
       rd : out std_logic_vector(31 downto 0);
       -- controller
-      we : in std_logic
+      we : in std_logic;
+      -- scan
+      wd : out std_logic_vector(31 downto 0)
     );
   end component;
 
   signal clk, rst, load : std_logic;
-  signal rd, wd : std_logic_vector(31 downto 0);
+  signal rd, rdt, wd : std_logic_vector(31 downto 0);
   signal we : std_logic;
   signal addr : std_logic_vector(31 downto 0);
   constant memfile : string := "./assets/mem/memfile.hex";
@@ -30,8 +32,11 @@ begin
   port map (
     clk => clk, rst => rst, load => load,
     addr => addr,
-    wd => wd, rd => rd,
-    we => we
+    rdt => rdt,
+    rd => rd,
+    we => we,
+    -- scan
+    wd => wd
   );
 
   clk_process: process
@@ -55,8 +60,10 @@ begin
 
     wait until falling_edge(clk);
     -- mem writeback
-    addr <= X"00000004"; we <= '1'; wd <= X"0000000A";
-    wait for clk_period/2 + clk_period*2 + 1 ns;
+    addr <= X"00000004"; we <= '1'; rdt <= X"0000000A";
+    wait for clk_period/2 + clk_period + 1 ns;
+    assert wd = X"0000000A";
+    wait for clk_period;
     -- check whether the data is written
     addr <= X"00000004"; we <= '0'; wait for clk_period;
     assert rd = X"0000000A";
