@@ -6,20 +6,23 @@ end entity;
 
 architecture testbench of flopr_en_tb is
   component flopr_en
+    generic(N : natural := 32);
     port (
       clk, rst, en: in std_logic;
-      a : in std_logic_vector(31 downto 0);
-      y : out std_logic_vector(31 downto 0)
+      a : in std_logic_vector(N-1 downto 0);
+      y : out std_logic_vector(N-1 downto 0)
         );
   end component;
 
   signal clk, rst, en : std_logic;
-  signal a, y : std_logic_vector(31 downto 0);
+  signal N : natural := 32;
+  signal a, y : std_logic_vector(N-1 downto 0);
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
-  uut : flopr_en port map (
+  uut : flopr_en generic map(N=>N)
+  port map (
     clk => clk, rst => rst, en => en,
     a => a, y => y
   );
