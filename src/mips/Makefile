@@ -58,7 +58,7 @@ memrw: mem shift_register2
 	make all F=memrw
 decode: flopr_en
 	make all F=decode
-regrw: reg sgnext mux2 shift_register2
+regrw: reg sgnext mux2 flopr_en mux4
 	make all F=regrw
 regrw2: reg sgnext
 	make all F=regrw2

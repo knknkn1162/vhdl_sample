@@ -61,16 +61,6 @@ architecture behavior of regrw is
         );
   end component;
 
-  component shift_register2
-    generic(N: natural);
-    port (
-      clk, rst, en : in std_logic;
-      a0 : in std_logic_vector(N-1 downto 0);
-      a1 : out std_logic_vector(N-1 downto 0);
-      a2 : out std_logic_vector(N-1 downto 0)
-    );
-  end component;
-
   component flopr_en
     generic(N : natural := 32);
     port (
