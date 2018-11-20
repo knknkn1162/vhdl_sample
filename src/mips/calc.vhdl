@@ -5,13 +5,12 @@ entity calc is
   port (
     clk, rst : in std_logic;
     rds, rdt, immext : in std_logic_vector(31 downto 0);
-    rt : in std_logic_vector(4 downto 0);
     target : in std_logic_vector(25 downto 0);
     alures : out std_logic_vector(31 downto 0);
     aluzero : out std_logic;
     brplus : out std_logic_vector(31 downto 0);
     ja : out std_logic_vector(27 downto 0);
-    mem_wa : out std_logic_vector(4 downto 0);
+    mem_wd : out std_logic_vector(31 downto 0);
     -- controller
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic;
@@ -77,13 +76,7 @@ begin
     a => rdt,
     y => rdt0
   );
-
-  reg_mem_wa : flopr_en generic map(N=>5)
-  port map (
-    clk => clk, rst => rst, en => calc_en,
-    a => rt,
-    y => mem_wa
-  );
+  mem_wd <= rdt0;
 
   reg_immext : flopr_en generic map(N=>32)
   port map (

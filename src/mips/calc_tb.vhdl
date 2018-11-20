@@ -5,18 +5,16 @@ entity calc_tb is
 end entity;
 
 architecture testbench of calc_tb is
-
   component calc
     port (
       clk, rst : in std_logic;
       rds, rdt, immext : in std_logic_vector(31 downto 0);
-      rt : in std_logic_vector(4 downto 0);
       target : in std_logic_vector(25 downto 0);
       alures : out std_logic_vector(31 downto 0);
       aluzero : out std_logic;
       brplus : out std_logic_vector(31 downto 0);
       ja : out std_logic_vector(27 downto 0);
-      mem_wa : out std_logic_vector(4 downto 0);
+      mem_wd : out std_logic_vector(31 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
@@ -26,11 +24,10 @@ architecture testbench of calc_tb is
 
   signal clk, rst : std_logic;
   signal rds, rdt, immext, alures : std_logic_vector(31 downto 0);
-  signal rt : std_logic_vector(4 downto 0);
   signal target : std_logic_vector(25 downto 0);
   signal brplus : std_logic_vector(31 downto 0);
   signal ja : std_logic_vector(27 downto 0);
-  signal mem_wa : std_logic_vector(4 downto 0);
+  signal mem_wd : std_logic_vector(31 downto 0);
   signal aluzero : std_logic;
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s, calc_en : std_logic;
@@ -41,12 +38,11 @@ begin
   uut : calc port map (
     clk => clk, rst => rst,
     rds => rds, rdt => rdt, immext => immext,
-    rt => rt,
     target => target,
     alures => alures,
     aluzero => aluzero, brplus => brplus,
     ja => ja,
-    mem_wa => mem_wa,
+    mem_wd => mem_wd,
     -- controller
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
@@ -69,9 +65,9 @@ begin
     rst <= '1'; wait for 1 ns; rst <= '0';
 
     -- for lw or sw instructions
-    rds <= X"00000001"; immext <= X"00000040"; rt <= "01001";
+    rds <= X"00000001"; immext <= X"00000040"; rdt <= X"00000090";
     alucont <= "010"; rdt_immext_s  <= '1'; wait for clk_period/2;
-    assert alures = X"00000041"; assert aluzero = '0'; assert mem_wa <= "01001";
+    assert alures = X"00000041"; assert aluzero = '0'; assert mem_wd <= X"00000090";
     assert brplus <= X"00000100";
     -- for R-type instructions
     rds <= X"00000006"; rdt <= X"00000006";
