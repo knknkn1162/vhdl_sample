@@ -26,6 +26,17 @@ addi $s0, $0, 5
 add $s1, $s0, $s0
 ```
 
+```asm
+sw $s0, 12($0)
+lw $s1, 12($0)
+```
+
+```asm
+; assume that $s0 /= [8]
+lw $s0, 8($0)
+sw $s0, 12($0)
+```
+
 ### stall
 
 ```asm
