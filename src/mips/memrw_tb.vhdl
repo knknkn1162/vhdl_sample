@@ -55,7 +55,8 @@ begin
 
     wait until falling_edge(clk);
     -- mem writeback
-    addr <= X"00000004"; we <= '1'; wd <= X"0000000A"; wait for clk_period/2 + 1 ns;
+    addr <= X"00000004"; we <= '1'; wd <= X"0000000A";
+    wait for clk_period/2 + clk_period*2 + 1 ns;
     -- check whether the data is written
     addr <= X"00000004"; we <= '0'; wait for clk_period;
     assert rd = X"0000000A";
