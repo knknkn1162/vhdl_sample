@@ -55,7 +55,7 @@ architecture behavior of calc is
 
 
   signal srca, srcb : std_logic_vector(31 downto 0);
-  signal rdt0 : std_logic_vector(31 downto 0);
+  signal rdt0, immext0 : std_logic_vector(31 downto 0);
   signal ja0 : std_logic_vector(27 downto 0);
   signal target28 : std_logic_vector(27 downto 0);
 
@@ -72,17 +72,23 @@ begin
     y => rdt0
   );
 
+  reg_immext : flopr_en port map (
+    clk => clk, rst => rst, en => '1',
+    a => immext,
+    y => immext0
+  );
+
   rdt_immext_mux : mux2 generic map (N=>32)
   port map (
     d0 => rdt0,
-    d1 => immext,
+    d1 => immext0,
     s => rdt_immext_s,
     y => srcb
   );
 
   immext_slt2 : slt2 generic map(N=>32)
   port map (
-    a => immext,
+    a => immext0,
     y => brplus
   );
 

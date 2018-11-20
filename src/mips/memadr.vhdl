@@ -12,7 +12,7 @@ entity memadr is
     reg_aluout : out std_logic_vector(31 downto 0);
     -- controller
     pc_aluout_s : in std_logic;
-    pc0_br_s : in std_logic_vector(1 downto 0);
+    pc4_br4_ja_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
     -- scan
     pc : out std_logic_vector(31 downto 0);
@@ -79,7 +79,7 @@ begin
     d01 => br4plus,
     d10 => ja32,
     d11 => pc4plus, -- dummy
-    s => pc0_br_s,
+    s => pc4_br4_ja_s,
     y => pcnext0
   );
   pcnext <= pcnext0;
