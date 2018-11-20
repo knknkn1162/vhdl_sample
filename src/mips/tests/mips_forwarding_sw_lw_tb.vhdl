@@ -109,8 +109,8 @@ begin
     assert rds = X"00000000"; assert immext = X"0000000C";
     wait for clk_period;
 
-    -- (MemWriteBackS, CalcS(AdrCalcS))
-    assert dec_sb = CONST_CALCS;
+    -- (MemWriteS, CalcS(AdrCalcS))
+    assert dec_sa = CONST_MEMWBS; assert dec_sb = CONST_CALCS;
     -- CalcS : lw $s1, 12($0)
     assert alures = X"0000000C";
     wait for clk_period;

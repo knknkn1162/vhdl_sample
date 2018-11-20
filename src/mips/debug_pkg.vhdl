@@ -4,16 +4,17 @@ use work.state_pkg.ALL;
 
 package debug_pkg is
   function decode_state(state: statetype) return std_logic_vector;
-  subtype state_vector_type is std_logic_vector(6 downto 0);
-  constant CONST_WAITS : state_vector_type := "0000000";
-  constant CONST_INITS : state_vector_type := "0000010";
-  constant CONST_LOADS : state_vector_type := "0000011";
-  constant CONST_FETCHS : state_vector_type := "0000100";
-  constant CONST_DECODES : state_vector_type := "0001000";
-  constant CONST_CALCS : state_vector_type := "0010000";
-  constant CONST_MEMRWS : state_vector_type := "0100000";
-  constant CONST_REGWBS : state_vector_type := "1000000";
-  constant CONST_UNKNOWNS : state_vector_type := "1111111";
+  subtype state_vector_type is std_logic_vector(7 downto 0);
+  constant CONST_WAITS : state_vector_type := "00000000";
+  constant CONST_INITS : state_vector_type := "00000010";
+  constant CONST_LOADS : state_vector_type := "00000011";
+  constant CONST_FETCHS : state_vector_type := "00000100";
+  constant CONST_DECODES : state_vector_type := "00001000";
+  constant CONST_CALCS : state_vector_type := "00010000";
+  constant CONST_MEMRWS : state_vector_type := "00100000";
+  constant CONST_MEMWBS : state_vector_type := "01000000";
+  constant CONST_REGWBS : state_vector_type := "10000000";
+  constant CONST_UNKNOWNS : state_vector_type := "11111111";
 end package;
 
 package body debug_pkg is
@@ -36,6 +37,8 @@ package body debug_pkg is
         ret := CONST_CALCS;
       when MemReadS =>
         ret := CONST_MEMRWS;
+      when MemWriteS =>
+        ret := CONST_MEMWBS;
       when RegWriteBackS | ALUWriteBackS | AddiWriteBackS =>
         ret := CONST_REGWBS;
       when others =>
