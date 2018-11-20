@@ -54,7 +54,7 @@ controller_pkg: state_pkg
 	ghdl -a controller_pkg.vhdl
 state_pkg:
 	ghdl -a state_pkg.vhdl
-memrw: mem
+memrw: mem shift_register2
 	make all F=memrw
 decode: flopr_en
 	make all F=decode

@@ -91,7 +91,6 @@ architecture behavior of datapath is
       aluzero : out std_logic;
       brplus : out std_logic_vector(31 downto 0);
       ja : out std_logic_vector(27 downto 0);
-      mem_wd : out std_logic_vector(31 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
@@ -128,6 +127,7 @@ architecture behavior of datapath is
   signal brplus0 : std_logic_vector(31 downto 0);
 
 begin
+  mem_wd0 <= rdt0;
   memrw0 : memrw generic map (memfile=>memfile)
   port map (
     clk => clk, rst => rst, load => load,
@@ -171,13 +171,11 @@ begin
     alures => alures0, aluzero => aluzero,
     brplus => brplus0,
     ja => ja0,
-    mem_wd => mem_wd0,
     -- controller
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
     calc_en => calc_en
   );
-  mem_wd <= mem_wd0;
   alures <= alures0;
 
   memadr0 : memadr port map (
