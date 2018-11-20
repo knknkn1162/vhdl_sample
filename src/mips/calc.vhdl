@@ -10,7 +10,6 @@ entity calc is
     aluzero : out std_logic;
     brplus : out std_logic_vector(31 downto 0);
     ja : out std_logic_vector(27 downto 0);
-    mem_wd : out std_logic_vector(31 downto 0);
     -- controller
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic;
@@ -76,7 +75,6 @@ begin
     a => rdt,
     y => rdt0
   );
-  mem_wd <= rdt0;
 
   reg_immext : flopr_en generic map(N=>32)
   port map (

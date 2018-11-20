@@ -7,7 +7,7 @@ entity flopr_en is
     clk, rst, en: in std_logic;
     a : in std_logic_vector(N-1 downto 0);
     y : out std_logic_vector(N-1 downto 0)
-       );
+  );
 end entity;
 
 
