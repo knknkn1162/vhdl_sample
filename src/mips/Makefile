@@ -21,11 +21,11 @@ all:
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd
 mips_all: mips
-	echo ${TESTBENCHES} | xargs -n1 -ITB ghdl -a ./tests/mips_TB_tb.vhdl
-	echo ${TESTBENCHES} | xargs -n1 -ITB make er F=mips_TB
+	echo ${TESTBENCHES} | xargs -n1 -ITB ghdl -a ./tests/TB_tb.vhdl
+	echo ${TESTBENCHES} | xargs -n1 -ITB make er F=TB
 mips_tb: mips
-	ghdl -a ./tests/mips_${F}_tb.vhdl
-	make er F=mips_${F}
+	ghdl -a ./tests/${F}_tb.vhdl
+	make er F=${F}
 mips: datapath controller debug_pkg
 	ghdl -a mips.vhdl
 forwarding_addi_add:

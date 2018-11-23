@@ -3,10 +3,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.debug_pkg.ALL;
 
-entity mips_lw_addi_tb is
+entity stall_lw_add_tb is
 end entity;
 
-architecture testbench of mips_lw_addi_tb is
+architecture testbench of stall_lw_add_tb is
   component mips
     generic(memfile : string; regfile : string := "./assets/reg/dummy.hex");
     port (
@@ -40,7 +40,7 @@ architecture testbench of mips_lw_addi_tb is
   signal dec_sa, dec_sb : state_vector_type;
   signal stall_en : std_logic;
 
-  constant memfile : string := "./assets/mem/lw_addi.hex";
+  constant memfile : string := "./assets/mem/stall_lw_add.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
@@ -96,35 +96,43 @@ begin
     assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS;
     -- -- DecodeS : lw $s0, 12($0)
     assert rds = X"00000000"; assert immext = X"0000000C";
-    -- -- FetchS : addi $t1, $0, 5
+    -- -- FetchS : add $s1, $s0, $s0
     assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"20090005";
+    assert mem_rd = X"02108820";
     wait for clk_period;
 
     -- (CalcS, DecodeS)
     assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
+    assert stall_en = '1';
     assert pc = X"00000008"; assert pcnext = X"0000000C";
     -- CalcS(AdrCalcS) : lw $s0, 12($0)
     assert alures = X"0000000C";
-    -- DecodeS : addi $t1, $0, 5
-    assert rds = X"00000000"; assert immext = X"00000005";
+    -- DecodeS : add $s1, $s0, $s0
+    assert rds = X"00000000"; assert rdt = X"00000000";
     wait for clk_period;
 
-    -- (MemReadS, CalcS)
-    assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_CALCS;
-    -- MemReadS : lw $s0, 12($0)
+    -- (MemReadS, DecodeS) [Stall]
+    assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_DECODES;
     assert addr = X"0000000C"; assert mem_rd = X"00000048";
-    -- CalcS : addi $t1, $0, 5
-    assert alures = X"00000005";
+    -- DecodeS : add $s1, $s0, $s0
+    assert rds = X"00000048"; assert rdt = X"00000048";
     wait for clk_period;
 
-    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS;
+    -- (-, CalcS)
+    assert dec_sb = CONST_CALCS;
     assert reg_wa = "10000"; assert reg_wd = X"00000048"; assert reg_we = '1';
+    -- -- CalcS
+    assert alures = X"00000090";
     wait for clk_period;
-    assert reg_wa = "01001"; assert reg_wd = X"00000005"; assert reg_we = '1';
+
+    wait for clk_period;
+    assert reg_wa = "10001"; assert reg_wd = X"00000090"; assert reg_we = '1';
+
 
     assert false report "end of test" severity note;
     stop <= TRUE;
     wait;
   end process;
+  
+
 end architecture;

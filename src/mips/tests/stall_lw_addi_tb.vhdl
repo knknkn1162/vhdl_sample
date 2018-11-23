@@ -3,12 +3,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.debug_pkg.ALL;
 
-entity mips_add_add_tb is
+entity stall_lw_addi_tb is
 end entity;
 
-architecture testbench of mips_add_add_tb is
+architecture testbench of stall_lw_addi_tb is
   component mips
-    generic(memfile : string; regfile : string);
+    generic(memfile : string; regfile : string := "./assets/reg/dummy.hex");
     port (
       clk, rst, load : in std_logic;
       -- scan for testbench
@@ -40,13 +40,12 @@ architecture testbench of mips_add_add_tb is
   signal dec_sa, dec_sb : state_vector_type;
   signal stall_en : std_logic;
 
-  constant memfile : string := "./assets/mem/add_add.hex";
-  constant regfile : string := "./assets/reg/add_add.hex";
+  constant memfile : string := "./assets/mem/stall_lw_addi.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
 begin
-  uut : mips generic map (memfile=>memfile, regfile=>regfile)
+  uut : mips generic map (memfile=>memfile)
   port map (
     clk => clk, rst => rst, load => load,
     pc => pc, pcnext => pcnext,
@@ -76,50 +75,60 @@ begin
     -- (InitS, InitWait2S)
     rst <= '1'; wait for 1 ns; rst <= '0';
     assert dec_sa = CONST_INITS; assert dec_sb = CONST_WAITS;
+
     -- syncronous reset
     load <= '1'; wait for clk_period/2; load <= '0';
+
     -- (LoadS, InitWaitS)
     assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS;
     wait for clk_period;
 
     -- (FetchS, InitS)
-    -- -- FetchS : add $t0, $s0, $s1
     assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_INITS;
+    -- -- FetchS : lw $s0, 12($0)
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"02114020";
+    assert mem_rd = X"8C10000C";
     -- (not yet)
-    assert rds = X"00000000"; assert rdt = X"00000000";
+    assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
 
     -- (DecodeS, FetchS)
     assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS;
-    -- -- DecodeS : add $t0, $s0, $s1
-    assert rds = X"00000005"; assert rdt = X"00000006";
-    -- -- FetchS : add $t1, $s1, $s2
+    -- -- DecodeS : lw $s0, 12($0)
+    assert rds = X"00000000"; assert immext = X"0000000C";
+    -- -- FetchS : addi $s1, $s0, 5
     assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"02324820";
+    assert mem_rd = X"22110005";
     wait for clk_period;
 
     -- (CalcS, DecodeS)
     assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
+    assert stall_en = '1';
     assert pc = X"00000008"; assert pcnext = X"0000000C";
-    -- CalcS(RtypeCalcS) : add $t0, $s0, $s1
-    assert alures = X"0000000B";
-    -- DecodeS : add $t1, $s1, $s2
-    assert rds = X"00000006"; assert rdt = X"00000007"; -- forwarding for pipeline
+    -- CalcS(AdrCalcS) : lw $s0, 12($0)
+    assert alures = X"0000000C";
+    -- DecodeS : addi $s1, $s0, 5
+    assert rds = X"00000000"; assert immext = X"00000005";
     wait for clk_period;
 
-    -- (-, CalcS(RtypeCalcS))
-    -- CalcS : add $t1, $s1, $s2
+    -- (MemReadS, DecodeS) [Stall]
+    assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_DECODES;
+    -- MemReadS : lw $s0, 12($0)
+    assert addr = X"0000000C"; assert mem_rd = X"00000048";
+    -- DecodeS : add $s1, $s0, $s0
+    assert rds = X"00000048"; assert immext = X"00000005";
+    wait for clk_period;
+
+    -- (-, CalcS)
     assert dec_sb = CONST_CALCS;
-    assert alures = X"0000000D";
+    assert reg_wa = "10000"; assert reg_wd = X"00000048";
+    -- -- CalcS
+    assert alures = X"0000004D";
     wait for clk_period;
 
-    assert reg_wa = "01000"; assert reg_wd = X"0000000B"; assert reg_we = '1';
     wait for clk_period;
+    assert reg_wa = "10001"; assert reg_wd = X"0000004D";
 
-    assert reg_wa = "01001"; assert reg_wd = X"0000000D"; assert reg_we = '1';
-    wait for clk_period;
 
     assert false report "end of test" severity note;
     stop <= TRUE;

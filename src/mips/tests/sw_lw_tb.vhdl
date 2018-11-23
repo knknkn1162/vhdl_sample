@@ -3,10 +3,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.debug_pkg.ALL;
 
-entity mips_forwarding_add_add_tb is
+entity sw_lw_tb is
 end entity;
 
-architecture testbench of mips_forwarding_add_add_tb is
+architecture testbench of sw_lw_tb is
   component mips
     generic(memfile : string; regfile : string);
     port (
@@ -40,8 +40,8 @@ architecture testbench of mips_forwarding_add_add_tb is
   signal dec_sa, dec_sb : state_vector_type;
   signal stall_en : std_logic;
 
-  constant memfile : string := "./assets/mem/forwarding_add_add.hex";
-  constant regfile : string := "./assets/reg/forwarding_add_add.hex";
+  constant memfile : string := "./assets/mem/sw_lw.hex";
+  constant regfile : string := "./assets/reg/sw_lw.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
 
@@ -83,42 +83,47 @@ begin
     wait for clk_period;
 
     -- (FetchS, InitS)
-    -- -- FetchS : add $s1, $s0, $s0
+    -- -- FetchS : sw $s0, 12($0)
     assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_INITS;
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"02108820";
+    assert mem_rd = X"AC10000C";
     -- (not yet)
-    assert rds = X"00000000"; assert rdt = X"00000000";
+    assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
 
     -- (DecodeS, FetchS)
     assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS;
-    -- -- DecodeS : add $s1, $s0, $s0
-    assert rds = X"00000005"; assert rdt = X"00000005";
-    -- -- FetchS : add $s2, $s1, $s1
+    -- -- DecodeS : sw $s0, 12($0)
+    assert rds = X"00000000"; assert immext = X"0000000C";
+    -- -- FetchS : lw $s1, 12($0)
     assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"02319020";
+    assert mem_rd = X"8C11000C";
     wait for clk_period;
 
     -- (CalcS, DecodeS)
     assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
     assert pc = X"00000008"; assert pcnext = X"0000000C";
-    -- CalcS(AddiCalcS) : addi $s1, $s0, $s0
-    assert alures = X"0000000A";
-    -- DecodeS : add $s2, $s1, $s1
-    assert rds = X"0000000A"; assert rdt = X"0000000A"; -- forwarding for pipeline
+    -- -- CalcS(AdrCalcS) : sw $s0, 12($0)
+    assert alures = X"0000000C";
+    -- -- DecodeS : lw $s1, 12($0)
+    assert rds = X"00000000"; assert immext = X"0000000C";
     wait for clk_period;
 
-    -- (-, CalcS(RtypeCalcS))
-    assert dec_sb = CONST_CALCS;
-    -- CalcS : add $s2, $s1, $s1
-    assert alures = X"00000014";
+    -- (MemWriteBackS, CalcS(AdrCalcS))
+    assert dec_sa = CONST_MEMWBS; assert dec_sb = CONST_CALCS;
+    -- -- MemWriteBackS : sw $s0, 12($0)
+    assert addr = X"0000000C"; assert mem_wd = X"0000000F";
+    -- CalcS : lw $s1, 12($0)
+    assert alures = X"0000000C";
     wait for clk_period;
 
-    assert reg_wa = "10001"; assert reg_wd = X"0000000A";
+    -- (-, MemReadS)
+    assert dec_sb = CONST_MEMRWS;
+    -- -- MemReadS : lw $s1, 12($0)
+    assert addr = X"0000000C"; assert mem_rd = X"0000000F"; -- not X"00000001"
     wait for clk_period;
 
-    assert reg_wa = "10010"; assert reg_wd = X"00000014";
+    assert reg_wa = "10001"; assert reg_wd = X"0000000F";
 
     assert false report "end of test" severity note;
     stop <= TRUE;
