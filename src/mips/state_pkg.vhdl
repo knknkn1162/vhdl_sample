@@ -11,6 +11,7 @@ package state_pkg is
     RtypeCalcS,
     BranchS,
     AddiCalcS,
-    JumpS
+    JumpS,
+    UnknownS
   );
 end package;

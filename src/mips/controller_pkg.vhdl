@@ -83,7 +83,7 @@ package body controller_pkg is
             when OP_J =>
               nextstate := JumpS;
             when others =>
-              nextState := FetchS;
+              nextState := UnknownS;
           end case;
         else
           -- stay the same state
@@ -96,7 +96,7 @@ package body controller_pkg is
           when OP_SW =>
             nextState := MemWriteBackS;
           when others =>
-            nextState := FetchS;
+            nextState := UnknownS;
         end case;
       -- when final state
       when AddiCalcS | RtypeCalcS | BranchS | JumpS =>
@@ -109,7 +109,7 @@ package body controller_pkg is
         nextState := FetchS;
       -- if undefined
       when others =>
-        nextState := InitWaitS;
+        nextState := UnknownS;
     end case;
     return nextstate;
   end function;

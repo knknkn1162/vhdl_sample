@@ -38,8 +38,9 @@ package body debug_pkg is
         ret := CONST_MEMRWS;
       when MemWriteBackS =>
         ret := CONST_MEMWBS;
-      when others =>
+      when UnknownS =>
         ret := CONST_UNKNOWNS;
+      when others =>
         -- do nothing
     end case;
     return ret;
