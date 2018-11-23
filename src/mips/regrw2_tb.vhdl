@@ -1,11 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity regrw2_tb is
+entity regrw_tb is
 end entity;
 
-architecture testbench of regrw2_tb is
-  component regrw2
+architecture testbench of regrw_tb is
+  component regrw
     generic(regfile : string := "./assets/reg/dummy.hex");
     port (
       clk, rst, load : in std_logic;
@@ -37,7 +37,7 @@ architecture testbench of regrw2_tb is
   signal stop : boolean;
 
 begin
-  uut : regrw2 port map (
+  uut : regrw port map (
     clk => clk, rst => rst, load => load,
     rs => rs, rt => rt,
     imm => imm,

@@ -1,7 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
-entity regrw2 is
+entity regrw is
   generic(regfile : string := "./assets/reg/dummy.hex");
   port (
     clk, rst, load : in std_logic;
@@ -18,7 +18,7 @@ entity regrw2 is
   );
 end entity;
 
-architecture behavior of regrw2 is
+architecture behavior of regrw is
   component reg
     generic(filename : string);
     port (
