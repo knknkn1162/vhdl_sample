@@ -101,14 +101,8 @@ package body controller_pkg is
           when others =>
             nextState := FetchS;
         end case;
-      when AddiCalcS =>
-        nextState := AddiWriteBackS;
-      when RtypeCalcS =>
-        nextstate := ALUWriteBackS;
-      when MemReadS =>
-        nextState := RegWritebackS;
       -- when final state
-      when RegWriteBackS | MemWriteBackS | AddiWriteBackS | ALUWriteBackS | BranchS | JumpS =>
+      when AddiCalcS | RtypeCalcS | MemReadS | MemWriteBackS | BranchS | JumpS =>
         nextState := FetchS;
       -- if undefined
       when others =>
@@ -152,20 +146,6 @@ package body controller_pkg is
       when others =>
         -- pc+4
         ret := "00";
-    end case;
-    return ret;
-  end function;
-
-  function get_reg_we(state : statetype) return std_logic is
-    -- for writeback
-    variable ret : std_logic;
-  begin
-    case state is
-      when RegWriteBackS | AddiWritebackS | ALUWriteBackS =>
-        ret := '1';
-      when others =>
-        -- required : DecodeS
-        ret := '0';
     end case;
     return ret;
   end function;
@@ -234,32 +214,6 @@ package body controller_pkg is
         ret := '1';
       when others =>
         -- required : RtypeCalcS
-        ret := '0';
-    end case;
-    return ret;
-  end function;
-
-  function get_memrd_aluout_s(state : statetype) return std_logic is
-    variable ret : std_logic;
-  begin
-    case state is
-      when AddiWritebackS | ALUWriteBackS =>
-        ret := '1';
-      when others =>
-        -- required : RegWriteBackS
-        ret := '0';
-    end case;
-    return ret;
-  end function;
-
-  function get_rt_rd_s(state : statetype) return std_logic is
-    variable ret : std_logic;
-  begin
-    case state is
-      when ALUWriteBackS =>
-        ret := '1';
-      when others =>
-        -- required : AddiWritebackS
         ret := '0';
     end case;
     return ret;

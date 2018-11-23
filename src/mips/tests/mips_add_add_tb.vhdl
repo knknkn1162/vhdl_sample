@@ -109,8 +109,9 @@ begin
     assert rds = X"00000006"; assert rdt = X"00000007"; -- forwarding for pipeline
     wait for clk_period;
 
-    -- (RtypeWriteBackS, CalcS(RtypeCalcS))
+    -- (-, CalcS(RtypeCalcS))
     -- CalcS : add $t1, $s1, $s2
+    assert dec_sb = CONST_CALCS;
     assert alures = X"0000000D";
     wait for clk_period;
 

@@ -15,7 +15,7 @@ architecture testbench of regw_cache_tb is
       memrds_wd : in std_logic_vector(31 downto 0);
       memrds_we : in std_logic;
       memrds_load_s : in std_logic;
-      -- for RegWriteBackS
+      -- for register WB
       reg_wa : out std_logic_vector(4 downto 0);
       reg_wd : out std_logic_vector(31 downto 0);
       reg_we : out std_logic;

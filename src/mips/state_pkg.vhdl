@@ -3,11 +3,11 @@ package state_pkg is
     -- soon after the initialization
     Wait2S, WaitS,
     InitS, LoadS,
-    FetchS, DecodeS, AdrCalcS, MemReadS, RegWritebackS,
+    FetchS, DecodeS, AdrCalcS, MemReadS,
     MemWriteBackS,
-    RtypeCalcS, ALUWriteBackS,
+    RtypeCalcS,
     BranchS,
-    AddiCalcS, AddiWriteBackS,
+    AddiCalcS,
     JumpS
   );
 end package;

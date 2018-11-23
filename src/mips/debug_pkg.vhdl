@@ -13,7 +13,6 @@ package debug_pkg is
   constant CONST_CALCS : state_vector_type := "00010000";
   constant CONST_MEMRWS : state_vector_type := "00100000";
   constant CONST_MEMWBS : state_vector_type := "01000000";
-  constant CONST_REGWBS : state_vector_type := "10000000";
   constant CONST_UNKNOWNS : state_vector_type := "11111111";
 end package;
 
@@ -39,8 +38,6 @@ package body debug_pkg is
         ret := CONST_MEMRWS;
       when MemWriteBackS =>
         ret := CONST_MEMWBS;
-      when RegWriteBackS | ALUWriteBackS | AddiWriteBackS =>
-        ret := CONST_REGWBS;
       when others =>
         ret := CONST_UNKNOWNS;
         -- do nothing
