@@ -6,7 +6,7 @@ use work.debug_pkg.state_vector_type;
 entity mips is
   generic(memfile : string; regfile : string);
   port (
-    clk, rst, load : in std_logic;
+    clk, rst : in std_logic;
     -- scan for testbench
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0);
@@ -15,7 +15,7 @@ entity mips is
     ja : out std_logic_vector(27 downto 0);
     alures : out std_logic_vector(31 downto 0);
     -- for scan
-    dec_sa, dec_sb : out state_vector_type;
+    dec_sa, dec_sb, dec_sc : out state_vector_type;
     reg_wa : out std_logic_vector(4 downto 0);
     reg_wd : out std_logic_vector(31 downto 0);
     reg_we : out std_logic;
@@ -64,7 +64,8 @@ architecture behavior of mips is
 
   component controller
     port (
-      clk, rst, load : in std_logic;
+      clk, rst : in std_logic;
+      load : out std_logic;
       opcode, funct : in std_logic_vector(5 downto 0);
       rs, rt, rd : in std_logic_vector(4 downto 0);
       mem_rd, alures : in std_logic_vector(31 downto 0);
@@ -88,10 +89,11 @@ architecture behavior of mips is
       rdt_immext_s : out std_logic;
       calc_en : out std_logic;
       -- for scan
-      dec_sa, dec_sb : out state_vector_type
+      dec_sa, dec_sb, dec_sc : out state_vector_type
     );
   end component;
 
+  signal load : std_logic;
   -- controller
   signal opcode, funct : std_logic_vector(5 downto 0);
   signal rs, rt, rd : std_logic_vector(4 downto 0);
@@ -174,7 +176,7 @@ begin
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
     calc_en => calc_en,
-    dec_sa => dec_sa, dec_sb => dec_sb
+    dec_sa => dec_sa, dec_sb => dec_sb, dec_sc => dec_sc
   );
   alures <= alures0;
   mem_rd <= mem_rd0;

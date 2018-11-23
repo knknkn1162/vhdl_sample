@@ -6,7 +6,8 @@ use work.debug_pkg.ALL;
 
 entity controller is
   port (
-    clk, rst, load : in std_logic;
+    clk, rst : in std_logic;
+    load : out std_logic;
     opcode, funct : in std_logic_vector(5 downto 0);
     rs, rt, rd : in std_logic_vector(4 downto 0);
     mem_rd, alures : in std_logic_vector(31 downto 0);
@@ -51,6 +52,7 @@ architecture behavior of controller is
   signal calcs_wa : std_logic_vector(4 downto 0);
   signal calcs_rt_rd_s, memrds_load_s : std_logic;
   signal alures_we, memrd_we : std_logic;
+  signal load0 : std_logic;
 
   component instr_shift_register is
     port (
@@ -120,15 +122,25 @@ begin
   end process;
   dec_sa <= dec_sa0; dec_sb <= dec_sb0; dec_sc <= dec_sc0;
 
+  process(stateA)
+  begin
+    if stateA = InitS then
+      load0 <= '1';
+    else
+      load0 <= '0';
+    end if;
+  end process;
+  load <= load0;
+
   -- State Machine
-  process(clk, rst, stateA, stateB, stateC, opcode, calcs_opcode, load, ena, enb)
+  process(clk, rst, stateA, stateB, stateC, opcode, calcs_opcode, ena, enb, load0)
     variable nextstateA0 : statetype;
     variable nextstateB0 : statetype;
     variable nextstateC0 : statetype;
   begin
-    nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load, ena, enb);
-    nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load, ena, enb);
-    nextstateC0 := get_nextstate(stateC, opcode, calcs_opcode, load, ena, enb);
+    nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load0, ena, enb);
+    nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load0, ena, enb);
+    nextstateC0 := get_nextstate(stateC, opcode, calcs_opcode, load0, ena, enb);
 
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;

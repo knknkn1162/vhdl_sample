@@ -10,7 +10,7 @@ architecture testbench of memfile_tb is
   component mips
     generic(memfile : string; regfile : string := "./assets/reg/dummy.hex");
     port (
-      clk, rst, load : in std_logic;
+      clk, rst : in std_logic;
       -- scan for testbench
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0);
@@ -19,7 +19,7 @@ architecture testbench of memfile_tb is
       ja : out std_logic_vector(27 downto 0);
       alures : out std_logic_vector(31 downto 0);
       -- for scan
-      dec_sa, dec_sb : out state_vector_type;
+      dec_sa, dec_sb, dec_sc : out state_vector_type;
       reg_wa : out std_logic_vector(4 downto 0);
       reg_wd : out std_logic_vector(31 downto 0);
       reg_we : out std_logic;
@@ -28,7 +28,7 @@ architecture testbench of memfile_tb is
     );
   end component;
 
-  signal clk, rst, load : std_logic;
+  signal clk, rst : std_logic;
   signal pc, pcnext : std_logic_vector(31 downto 0);
   signal addr, mem_rd, mem_wd : std_logic_vector(31 downto 0);
   signal reg_wa : std_logic_vector(4 downto 0);
@@ -37,7 +37,7 @@ architecture testbench of memfile_tb is
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
   signal ja : std_logic_vector(27 downto 0);
   signal alures : std_logic_vector(31 downto 0);
-  signal dec_sa, dec_sb : state_vector_type;
+  signal dec_sa, dec_sb, dec_sc : state_vector_type;
   signal stall_en : std_logic;
 
   constant memfile : string := "./assets/mem/memfile.hex";
@@ -47,14 +47,14 @@ architecture testbench of memfile_tb is
 begin
   uut : mips generic map (memfile=>memfile)
   port map (
-    clk => clk, rst => rst, load => load,
+    clk => clk, rst => rst,
     pc => pc, pcnext => pcnext,
     addr => addr, mem_rd => mem_rd, mem_wd => mem_wd,
     rds => rds, rdt => rdt, immext => immext,
     ja => ja,
     alures => alures,
     -- for scan
-    dec_sa => dec_sa, dec_sb => dec_sb,
+    dec_sa => dec_sa, dec_sb => dec_sb, dec_sc => dec_sc,
     reg_wa => reg_wa, reg_wd => reg_wd, reg_we => reg_we,
     stall_en => stall_en
   );

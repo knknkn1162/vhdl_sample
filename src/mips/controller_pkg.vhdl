@@ -70,7 +70,6 @@ package body controller_pkg is
     return ena;
   end function;
 
-
   function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic) return statetype is
     variable nextstate : statetype;
   begin
