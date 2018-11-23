@@ -37,12 +37,9 @@ package controller_pkg is
   function get_instr_en(state: statetype) return std_logic;
   function get_pc4_br4_ja_s(state : statetype; aluzero : std_logic) return std_logic_vector;
   function get_mem_we(state : statetype) return std_logic;
-  function get_reg_we(state : statetype) return std_logic;
   function get_alucont(state : statetype; funct : std_logic_vector(5 downto 0)) return std_logic_vector;
   function get_pc_aluout_s(state: statetype) return std_logic;
   function get_rdt_immext_s(state : statetype) return std_logic;
-  function get_memrd_aluout_s(state : statetype) return std_logic;
-  function get_rt_rd_s(state : statetype) return std_logic;
 end package;
 
 package body controller_pkg is
