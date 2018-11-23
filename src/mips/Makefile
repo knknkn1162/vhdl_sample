@@ -1,7 +1,7 @@
 F=dummy
 VHDL=vhdl
 MEM=dummy
-TESTBENCHES="lw_addi add_add addi_add forwarding_addi_add forwarding_add_add sw_lw stall_lw_add stall_lw_addi"
+TESTBENCHES="sw_lw lw_addi add_add addi_add forwarding_addi_add forwarding_add_add stall_lw_add stall_lw_addw"
 
 clean:
 	rm -f work-obj93.cf *.o *.vcd
