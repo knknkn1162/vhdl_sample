@@ -73,12 +73,12 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period;
-    -- (InitS, Wait2S)
+    -- (InitS, InitWait2S)
     rst <= '1'; wait for 1 ns; rst <= '0';
     assert dec_sa = CONST_INITS; assert dec_sb = CONST_WAITS;
     -- syncronous reset
     load <= '1'; wait for clk_period/2; load <= '0';
-    -- (LoadS, WaitS)
+    -- (LoadS, InitWaitS)
     assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS;
     wait for clk_period;
 
