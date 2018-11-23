@@ -117,7 +117,7 @@ begin
   dec_sa <= dec_sa0; dec_sb <= dec_sb0;
 
   -- State Machine
-  process(clk, rst, opcode, funct)
+  process(clk, rst, stateA, stateB, opcode, calcs_opcode, load, ena, enb)
     variable nextstateA0 : statetype;
     variable nextstateB0 : statetype;
   begin
