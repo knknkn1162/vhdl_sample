@@ -36,7 +36,7 @@ architecture behavior of mips is
       -- for memadr
       pc_aluout_s : in std_logic;
       pc4_br4_ja_s : in std_logic_vector(1 downto 0);
-      pc_en : in std_logic;
+      pc_en, rw_en : in std_logic;
       -- for memwrite
       mem_we: in std_logic;
       -- for decode
@@ -72,7 +72,7 @@ architecture behavior of mips is
       -- for memread
       pc_aluout_s : out std_logic;
       pc4_br4_ja_s : out std_logic_vector(1 downto 0);
-      pc_en : out std_logic;
+      pc_en, rw_en : out std_logic;
 
       -- for memwrite
       mem_we: out std_logic;
@@ -114,7 +114,7 @@ architecture behavior of mips is
   -- for memadr
   signal pc_aluout_s : std_logic;
   signal pc4_br4_ja_s : std_logic_vector(1 downto 0);
-  signal pc_en : std_logic;
+  signal pc_en, rw_en : std_logic;
 
 begin
   datapath0 : datapath generic map (memfile=>memfile, regfile=>regfile)
@@ -128,6 +128,7 @@ begin
     pc_aluout_s => pc_aluout_s,
     pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
+    rw_en => rw_en,
     -- for memwrite
     mem_we => mem_we,
     -- forwarding for pipeline
@@ -160,6 +161,7 @@ begin
     -- for memadr
     pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
+    rw_en => rw_en,
     -- for memwrite
     mem_we => mem_we,
     -- for decode

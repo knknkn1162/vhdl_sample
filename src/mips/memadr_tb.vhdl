@@ -17,6 +17,7 @@ architecture testbench of memadr_tb is
       pc_aluout_s : in std_logic;
       pc4_br4_ja_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
+      rw_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0)
@@ -27,7 +28,7 @@ architecture testbench of memadr_tb is
   signal brplus : std_logic_vector(31 downto 0);
   signal ja : std_logic_vector(27 downto 0);
   signal alures, reg_aluout : std_logic_vector(31 downto 0);
-  signal pc_aluout_s, pc_en : std_logic;
+  signal pc_aluout_s, pc_en, rw_en : std_logic;
   signal pc4_br4_ja_s : std_logic_vector(1 downto 0);
   signal addr : std_logic_vector(31 downto 0);
   signal pc, pcnext : std_logic_vector(31 downto 0);
@@ -43,6 +44,7 @@ begin
     reg_aluout => reg_aluout,
     pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
+    rw_en => rw_en,
     pc => pc, pcnext => pcnext
   );
 
@@ -60,6 +62,7 @@ begin
     wait for clk_period;
     pc4_br4_ja_s <= "00";
     rst <= '1'; wait for 1 ns; rst <= '0';
+    rw_en <= '1';
     assert pc = X"00000000"; assert pcnext = X"00000004";
     alures <= X"0000002C"; pc_aluout_s <= '1'; wait for clk_period/2; assert addr = X"0000002C";
     -- enable pc counter

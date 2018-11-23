@@ -15,6 +15,7 @@ entity controller is
     pc_aluout_s : out std_logic;
     pc4_br4_ja_s : out std_logic_vector(1 downto 0);
     pc_en : out std_logic;
+    rw_en : out std_logic;
 
     -- for memwrite
     mem_we: out std_logic;
@@ -44,6 +45,7 @@ architecture behavior of controller is
   signal memrds_rs_dummy, memrds_rt, memrds_rd_dummy : std_logic_vector(4 downto 0);
   signal instr_shift_en : std_logic_vector(1 downto 0);
   signal ena : std_logic;
+  signal enb : std_logic;
   -- for cache register address and data
   signal calcs_wa : std_logic_vector(4 downto 0);
   signal calcs_rt_rd_s, memrds_load_s : std_logic;
@@ -221,7 +223,20 @@ begin
     ena <= ena0;
   end process;
 
-  process(stateA, stateB, ena)
+  -- Judge whether the 2-states collide
+  process(stateA, stateB, enb)
+    variable enb0 : std_logic;
+  begin
+    enb0 := '1';
+    if stateA = MemReadS or stateA = MemWriteBackS then
+      if is_calcs(stateB) then
+        enb0 := '0';
+      end if;
+    end if;
+    enb <= enb0;
+  end process;
+
+  process(stateA, stateB, ena, enb)
     variable pc_enA, pc_enB : std_logic;
     variable instr_enA, instr_enB : std_logic;
   begin
@@ -230,11 +245,12 @@ begin
     pc_en <= (pc_enA or pc_enB) and ena;
 
     -- for calc
-    calc_en <= ena;
+    calc_en <= ena and enb;
+    rw_en <= enb;
 
     -- for writeback
     instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);
-    instr_en <= (instr_enA or instr_enB) and ena;
+    instr_en <= (instr_enA or instr_enB) and ena and enb;
   end process;
 
   process(stateA, stateB)

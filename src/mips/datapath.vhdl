@@ -14,6 +14,7 @@ entity datapath is
     pc_aluout_s : in std_logic;
     pc4_br4_ja_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
+    rw_en : in std_logic;
     -- for memwrite
     mem_we: in std_logic;
     -- for decode
@@ -112,7 +113,7 @@ architecture behavior of datapath is
       -- controller
       pc_aluout_s : in std_logic;
       pc4_br4_ja_s : in std_logic_vector(1 downto 0);
-      pc_en : in std_logic;
+      pc_en, rw_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0)
@@ -193,6 +194,7 @@ begin
     -- controller
     pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
+    rw_en => rw_en,
     -- scan
     pc => pc, pcnext => pcnext
   );

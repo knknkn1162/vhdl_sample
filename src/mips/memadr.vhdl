@@ -14,6 +14,7 @@ entity memadr is
     pc_aluout_s : in std_logic;
     pc4_br4_ja_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
+    rw_en : in std_logic;
     -- scan
     pc : out std_logic_vector(31 downto 0);
     pcnext : out std_logic_vector(31 downto 0)
@@ -64,7 +65,7 @@ begin
   pc <= pc0;
 
   flopr_aluout : flopr_en port map (
-    clk => clk, rst => rst, en => '1',
+    clk => clk, rst => rst, en => rw_en,
     a => alures, y => aluout
   );
   reg_aluout <= aluout;

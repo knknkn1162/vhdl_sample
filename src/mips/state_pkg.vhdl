@@ -1,3 +1,6 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
 package state_pkg is
   type statetype is (
     -- soon after the initialization
@@ -11,18 +14,12 @@ package state_pkg is
     JumpS
   );
 
-  function is_calcs(state : statetype) return std_logic;
+  function is_calcs(state : statetype) return boolean;
 end package;
 
 package body state_pkg is
-  function is_calcs(state: statetype) return std_logic is
-    variable ret : std_logic;
+  function is_calcs(state: statetype) return boolean is
   begin
-    if state = AdrCalcS or state = RtypeCalcS or state = AddiCalcS or state = BranchS or state = JumpS then
-      ret = '1';
-    else
-      ret = '0';
-    end if;
-    return ret;
+    return state = AdrCalcS or state = RtypeCalcS or state = AddiCalcS or state = BranchS or state = JumpS;
   end function;
 end package body;
