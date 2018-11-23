@@ -40,6 +40,7 @@ architecture testbench of memfile_tb is
   signal dec_sa, dec_sb, dec_sc : state_vector_type;
   signal stall_en : std_logic;
 
+  -- This sample program is used in the book, Digital Design and Computer Architecture.
   constant memfile : string := "./assets/mem/memfile.hex";
   constant clk_period : time := 10 ns;
   signal stop : boolean;
