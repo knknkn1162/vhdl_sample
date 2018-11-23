@@ -116,8 +116,8 @@ begin
 
   -- State Machine
   process(clk, rst, opcode, funct)
-    variable stateA0, nextstateA0 : statetype;
-    variable stateB0, nextstateB0 : statetype;
+    variable nextstateA0 : statetype;
+    variable nextstateB0 : statetype;
   begin
     nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load, ena);
     nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load, ena);
