@@ -40,13 +40,43 @@ package controller_pkg is
   function get_alucont(state : statetype; funct : std_logic_vector(5 downto 0)) return std_logic_vector;
   function get_pc_aluout_s(state: statetype) return std_logic;
   function get_rdt_immext_s(state : statetype) return std_logic;
+  function get_ena(state: statetype; calcs_opcode : std_logic_vector(5 downto 0); rs : std_logic_vector(4 downto 0); rt: std_logic_vector(4 downto 0); calcs_rt : std_logic_vector(4 downto 0)) return std_logic;
+  function get_enb(state1: statetype; state2: statetype) return std_logic;
 end package;
 
 package body controller_pkg is
+  function get_enb(state1: statetype; state2 : statetype) return std_logic is
+    variable enb : std_logic;
+  begin
+    enb := '1';
+    if state1 = MemReadS or state1 = MemWriteBackS then
+      -- AdrCalcS is not the end of the state, so the condition `state = AdrCalcS` must not be added
+      if state2 = RtypeCalcS or state2 = AddiCalcS or state2 = BranchS or state2 = JumpS then
+        enb := '0';
+      end if;
+    end if;
+    return enb;
+  end function;
+
+  function get_ena(state: statetype; calcs_opcode : std_logic_vector(5 downto 0); rs : std_logic_vector(4 downto 0); rt: std_logic_vector(4 downto 0); calcs_rt : std_logic_vector(4 downto 0)) return std_logic is
+    variable ena : std_logic;
+  begin
+    ena := '1';
+    if state = AdrCalcS and calcs_opcode = OP_LW then
+      if calcs_rt = rt or calcs_rt = rs then
+        ena := '0';
+      end if;
+    end if;
+    return ena;
+  end function;
+
+
   function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic) return statetype is
     variable nextstate : statetype;
   begin
     case state is
+      when InitWait3S =>
+        nextState := InitWait2S;
       when InitWait2S =>
         nextstate := InitWaitS;
       when InitWaitS =>
@@ -119,7 +149,7 @@ package body controller_pkg is
   begin
     case state is
       -- when initialization
-      when InitS | LoadS | InitWaitS | InitWait2S =>
+      when InitS | LoadS | InitWaitS | InitWait2S | InitWait3S =>
         ret := '0';
       when others =>
         ret := '1';

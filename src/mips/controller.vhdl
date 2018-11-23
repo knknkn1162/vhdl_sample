@@ -31,14 +31,15 @@ entity controller is
     rdt_immext_s : out std_logic;
     calc_en : out std_logic;
     -- for scan
-    dec_sa, dec_sb : out state_vector_type
+    dec_sa, dec_sb, dec_sc : out state_vector_type
   );
 end entity;
 
 architecture behavior of controller is
+  signal dec_sa0, dec_sb0, dec_sc0 : state_vector_type;
   signal stateA, nextstateA : statetype;
-  signal dec_sa0, dec_sb0 : state_vector_type;
   signal stateB, nextstateB : statetype;
+  signal stateC, nextstateC : statetype;
   signal calcs_opcode, calcs_funct : std_logic_vector(5 downto 0);
   signal calcs_rs, calcs_rt, calcs_rd : std_logic_vector(4 downto 0);
   signal memrds_opcode, memrds_funct : std_logic_vector(5 downto 0);
@@ -103,29 +104,35 @@ begin
     if rst = '1' then
       stateA <= InitS;
       stateB <= InitWait2S;
+      stateC <= InitWait3S;
     elsif rising_edge(clk) then
       stateA <= nextStateA;
       stateB <= nextStateB;
+      stateC <= nextStateC;
     end if;
   end process;
 
-  process(stateA, stateB)
+  process(stateA, stateB, stateC)
   begin
     dec_sa0 <= decode_state(stateA);
     dec_sb0 <= decode_state(stateB);
+    dec_sc0 <= decode_state(stateC);
   end process;
-  dec_sa <= dec_sa0; dec_sb <= dec_sb0;
+  dec_sa <= dec_sa0; dec_sb <= dec_sb0; dec_sc <= dec_sc0;
 
   -- State Machine
-  process(clk, rst, stateA, stateB, opcode, calcs_opcode, load, ena, enb)
+  process(clk, rst, stateA, stateB, stateC, opcode, calcs_opcode, load, ena, enb)
     variable nextstateA0 : statetype;
     variable nextstateB0 : statetype;
+    variable nextstateC0 : statetype;
   begin
     nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load, ena, enb);
     nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load, ena, enb);
-    -- todo : additional expr
+    nextstateC0 := get_nextstate(stateC, opcode, calcs_opcode, load, ena, enb);
+
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;
+    nextStateC <= nextStateC0;
   end process;
 
   -- store old instrs
@@ -164,9 +171,9 @@ begin
     y => calcs_wa
   );
 
-  process(stateA, stateB)
+  process(stateA, stateB, stateC)
   begin
-    if(stateA = MemReadS or stateB = MemReadS) then
+    if(stateA = MemReadS or stateB = MemReadS or stateC = MemReadS) then
       memrds_load_s <= '1';
     else
       memrds_load_s <= '0';
@@ -211,89 +218,94 @@ begin
   );
 
   -- stall
-  process(stateA, stateB, calcs_opcode, rs, rt)
-    variable ena0 : std_logic;
+  process(stateA, stateB, stateC, calcs_opcode, rs, rt)
+    variable enaA, enaB, enaC : std_logic;
   begin
-    ena0 := '1';
-    if stateA = AdrCalcS and calcs_opcode = OP_LW then
-      if calcs_rt = rt or calcs_rt = rs then
-        ena0 := '0';
-      end if;
-    end if;
-    ena <= ena0;
+    enaA := get_ena(stateA, calcs_opcode, rs, rt, calcs_rt);
+    enaB := get_ena(stateB, calcs_opcode, rs, rt, calcs_rt);
+    enaC := get_ena(stateC, calcs_opcode, rs, rt, calcs_rt);
+    ena <= enaA and enaB and enaC;
   end process;
 
   -- Judge whether the 2-states collide
-  process(stateA, stateB, enb)
-    variable enb0 : std_logic;
+  process(stateA, stateB, stateC, enb)
+    variable enbAB, enbBC, enbCA : std_logic;
   begin
-    enb0 := '1';
-    if stateA = MemReadS or stateA = MemWriteBackS then
-      -- AdrCalcS is not the end of the state, so the condition `state = AdrCalcS` must not be added
-      if stateB = RtypeCalcS or stateB = AddiCalcS or stateB = BranchS or stateB = JumpS then
-        enb0 := '0';
-      end if;
-    end if;
-    enb <= enb0;
+    enbAB := get_enb(stateA, stateB);
+    enbBC := get_enb(stateB, stateC);
+    enbCA := get_enb(stateC, stateA);
+    enb <= enbAB and enbBC and enbCA;
   end process;
 
-  process(stateA, stateB, ena, enb)
-    variable pc_enA, pc_enB : std_logic;
-    variable instr_enA, instr_enB : std_logic;
+  process(stateA, stateB, stateC, ena, enb)
+    variable pc_enA, pc_enB, pc_enC : std_logic;
+    variable instr_enA, instr_enB, instr_enC : std_logic;
   begin
     -- for memadr
-    pc_enA := get_pc_en(stateA); pc_enB := get_pc_en(stateB);
-    pc_en <= (pc_enA or pc_enB) and ena;
+    pc_enA := get_pc_en(stateA); pc_enB := get_pc_en(stateB); pc_enC := get_pc_en(stateC);
+    pc_en <= (pc_enA or pc_enB or pc_enC) and ena;
 
     -- for calc
     calc_en <= ena and enb;
     rw_en <= enb;
 
     -- for writeback
-    instr_enA := get_instr_en(stateA); instr_enB := get_instr_en(stateB);
-    instr_en <= (instr_enA or instr_enB) and ena and enb;
+    instr_enA := get_instr_en(stateA);
+    instr_enB := get_instr_en(stateB);
+    instr_enC := get_instr_en(stateC);
+    instr_en <= (instr_enA or instr_enB or instr_enC) and ena and enb;
   end process;
 
-  process(stateA, stateB)
+  process(stateA, stateB, stateC)
     -- for memadr
-    variable pc_aluout_sA, pc_aluout_sB : std_logic;
+    variable pc_aluout_sA, pc_aluout_sB, pc_aluout_sC : std_logic;
 
     -- for memwrite
-    variable mem_weA, mem_weB: std_logic;
+    variable mem_weA, mem_weB, mem_weC: std_logic;
     -- for decode
     -- for calc
-    variable alucontA, alucontB : std_logic_vector(2 downto 0);
-    variable rdt_immext_sA, rdt_immext_sB : std_logic;
+    variable alucontA, alucontB, alucontC : std_logic_vector(2 downto 0);
+    variable rdt_immext_sA, rdt_immext_sB, rdt_immext_sC : std_logic;
   begin
 
     -- for memadr
-    pc_aluout_sA := get_pc_aluout_s(stateA); pc_aluout_sB := get_pc_aluout_s(stateB);
-    pc_aluout_s <= pc_aluout_sA or pc_aluout_sB;
+    pc_aluout_sA := get_pc_aluout_s(stateA);
+    pc_aluout_sB := get_pc_aluout_s(stateB);
+    pc_aluout_sC := get_pc_aluout_s(stateC);
+    pc_aluout_s <= pc_aluout_sA or pc_aluout_sB or pc_aluout_sC;
 
     -- for memwrite
-    mem_weA := get_mem_we(stateA); mem_weB := get_mem_we(stateB);
-    mem_we <= mem_weA or mem_weB;
+    mem_weA := get_mem_we(stateA);
+    mem_weB := get_mem_we(stateB);
+    mem_weC := get_mem_we(stateC);
+    mem_we <= mem_weA or mem_weB or mem_weC;
 
     -- for decode
 
-    rdt_immext_sA := get_rdt_immext_s(stateA); rdt_immext_sB := get_rdt_immext_s(stateB);
-    rdt_immext_s <= rdt_immext_sA or rdt_immext_sB;
+    rdt_immext_sA := get_rdt_immext_s(stateA);
+    rdt_immext_sB := get_rdt_immext_s(stateB);
+    rdt_immext_sC := get_rdt_immext_s(stateC);
+    rdt_immext_s <= rdt_immext_sA or rdt_immext_sB or rdt_immext_sC;
   end process;
 
   -- depending on funct
-  process(stateA, stateB, funct)
-    variable alucontA, alucontB : std_logic_vector(2 downto 0);
+  process(stateA, stateB, stateC, funct)
+    variable alucontA, alucontB, alucontC : std_logic_vector(2 downto 0);
   begin
     -- for calc
-    alucontA := get_alucont(stateA, funct); alucontB := get_alucont(stateB, funct);
-    alucont <= alucontA or alucontB;
+    alucontA := get_alucont(stateA, funct);
+    alucontB := get_alucont(stateB, funct);
+    alucontC := get_alucont(stateC, funct);
+    alucont <= alucontA or alucontB or alucontC;
   end process;
 
   -- depend on aluzero
-  process(stateA, stateB, aluzero)
-    variable pc4_br4_ja_sA, pc4_br4_ja_sB : std_logic_vector(1 downto 0);
+  process(stateA, stateB, stateC, aluzero)
+    variable pc4_br4_ja_sA, pc4_br4_ja_sB, pc4_br4_ja_sC : std_logic_vector(1 downto 0);
   begin
-    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, aluzero); pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, aluzero);
-    pc4_br4_ja_s <= pc4_br4_ja_sA or pc4_br4_ja_sB;
+    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, aluzero);
+    pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, aluzero);
+    pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, aluzero);
+    pc4_br4_ja_s <= pc4_br4_ja_sA or pc4_br4_ja_sB or pc4_br4_ja_sC;
   end process;
 end architecture;
