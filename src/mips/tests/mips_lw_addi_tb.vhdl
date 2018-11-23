@@ -118,6 +118,7 @@ begin
     assert alures = X"00000005";
     wait for clk_period;
 
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS;
     assert reg_wa = "10000"; assert reg_wd = X"00000048"; assert reg_we = '1';
     wait for clk_period;
     assert reg_wa = "01001"; assert reg_wd = X"00000005"; assert reg_we = '1';

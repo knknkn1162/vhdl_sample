@@ -13,13 +13,4 @@ package state_pkg is
     AddiCalcS,
     JumpS
   );
-
-  function is_calcs(state : statetype) return boolean;
 end package;
-
-package body state_pkg is
-  function is_calcs(state: statetype) return boolean is
-  begin
-    return state = AdrCalcS or state = RtypeCalcS or state = AddiCalcS or state = BranchS or state = JumpS;
-  end function;
-end package body;

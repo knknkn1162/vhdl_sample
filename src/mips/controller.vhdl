@@ -121,8 +121,8 @@ begin
     variable nextstateA0 : statetype;
     variable nextstateB0 : statetype;
   begin
-    nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load, ena);
-    nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load, ena);
+    nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load, ena, enb);
+    nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load, ena, enb);
     -- todo : additional expr
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;
@@ -229,7 +229,8 @@ begin
   begin
     enb0 := '1';
     if stateA = MemReadS or stateA = MemWriteBackS then
-      if is_calcs(stateB) then
+      -- AdrCalcS is not the end of the state, so the condition `state = AdrCalcS` must not be added
+      if stateB = RtypeCalcS or stateB = AddiCalcS or stateB = BranchS or stateB = JumpS then
         enb0 := '0';
       end if;
     end if;
