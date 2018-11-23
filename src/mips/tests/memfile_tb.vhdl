@@ -122,7 +122,7 @@ begin
     -- CalcS : 04 2003000c : addi $3, $0, 12     # initialize $3 = 12
     assert alures = X"0000000C";
     -- DecodeS : 08 2067fff7 : addi $7, $3, -9     # initialize $7 = 3 [$3 : forwarding]
-    assert rds = X"0000000C"; assert immext = X"0000FFF7";
+    assert rds = X"0000000C"; assert immext = X"FFFFFFF7";
     wait for clk_period;
 
     -- (DecodeS, FetchS, CalcS)
