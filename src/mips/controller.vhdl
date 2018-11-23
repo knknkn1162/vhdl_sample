@@ -301,13 +301,13 @@ begin
   end process;
 
   -- depending on funct
-  process(stateA, stateB, stateC, funct)
+  process(stateA, stateB, stateC, calcs_funct)
     variable alucontA, alucontB, alucontC : std_logic_vector(2 downto 0);
   begin
     -- for calc
-    alucontA := get_alucont(stateA, funct);
-    alucontB := get_alucont(stateB, funct);
-    alucontC := get_alucont(stateC, funct);
+    alucontA := get_alucont(stateA, calcs_funct);
+    alucontB := get_alucont(stateB, calcs_funct);
+    alucontC := get_alucont(stateC, calcs_funct);
     alucont <= alucontA or alucontB or alucontC;
   end process;
 

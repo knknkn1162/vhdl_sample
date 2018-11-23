@@ -127,7 +127,7 @@ begin
 
     -- (DecodeS, FetchS, CalcS)
     assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
-    -- DecodeS: 0c 00e22025 :  or   $4, $7, $2     # $4 <= 3 or 5 = 7
+    -- DecodeS: 0c 00e22025 :  or   $4, $7, $2     # $4 <= 3 or 5 = 7 [ $7 : forwarding ]
     assert rds = X"00000003"; assert rdt = X"00000005";
     -- FetchS : 10 00642824 : and $5,  $3, $4     # $5 <= 12 and 7 = 4
     assert pc = X"00000010"; assert pcnext = X"00000014";
@@ -140,7 +140,7 @@ begin
     assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
     -- CalcS : 0c 00e22025 :  or   $4, $7, $2     # $4 <= 3 or 5 = 7
     assert alures = X"00000007";
-    -- DecodeS : 10 00642824 : and $5,  $3, $4     # $5 <= 12 and 7 = 4 [$7 : forwarding]
+    -- DecodeS : 10 00642824 : and $5,  $3, $4     # $5 <= 12 and 7 = 4 [ $4 : forwarding ]
     assert rds = X"0000000C"; assert rdt = X"00000007";
     -- FetchS : 14 00a42820 : add $5,  $5, $4     # $5 = 4 + 7 = 11
     assert pc = X"00000014"; assert pcnext = X"00000018";
