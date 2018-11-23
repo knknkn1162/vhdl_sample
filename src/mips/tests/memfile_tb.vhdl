@@ -72,56 +72,188 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period;
-    -- (InitS, InitWait2S)
+    -- (InitS, InitWait2S, InitWait3S)
     rst <= '1'; wait for 1 ns; rst <= '0';
-    assert dec_sa = CONST_INITS; assert dec_sb = CONST_WAITS;
+    assert dec_sa = CONST_INITS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_WAITS;
 
-    -- syncronous reset
-    load <= '1'; wait for clk_period/2; load <= '0';
+    -- automatically dive into LoadS
+    wait for clk_period/2;
 
-    -- (LoadS, InitWaitS)
-    assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS;
+    -- (LoadS, InitWaitS, InitWait2S)
+    assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_WAITS;
     wait for clk_period;
 
-    -- (FetchS, InitS)
-    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_INITS;
-    -- -- FetchS : lw $s0, 12($0)
+    -- (FetchS, InitS, InitWaitS)
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_INITS; assert dec_sc = CONST_WAITS;
+    -- -- FetchS : 00 20020005 : addi $2, $0, 5      # initialize $2 = 5
     assert pc = X"00000000"; assert pcnext = X"00000004";
-    assert mem_rd = X"8C10000C";
-    -- (not yet)
+    assert mem_rd = X"20020005";
+    -- InitS : (not yet)
     assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
 
-    -- (DecodeS, FetchS)
-    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS;
-    -- -- DecodeS : lw $s0, 12($0)
-    assert rds = X"00000000"; assert immext = X"0000000C";
-    -- -- FetchS : addi $t1, $0, 5
-    assert pc = X"00000004"; assert pcnext = X"00000008";
-    assert mem_rd = X"20090005";
-    wait for clk_period;
-
-    -- (CalcS, DecodeS)
-    assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES;
-    assert pc = X"00000008"; assert pcnext = X"0000000C";
-    -- CalcS(AdrCalcS) : lw $s0, 12($0)
-    assert alures = X"0000000C";
-    -- DecodeS : addi $t1, $0, 5
+    -- (DecodeS, FetchS, InitS)
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_INITS;
+    -- -- DecodeS : 00 20020005 : addi $2, $0, 5      # initialize $2 = 5
     assert rds = X"00000000"; assert immext = X"00000005";
+    -- -- FetchS : 04 2003000c : addi $3, $0, 12     # initialize $3 = 12
+    assert pc = X"00000004"; assert pcnext = X"00000008";
+    assert mem_rd = X"2003000C";
+    -- InitS : (not yet)
     wait for clk_period;
 
-    -- (MemReadS, CalcS)
-    assert dec_sa = CONST_MEMRWS; assert dec_sb = CONST_CALCS;
-    -- MemReadS : lw $s0, 12($0)
-    assert addr = X"0000000C"; assert mem_rd = X"00000048";
-    -- CalcS : addi $t1, $0, 5
+    -- (CalcS, DecodeS, FetchS)
+    assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
+    -- CalcS(AdrCalcS) : 00 20020005 : addi $2, $0, 5      # initialize $2 = 5
     assert alures = X"00000005";
+    -- DecodeS : 04 2003000c : addi $3, $0, 12     # initialize $3 = 12
+    assert rds = X"00000000"; assert immext = X"0000000C";
+    -- FetchS : 08 2067fff7 : addi $7, $3, -9     # initialize $7 = 3
+    assert pc = X"00000008"; assert pcnext = X"0000000C";
+    assert mem_rd = X"2067FFF7";
     wait for clk_period;
 
-    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS;
-    assert reg_wa = "10000"; assert reg_wd = X"00000048"; assert reg_we = '1';
+    -- (FetchS, CalcS, DecodeS)
+    assert dec_sa = CONST_FetchS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
+    -- FetchS : 0c 00e22025 : or   $4, $7, $2     # $4 <= 3 or 5 = 7
+    assert pc = X"0000000C"; assert pcnext = X"00000010";
+    assert mem_rd = X"00E22025";
+    -- CalcS : 04 2003000c : addi $3, $0, 12     # initialize $3 = 12
+    assert alures = X"0000000C";
+    -- DecodeS : 08 2067fff7 : addi $7, $3, -9     # initialize $7 = 3 [$3 : forwarding]
+    assert rds = X"0000000C"; assert immext = X"0000FFF7";
     wait for clk_period;
-    assert reg_wa = "01001"; assert reg_wd = X"00000005"; assert reg_we = '1';
+
+    -- (DecodeS, FetchS, CalcS)
+    assert dec_sa = CONST_DECS; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
+    -- DecodeS: 0c 00e22025 :  or   $4, $7, $2     # $4 <= 3 or 5 = 7
+    assert rds = X"00000003"; assert rdt = X"00000005";
+    -- FetchS : 10 00642824 : and $5,  $3, $4     # $5 <= 12 and 7 = 4
+    assert pc = X"00000010"; assert pcnext = X"00000014";
+    assert mem_rd = X"00642824";
+    -- CalcS : 08 2067fff7 : addi $7, $3, -9     # initialize $7 = 3
+    assert alures = X"00000003";
+    wait for clk_period;
+
+    -- (CalcS, DecodeS, FetchS)
+    assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
+    -- CalcS : 0c 00e22025 :  or   $4, $7, $2     # $4 <= 3 or 5 = 7
+    assert alures = X"00000007";
+    -- DecodeS : 10 00642824 : and $5,  $3, $4     # $5 <= 12 and 7 = 4 [$7 : forwarding]
+    assert rds = X"0000000C"; assert rdt = X"00000007";
+    -- FetchS : 14 00a42820 : add $5,  $5, $4     # $5 = 4 + 7 = 11
+    assert pc = X"00000014"; assert pcnext = X"00000018";
+    assert mem_rd = X"00a42820";
+    wait for clk_period;
+
+    -- (FetchS, CalcS, DecodeS)
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
+    -- FetchS : 18 10a7000a : beq $5,  $7, end    # shouldnt be taken
+    assert pc = X"00000018"; assert pcnext = X"0000001C";
+    assert mem_rd = X"10a7000a";
+    -- CalcS : 10 00642824 : and $5,  $3, $4     # $5 <= 12 and 7 = 4
+    assert alures = X"00000004";
+    -- DecodeS : 14 00a42820 : add $5,  $5, $4     # $5 = 4 + 7 = 11 [ $5 : forwarding ]
+    assert rds = X"00000004"; assert rdt = X"00000007";
+    wait for clk_period;
+
+    -- (DecodeS, FetchS, CalcS)
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
+    -- DecodeS : 18 10a7000a : beq $5,  $7, end    # shouldnt be taken [ $5 : forwarding ]
+    assert rds = X"0000000B"; assert rdt = X"00000003";
+    -- FetchS : 1c 0064202a : slt $4, $3, $4 : #$4=12<7=0
+    assert pc = X"0000001C"; assert pcnext = X"00000020";
+    assert mem_rd = X"0064202a";
+    -- CalcS : 14 00a42820 : add $5,  $5, $4     # $5 = 4 + 7 = 11
+    assert alures = X"0000000B";
+    wait for clk_period;
+
+    -- (WaitS, DecodeS, FetchS)
+    assert dec_sa = CONST_WAITS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
+    -- WaitS : 18 10a7000a : beq $5,  $7, end    # shouldnt be taken [stall]
+    -- DecodeS : 1c 0064202a : slt $4, $3, $4 : #$4=12<7=0
+    assert rds = X"0000000C"; assert rdt = X"00000007";
+    -- FetchS : 20 10800001 : beq $4,  $0, around # should be taken
+    assert pc = X"00000020"; assert pcnext = X"00000024";
+    assert mem_rd = X"10800001";
+    wait for clk_period;
+
+    -- (FetchS, CalcS, DecodeS)
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
+    -- FetchS : 24 20050000 : addi $5, $0, 0 # shouldn’t happen
+    assert pc = X"00000024"; assert pcnext = X"00000028";
+    assert mem_rd = X"20050000";
+    -- CalcS : 1c 0064202a : slt $4, $3, $4 : #$4=12<7=0
+    assert alures = X"00000000";
+    -- DecodeS : 20 10800001 : beq $4,  $0, around # should be taken
+    assert rds = X"00000000"; assert rdt = X"00000000"
+    wait for clk_period;
+
+    -- (FlashS[DecodeS], FetchS, WaitS)
+    assert dec_sa = CONST_FLASHS; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_WAITS;
+    -- FlashS[DecodeS]
+    assert rds = X"00000000"; assert rdt = X"00000000";
+    -- FetchS : 28 00e2202a : slt $4,  $7, $2     # $4 = 3 < 5 = 1
+    assert pc = X"00000028"; assert pcnext = X"0000002C";
+    assert mem_rd = X"00e2202a";
+    -- CalcS : 20 10800001 : beq $4,  $0, around # should be taken
+    assert alures = X"10800001";
+    wait for clk_period;
+
+    -- (FlashS[CalcS], DecodeS, FetchS)
+    assert dec_sa = CONST_FLASHS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
+    -- FlashS[CalcS]
+    -- DecodeS : 28 00e2202a : slt $4,  $7, $2     # $4 = 3 < 5 = 1
+    assert rds = X"00000003"; assert rdt = X"00000005"
+    -- FetchS : 2c 00853820 : add $7,  $4, $5     # $7 = 1 + 11 = 12
+    assert pc = X"0000002C"; assert pcnext = X"00000030";
+    assert mem_rd = X"00853820";
+    wait for clk_period;
+
+
+    -- (FetchS, CalcS, DecodeS)
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
+    -- FetchS : 30 00e23822 : sub $7,  $7, $2     # $7 = 12 - 5 = 7
+    assert pc = X"00000030"; assert pcnext = X"00000034";
+    assert mem_rd = X"00853820";
+    -- CalcS : 28 00e2202a : slt $4,  $7, $2     # $4 = 3 < 5 = 1
+    assert alures = X"00000001";
+    -- DecodeS : 2c 00853820 : add $7,  $4, $5     # $7 = 1 + 11 = 12
+    assert rds = X"00000001"; assert rdt = X"0000000B";
+    wait for clk_period;
+
+    -- (DecodeS, FetchS, CalcS)
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
+    -- DecodeS : 30 00e23822 : sub $7,  $7, $2     # $7 = 12 - 5 = 7 [ $7 : forwarding ]
+    assert rds = X"0000000C"; assert rdt = X"00000005";
+    -- FetchS : 34 ac670044 : sw   $7, 68($3)     # [80] = 7
+    assert pc = X"00000034"; assert pcnext = X"00000038";
+    assert mem_rd = X"ac670044";
+    -- CalcS : 2c 00853820 : add $7,  $4, $5     # $7 = 1 + 11 = 12
+    assert alures = X"0000000C";
+    wait for clk_period;
+
+    -- (CalcS, DecodeS, FetchS)
+    assert dec_sa = CONST_CALCS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
+    -- CalcS : 30 00e23822 : sub $7,  $7, $2     # $7 = 12 - 5 = 7
+    assert alures = X"00000007";
+    -- DecodeS : 34 ac670044 : sw   $7, 68($3)     # [80] = 7
+    assert rds = X"0000000C"  assert immext = X"00000044";
+    -- FetchS : 38 8c020050 : lw   $2, 80($0)     # $2 = [80] = 7
+    assert pc = X"00000038"; assert pcnext = X"0000003C";
+    assert mem_rd = X"8c020050";
+    wait for clk_period;
+
+    -- (FetchS, CalcS, DecodeS)
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
+    -- FetchS : 3c 08000011 : j    end            # should be taken
+    -- CalcS : : 34 ac670044 : sw   $7, 68($3)     # [80] = 7
+    assert alures = X"00000050"; -- addr
+    -- DecodeS: 38 8c020050 : lw   $2, 80($0)     # $2 = [80] = 7
+    assert rds = X"00000000"; assert immext = X"00000050";
+    wait for clk_period;
+
+    -- TODO : The program has not been finished yet.
 
     assert false report "end of test" severity note;
     stop <= TRUE;
