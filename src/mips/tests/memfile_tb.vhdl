@@ -125,7 +125,7 @@ begin
     wait for clk_period;
 
     -- (DecodeS, FetchS, CalcS)
-    assert dec_sa = CONST_DECS; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
     -- DecodeS: 0c 00e22025 :  or   $4, $7, $2     # $4 <= 3 or 5 = 7
     assert rds = X"00000003"; assert rdt = X"00000005";
     -- FetchS : 10 00642824 : and $5,  $3, $4     # $5 <= 12 and 7 = 4
@@ -180,13 +180,13 @@ begin
 
     -- (FetchS, CalcS, DecodeS)
     assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
-    -- FetchS : 24 20050000 : addi $5, $0, 0 # shouldn’t happen
+    -- FetchS : 24 20050000 : addi $5, $0, 0 # shouldnt happen
     assert pc = X"00000024"; assert pcnext = X"00000028";
     assert mem_rd = X"20050000";
     -- CalcS : 1c 0064202a : slt $4, $3, $4 : #$4=12<7=0
     assert alures = X"00000000";
     -- DecodeS : 20 10800001 : beq $4,  $0, around # should be taken
-    assert rds = X"00000000"; assert rdt = X"00000000"
+    assert rds = X"00000000"; assert rdt = X"00000000";
     wait for clk_period;
 
     -- (FlashS[DecodeS], FetchS, WaitS)
@@ -204,7 +204,7 @@ begin
     assert dec_sa = CONST_FLASHS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
     -- FlashS[CalcS]
     -- DecodeS : 28 00e2202a : slt $4,  $7, $2     # $4 = 3 < 5 = 1
-    assert rds = X"00000003"; assert rdt = X"00000005"
+    assert rds = X"00000003"; assert rdt = X"00000005";
     -- FetchS : 2c 00853820 : add $7,  $4, $5     # $7 = 1 + 11 = 12
     assert pc = X"0000002C"; assert pcnext = X"00000030";
     assert mem_rd = X"00853820";
@@ -238,7 +238,7 @@ begin
     -- CalcS : 30 00e23822 : sub $7,  $7, $2     # $7 = 12 - 5 = 7
     assert alures = X"00000007";
     -- DecodeS : 34 ac670044 : sw   $7, 68($3)     # [80] = 7
-    assert rds = X"0000000C"  assert immext = X"00000044";
+    assert rds = X"0000000C";  assert immext = X"00000044";
     -- FetchS : 38 8c020050 : lw   $2, 80($0)     # $2 = [80] = 7
     assert pc = X"00000038"; assert pcnext = X"0000003C";
     assert mem_rd = X"8c020050";
