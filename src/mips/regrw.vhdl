@@ -13,6 +13,7 @@ entity regrw is
     wd : in std_logic_vector(31 downto 0);
     we : in std_logic;
     cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
+    is_equal : out std_logic;
 
     rds, rdt, immext : out std_logic_vector(31 downto 0)
   );
@@ -44,6 +45,8 @@ architecture behavior of regrw is
   end component;
 
   signal rd1, rd2 : std_logic_vector(31 downto 0);
+  signal rds0, rdt0 : std_logic_vector(31 downto 0);
+  constant zero : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
   reg0 : reg generic map(filename=>regfile)
@@ -57,18 +60,30 @@ begin
   process(cached_rds, rd1)
   begin
     if not is_X(cached_rds) then
-      rds <= cached_rds;
+      rds0 <= cached_rds;
     else
-      rds <= rd1;
+      rds0 <= rd1;
     end if;
   end process;
+  rds <= rds0;
 
   process(cached_rdt, rd2)
   begin
     if not is_X(cached_rdt) then
-      rdt <= cached_rdt;
+      rdt0 <= cached_rdt;
     else
-      rdt <= rd2;
+      rdt0 <= rd2;
+    end if;
+  end process;
+  rdt <= rdt0;
+
+  -- support beq
+  process(rds0, rdt0)
+  begin
+    if (rds0 xor rdt0) = zero then
+      is_equal <= '1';
+    else
+      is_equal <= '0';
     end if;
   end process;
 

@@ -17,6 +17,7 @@ architecture testbench of regrw_tb is
       wd : in std_logic_vector(31 downto 0);
       we : in std_logic;
       cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
+      is_equal : out std_logic;
 
       rds, rdt, immext : out std_logic_vector(31 downto 0)
     );
@@ -31,6 +32,7 @@ architecture testbench of regrw_tb is
   signal we : std_logic;
 
   signal cached_rds, cached_rdt : std_logic_vector(31 downto 0);
+  signal is_equal : std_logic;
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
 
   constant clk_period : time := 10 ns;
@@ -45,6 +47,7 @@ begin
     -- from controller
     wa => wa, wd => wd, we => we,
     cached_rds => cached_rds, cached_rdt => cached_rdt,
+    is_equal => is_equal,
     rds => rds, rdt => rdt, immext => immext
   );
 
@@ -75,6 +78,8 @@ begin
 
     rs <= "00001"; cached_rds <= X"00000005"; wait for 1 ns; assert rds = X"00000005";
     rt <= "10000"; cached_rdt <= X"00000005"; wait for 1 ns; assert rds = X"00000005";
+
+    rs <= "10000"; rt <= "10000"; wait for 1 ns; assert is_equal = '1';
 
     stop <= TRUE;
     -- success message
