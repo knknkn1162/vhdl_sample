@@ -84,8 +84,8 @@ begin
     assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_WAITS;
     wait for clk_period;
 
-    -- (FetchS, InitS, InitWaitS)
-    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_INITS; assert dec_sc = CONST_WAITS;
+    -- (FetchS, WaitS, InitWaitS)
+    assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_WAITS;
     -- -- FetchS : 00 20020005 : addi $2, $0, 5      # initialize $2 = 5
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"20020005";
@@ -94,7 +94,7 @@ begin
     wait for clk_period;
 
     -- (DecodeS, FetchS, InitS)
-    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_INITS;
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_WAITS;
     -- -- DecodeS : 00 20020005 : addi $2, $0, 5      # initialize $2 = 5
     assert rds = X"00000000"; assert immext = X"00000005";
     -- -- FetchS : 04 2003000c : addi $3, $0, 12     # initialize $3 = 12

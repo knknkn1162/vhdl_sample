@@ -80,13 +80,11 @@ package body controller_pkg is
       when InitWait2S =>
         nextstate := InitWaitS;
       when InitWaitS =>
-        nextState := InitS;
+        nextState := WaitS;
+      when WaitS =>
+        nextState := FetchS;
       when InitS =>
-        if load = '1' then
           nextstate := LoadS;
-        else
-          nextState := FetchS;
-        end if;
       when LoadS =>
         nextState := FetchS;
       when FetchS =>

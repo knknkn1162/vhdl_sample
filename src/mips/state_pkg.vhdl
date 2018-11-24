@@ -5,6 +5,7 @@ package state_pkg is
   type statetype is (
     -- soon after the initialization
     InitWait3S, InitWait2S, InitWaitS,
+    WaitS,
     InitS, LoadS,
     FetchS, DecodeS, AdrCalcS, MemReadS,
     MemWriteBackS,
