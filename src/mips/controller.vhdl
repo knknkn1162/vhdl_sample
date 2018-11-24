@@ -11,7 +11,7 @@ entity controller is
     opcode, funct : in std_logic_vector(5 downto 0);
     rs, rt, rd : in std_logic_vector(4 downto 0);
     mem_rd, alures : in std_logic_vector(31 downto 0);
-    aluzero : in std_logic;
+    is_equal : in std_logic;
     -- for memread
     pc_aluout_s : out std_logic;
     pc4_br4_ja_s : out std_logic_vector(1 downto 0);
@@ -311,13 +311,13 @@ begin
     alucont <= alucontA or alucontB or alucontC;
   end process;
 
-  -- depend on aluzero
-  process(stateA, stateB, stateC, aluzero)
+  -- depend on is_equal (Judge @ DecodeS)
+  process(stateA, stateB, stateC, is_equal)
     variable pc4_br4_ja_sA, pc4_br4_ja_sB, pc4_br4_ja_sC : std_logic_vector(1 downto 0);
   begin
-    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, aluzero);
-    pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, aluzero);
-    pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, aluzero);
+    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, opcode, is_equal);
+    pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, opcode, is_equal);
+    pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, opcode, is_equal);
     pc4_br4_ja_s <= pc4_br4_ja_sA or pc4_br4_ja_sB or pc4_br4_ja_sC;
   end process;
 end architecture;

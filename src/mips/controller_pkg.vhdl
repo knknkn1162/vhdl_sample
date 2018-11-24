@@ -6,15 +6,16 @@ package controller_pkg is
   subtype optype is std_logic_vector(5 downto 0);
   subtype functtype is std_logic_vector(5 downto 0);
 
-  constant OP_LW : optype := "100011";
-  constant OP_SW : optype := "101011";
+  constant OP_LW : optype := "100011"; -- 0x23
+  constant OP_SW : optype := "101011"; -- 0x2B
   constant OP_ADDI : optype := "001000"; -- 0x08
   constant OP_ADDIU : optype := "001001"; -- 0x09
   constant OP_ANDI : optype := "001100"; -- 0x0C
   constant OP_SLTI : optype := "001010"; -- 0x0A
 
   constant OP_RTYPE : optype := "000000";
-  constant OP_BEQ : optype := "000100";
+  constant OP_BEQ : optype := "000100"; -- 0x04
+  constant OP_BNE : optype := "000101"; -- 0x05
   constant OP_J : optype := "000010"; -- 0x02
 
   constant FUNCT_ADD : functtype := "100000"; -- 0x20
@@ -35,7 +36,7 @@ package controller_pkg is
   function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic) return statetype;
   function get_pc_en(state: statetype) return std_logic;
   function get_instr_en(state: statetype) return std_logic;
-  function get_pc4_br4_ja_s(state : statetype; aluzero : std_logic) return std_logic_vector;
+  function get_pc4_br4_ja_s(state : statetype; opcode: std_logic_vector(5 downto 0); is_equal : std_logic) return std_logic_vector;
   function get_mem_we(state : statetype) return std_logic;
   function get_alucont(state : statetype; funct : std_logic_vector(5 downto 0)) return std_logic_vector;
   function get_pc_aluout_s(state: statetype) return std_logic;
@@ -167,14 +168,21 @@ package body controller_pkg is
     return ret;
   end function;
 
-  function get_pc4_br4_ja_s(state : statetype; aluzero : std_logic) return std_logic_vector is
+  function get_pc4_br4_ja_s(state : statetype; opcode: std_logic_vector(5 downto 0); is_equal : std_logic) return std_logic_vector is
     variable ret : std_logic_vector(1 downto 0);
   begin
     case state is
-      when BranchS =>
-        ret := "0" & aluzero;
-      when JumpS =>
-        ret := "10";
+      when DecodeS =>
+        -- "01" : should be taken "00" : shouldnt be taken
+        if opcode = OP_BEQ then
+          ret := "0" & is_equal;
+        elsif opcode = OP_BNE then
+          ret := "0" & (not is_equal);
+        elsif opcode = OP_J then
+          ret := "10";
+        else
+          ret := "00";
+        end if;
       when others =>
         -- pc+4
         ret := "00";
