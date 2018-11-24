@@ -75,12 +75,10 @@ package body controller_pkg is
     variable nextstate : statetype;
   begin
     case state is
-      when InitWait3S =>
-        nextState := InitWait2S;
-      when InitWait2S =>
-        nextstate := InitWaitS;
-      when InitWaitS =>
-        nextState := WaitS;
+      when Wait3S =>
+        nextState := Wait2S;
+      when Wait2S =>
+        nextstate := WaitS;
       when WaitS =>
         nextState := FetchS;
       when InitS =>
@@ -147,7 +145,7 @@ package body controller_pkg is
   begin
     case state is
       -- when initialization
-      when InitS | LoadS | InitWaitS | InitWait2S | InitWait3S =>
+      when InitS | LoadS | WaitS | Wait2S | Wait3S =>
         ret := '0';
       when others =>
         ret := '1';

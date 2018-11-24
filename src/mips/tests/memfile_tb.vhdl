@@ -73,18 +73,18 @@ begin
   begin
     -- wait until rising_edge
     wait for clk_period;
-    -- (InitS, InitWait2S, InitWait3S)
+    -- (InitS, Wait2S, Wait3S)
     rst <= '1'; wait for 1 ns; rst <= '0';
     assert dec_sa = CONST_INITS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_WAITS;
 
     -- automatically dive into LoadS
     wait for clk_period/2;
 
-    -- (LoadS, InitWaitS, InitWait2S)
+    -- (LoadS, WaitS, Wait2S)
     assert dec_sa = CONST_LOADS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_WAITS;
     wait for clk_period;
 
-    -- (FetchS, WaitS, InitWaitS)
+    -- (FetchS, WaitS, WaitS)
     assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_WAITS;
     -- -- FetchS : 00 20020005 : addi $2, $0, 5      # initialize $2 = 5
     assert pc = X"00000000"; assert pcnext = X"00000004";
@@ -169,8 +169,8 @@ begin
     assert alures = X"0000000B";
     wait for clk_period;
 
-    -- (Nop1S, DecodeS, FetchS)
-    assert dec_sa = CONST_NOPS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
+    -- (WaitS, DecodeS, FetchS)
+    assert dec_sa = CONST_WAITS; assert dec_sb = CONST_DECODES; assert dec_sc = CONST_FETCHS;
     -- NopS: 18
     -- DecodeS : 1c 0064202a : slt $4, $3, $4 : #$4=12<7=0
     assert rds = X"0000000C"; assert rdt = X"00000007";
@@ -191,7 +191,7 @@ begin
     wait for clk_period;
 
     -- (FlashS[DecodeS], FetchS, Nop1S)
-    assert dec_sa = CONST_WAITS; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_NOPS;
+    assert dec_sa = CONST_WAITS; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_WAITS;
     -- FlashS[DecodeS] : 24
     assert rds = X"00000000"; assert rdt = X"00000000";
     -- FetchS : 2c 00853820 : add $7,  $4, $5     # $7 = 1 + 11 = 12
