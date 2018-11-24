@@ -49,6 +49,7 @@ architecture behavior of controller is
   signal instr_shift_en : std_logic_vector(1 downto 0);
   signal ena : std_logic;
   signal enb : std_logic;
+  signal is_branch : std_logic;
   -- for cache register address and data
   signal calcs_wa : std_logic_vector(4 downto 0);
   signal calcs_rt_rd_s, memrds_load_s : std_logic;
@@ -139,9 +140,9 @@ begin
     variable nextstateB0 : statetype;
     variable nextstateC0 : statetype;
   begin
-    nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load0, ena, enb);
-    nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load0, ena, enb);
-    nextstateC0 := get_nextstate(stateC, opcode, calcs_opcode, load0, ena, enb);
+    nextstateA0 := get_nextstate(stateA, opcode, calcs_opcode, load0, ena, enb, is_branch);
+    nextstateB0 := get_nextstate(stateB, opcode, calcs_opcode, load0, ena, enb, is_branch);
+    nextstateC0 := get_nextstate(stateC, opcode, calcs_opcode, load0, ena, enb, is_branch);
 
     nextstateA <= nextstateA0;
     nextstateB <= nextstateB0;
@@ -321,4 +322,6 @@ begin
     pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, opcode, is_equal);
     pc4_br4_ja_s <= pc4_br4_ja_sA or pc4_br4_ja_sB or pc4_br4_ja_sC;
   end process;
+
+  is_branch <= get_branch_flag(is_equal, opcode);
 end architecture;

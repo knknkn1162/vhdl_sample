@@ -33,7 +33,7 @@ package controller_pkg is
   constant FUNCT_SUB : functtype := "100010"; -- 0x22
   constant FUNCT_SUBU : functtype := "100011"; -- 0x23
 
-  function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic) return statetype;
+  function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic; is_branch : std_logic) return statetype;
   function get_pc_en(state: statetype) return std_logic;
   function get_instr_en(state: statetype) return std_logic;
   function get_pc4_br4_ja_s(state : statetype; opcode: std_logic_vector(5 downto 0); is_equal : std_logic) return std_logic_vector;
@@ -43,9 +43,23 @@ package controller_pkg is
   function get_rdt_immext_s(state : statetype) return std_logic;
   function get_ena(state: statetype; calcs_opcode : std_logic_vector(5 downto 0); rs : std_logic_vector(4 downto 0); rt: std_logic_vector(4 downto 0); calcs_rt : std_logic_vector(4 downto 0)) return std_logic;
   function get_enb(state1: statetype; state2: statetype) return std_logic;
+  function get_branch_flag(is_equal : std_logic; opcode : std_logic_vector(5 downto 0)) return std_logic;
 end package;
 
 package body controller_pkg is
+  function get_branch_flag(is_equal : std_logic; opcode : std_logic_vector(5 downto 0)) return std_logic is
+    variable is_branch : std_logic;
+  begin
+    if opcode = OP_BEQ then
+      is_branch := is_equal;
+    elsif opcode = OP_BNE then
+      is_branch := (not is_equal);
+    else
+      is_branch := '0';
+    end if;
+    return is_branch;
+  end function;
+
   function get_enb(state1: statetype; state2 : statetype) return std_logic is
     variable enb : std_logic;
   begin
@@ -71,7 +85,7 @@ package body controller_pkg is
     return ena;
   end function;
 
-  function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic) return statetype is
+  function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic; is_branch : std_logic) return statetype is
     variable nextstate : statetype;
   begin
     case state is
@@ -86,12 +100,13 @@ package body controller_pkg is
       when WaitS | LoadS =>
         nextState := FetchS;
       when FetchS =>
+        if is_branch = '1' then
+          nextstate := Wait2S;
         -- stall
-        if ena = '1' then
-          nextState := DecodeS;
+        elsif ena = '0' then
+          nextState := FetchS;
         else
-          -- stay the same state
-          nextstate := FetchS;
+          nextstate := DecodeS;
         end if;
       when DecodeS =>
         -- stall
