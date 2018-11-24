@@ -94,11 +94,7 @@ architecture behavior of datapath is
     port (
       clk, rst : in std_logic;
       rds, rdt, immext : in std_logic_vector(31 downto 0);
-      target : in std_logic_vector(25 downto 0);
       alures : out std_logic_vector(31 downto 0);
-      aluzero : out std_logic;
-      brplus : out std_logic_vector(31 downto 0);
-      ja : out std_logic_vector(27 downto 0);
       -- controller
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
