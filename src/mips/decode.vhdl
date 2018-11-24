@@ -31,6 +31,7 @@ begin
     a => mem_rd,
     y => instr0
   );
+
   -- for controller
   opcode <= instr0(31 downto 26);
   rs <= instr0(25 downto 21);

@@ -113,7 +113,9 @@ architecture behavior of datapath is
       -- controller
       pc_aluout_s : in std_logic;
       pc4_br4_ja_s : in std_logic_vector(1 downto 0);
-      pc_en, rw_en : in std_logic;
+      pc_en : in std_logic;
+      instr_en : in std_logic;
+      rw_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
       pcnext : out std_logic_vector(31 downto 0)
@@ -194,6 +196,7 @@ begin
     -- controller
     pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
+    instr_en => instr_en,
     rw_en => rw_en,
     -- scan
     pc => pc, pcnext => pcnext
