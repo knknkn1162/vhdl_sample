@@ -22,7 +22,7 @@ package body debug_pkg is
     variable ret : state_vector_type;
   begin
     case state is
-      when WaitS | Wait2S | Wait3S =>
+      when WaitS | Wait2S | Wait3S | Wait4S =>
         ret := CONST_WAITS;
       when InitS =>
         ret := CONST_INITS;

@@ -106,8 +106,8 @@ begin
   process(clk, rst) begin
     if rst = '1' then
       stateA <= InitS;
-      stateB <= Wait2S;
-      stateC <= Wait3S;
+      stateB <= Wait3S;
+      stateC <= Wait4S;
     elsif rising_edge(clk) then
       stateA <= nextStateA;
       stateB <= nextStateB;
