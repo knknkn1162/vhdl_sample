@@ -41,6 +41,7 @@ architecture behavior of mips is
       mem_we: in std_logic;
       -- for decode
       cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
+      is_equal : out std_logic;
       -- for writeback
       instr_en : in std_logic;
       reg_wa : in std_logic_vector(4 downto 0);
@@ -50,7 +51,6 @@ architecture behavior of mips is
       alucont : in std_logic_vector(2 downto 0);
       rdt_immext_s : in std_logic;
       calc_en : in std_logic;
-      aluzero : out std_logic;
 
       -- scan for testbench
       pc : out std_logic_vector(31 downto 0);
@@ -69,7 +69,9 @@ architecture behavior of mips is
       opcode, funct : in std_logic_vector(5 downto 0);
       rs, rt, rd : in std_logic_vector(4 downto 0);
       mem_rd, alures : in std_logic_vector(31 downto 0);
-      aluzero : in std_logic;
+      -- for decode
+      is_equal : in std_logic;
+
       -- for memread
       pc_aluout_s : out std_logic;
       pc4_br4_ja_s : out std_logic_vector(1 downto 0);
@@ -101,6 +103,7 @@ architecture behavior of mips is
   signal mem_we: std_logic;
   -- for decode
   signal cached_rds, cached_rdt : std_logic_vector(31 downto 0);
+  signal is_equal : std_logic;
   -- for writeback
   signal instr_en : std_logic;
   signal reg_wa0 : std_logic_vector(4 downto 0);
@@ -110,7 +113,6 @@ architecture behavior of mips is
   signal alucont : std_logic_vector(2 downto 0);
   signal rdt_immext_s : std_logic;
   signal calc_en : std_logic;
-  signal aluzero : std_logic;
   signal mem_rd0, alures0 : std_logic_vector(31 downto 0);
 
   -- for memadr
@@ -135,13 +137,13 @@ begin
     mem_we => mem_we,
     -- forwarding for pipeline
     cached_rds => cached_rds, cached_rdt => cached_rdt,
+    is_equal => is_equal,
     -- for writeback
     instr_en => instr_en,
     reg_wa => reg_wa0, reg_wd => reg_wd0, reg_we => reg_we0,
     -- for calc
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
-    aluzero => aluzero,
     calc_en => calc_en,
     
     -- scan for testbench
@@ -158,7 +160,7 @@ begin
     opcode => opcode, funct => funct,
     rs => rs, rt => rt, rd => rd,
     mem_rd => mem_rd0, alures => alures0,
-    aluzero => aluzero,
+    is_equal => is_equal,
     -- out
     -- for memadr
     pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,

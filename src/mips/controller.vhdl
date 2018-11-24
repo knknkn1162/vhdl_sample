@@ -11,6 +11,7 @@ entity controller is
     opcode, funct : in std_logic_vector(5 downto 0);
     rs, rt, rd : in std_logic_vector(4 downto 0);
     mem_rd, alures : in std_logic_vector(31 downto 0);
+    -- for decode
     is_equal : in std_logic;
     -- for memread
     pc_aluout_s : out std_logic;

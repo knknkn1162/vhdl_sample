@@ -19,6 +19,7 @@ entity datapath is
     mem_we: in std_logic;
     -- for decode
     cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
+    is_equal : out std_logic;
     -- for writeback
     instr_en : in std_logic;
     reg_wa : in std_logic_vector(4 downto 0);
@@ -28,7 +29,6 @@ entity datapath is
     alucont : in std_logic_vector(2 downto 0);
     rdt_immext_s : in std_logic;
     calc_en : in std_logic;
-    aluzero : out std_logic;
 
     -- scan for testbench
     pc : out std_logic_vector(31 downto 0);
@@ -75,14 +75,18 @@ architecture behavior of datapath is
       clk, rst, load : in std_logic;
       rs, rt : in std_logic_vector(4 downto 0);
       imm : in std_logic_vector(15 downto 0);
+      target : in std_logic_vector(25 downto 0); -- J-type
 
       -- from controller
       wa : in std_logic_vector(4 downto 0);
       wd : in std_logic_vector(31 downto 0);
       we : in std_logic;
       cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
+      is_equal : out std_logic;
 
-      rds, rdt, immext : out std_logic_vector(31 downto 0)
+      rds, rdt, immext : out std_logic_vector(31 downto 0);
+      brplus : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0)
     );
   end component;
 
@@ -161,11 +165,15 @@ begin
   port map (
     clk => clk, rst => rst, load => load,
     rs => rs0, rt => rt0, imm => imm0,
+    target => target0,
     -- from controller
     wa => reg_wa, wd => reg_wd, we => reg_we,
     cached_rds => cached_rds, cached_rdt => cached_rdt,
+    is_equal => is_equal,
     -- out
-    rds => rds0, rdt => rdt0, immext => immext0
+    rds => rds0, rdt => rdt0, immext => immext0,
+    brplus => brplus0,
+    ja => ja0
   );
 
   rds <= rds0; rdt <= rdt0; immext <= immext0;
@@ -173,10 +181,7 @@ begin
   calc0 : calc port map (
     clk => clk, rst => rst,
     rds => rds0, rdt => rdt0, immext => immext0,
-    target => target0,
-    alures => alures0, aluzero => aluzero,
-    brplus => brplus0,
-    ja => ja0,
+    alures => alures0,
     -- controller
     alucont => alucont,
     rdt_immext_s => rdt_immext_s,
