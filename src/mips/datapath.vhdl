@@ -143,7 +143,6 @@ begin
     wd => mem_wd
   );
   mem_rd <= mem_rd0;
-  addr <= mem_addr0; -- for scan
 
   decode0 : decode port map (
     clk => clk, rst => rst,
@@ -190,7 +189,7 @@ begin
     alures => alures0,
     ja => ja0,
     brplus => brplus0,
-    addr => mem_addr0,
+    addr => mem_addr0, -- out
     reg_aluout => reg_aluout0,
     -- controller
     pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
@@ -199,4 +198,5 @@ begin
     -- scan
     pc => pc, pcnext => pcnext
   );
+  addr <= mem_addr0; -- for scan
 end architecture;
