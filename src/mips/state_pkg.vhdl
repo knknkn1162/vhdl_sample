@@ -9,9 +9,7 @@ package state_pkg is
     FetchS, DecodeS, AdrCalcS, MemReadS,
     MemWriteBackS,
     RtypeCalcS,
-    BranchS,
     AddiCalcS,
-    JumpS,
     UnknownS
   );
 end package;

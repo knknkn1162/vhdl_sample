@@ -52,7 +52,7 @@ package body controller_pkg is
     enb := '1';
     if state1 = MemReadS or state1 = MemWriteBackS then
       -- AdrCalcS is not the end of the state, so the condition `state = AdrCalcS` must not be added
-      if state2 = RtypeCalcS or state2 = AddiCalcS or state2 = BranchS or state2 = JumpS then
+      if state2 = RtypeCalcS or state2 = AddiCalcS then
         enb := '0';
       end if;
     end if;
@@ -104,10 +104,8 @@ package body controller_pkg is
               nextState := RtypeCalcS;
             when OP_ADDI =>
               nextState := AddiCalcS;
-            when OP_BEQ =>
-              nextState := BranchS;
-            when OP_J =>
-              nextstate := JumpS;
+            when OP_BEQ | OP_BNE | OP_J =>
+              nextState := WaitS;
             when others =>
               nextState := UnknownS;
           end case;
@@ -125,7 +123,7 @@ package body controller_pkg is
             nextState := UnknownS;
         end case;
       -- when final state
-      when AddiCalcS | RtypeCalcS | BranchS | JumpS =>
+      when AddiCalcS | RtypeCalcS =>
         if enb = '1' then
           nextState := FetchS;
         else

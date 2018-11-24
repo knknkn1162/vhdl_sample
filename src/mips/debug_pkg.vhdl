@@ -32,7 +32,7 @@ package body debug_pkg is
         ret := CONST_FETCHS;
       when DecodeS =>
         ret := CONST_DECODES;
-      when AdrCalcS | RtypeCalcS | AddiCalcS | BranchS | JumpS =>
+      when AdrCalcS | RtypeCalcS | AddiCalcS =>
         ret := CONST_CALCS;
       when MemReadS =>
         ret := CONST_MEMRWS;
