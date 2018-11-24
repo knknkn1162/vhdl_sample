@@ -11,6 +11,7 @@ architecture testbench of regrw_tb is
       clk, rst, load : in std_logic;
       rs, rt : in std_logic_vector(4 downto 0);
       imm : in std_logic_vector(15 downto 0);
+      target : in std_logic_vector(25 downto 0); -- J-type
 
       -- from controller
       wa : in std_logic_vector(4 downto 0);
@@ -19,13 +20,16 @@ architecture testbench of regrw_tb is
       cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
       is_equal : out std_logic;
 
-      rds, rdt, immext : out std_logic_vector(31 downto 0)
+      rds, rdt, immext : out std_logic_vector(31 downto 0);
+      brplus : out std_logic_vector(31 downto 0);
+      ja : out std_logic_vector(27 downto 0)
     );
   end component;
 
   signal clk, rst, load : std_logic;
   signal rs, rt : std_logic_vector(4 downto 0);
   signal imm : std_logic_vector(15 downto 0);
+  signal target : std_logic_vector(25 downto 0);
 
   signal wa : std_logic_vector(4 downto 0);
   signal wd : std_logic_vector(31 downto 0);
@@ -33,7 +37,10 @@ architecture testbench of regrw_tb is
 
   signal cached_rds, cached_rdt : std_logic_vector(31 downto 0);
   signal is_equal : std_logic;
+
   signal rds, rdt, immext : std_logic_vector(31 downto 0);
+  signal brplus : std_logic_vector(31 downto 0);
+  signal ja : std_logic_vector(27 downto 0);
 
   constant clk_period : time := 10 ns;
   signal stop : boolean;
@@ -43,12 +50,16 @@ begin
     clk => clk, rst => rst, load => load,
     rs => rs, rt => rt,
     imm => imm,
+    target => target,
 
     -- from controller
     wa => wa, wd => wd, we => we,
     cached_rds => cached_rds, cached_rdt => cached_rdt,
     is_equal => is_equal,
-    rds => rds, rdt => rdt, immext => immext
+
+    rds => rds, rdt => rdt, immext => immext,
+    brplus => brplus,
+    ja => ja
   );
 
   clk_process: process
@@ -67,6 +78,7 @@ begin
 
     -- read immediate extended 32 bit
     imm <= X"0020"; wait for 1 ns; assert immext = X"00000020";
+    assert brplus = X"00000080";
     -- write
     wa <= "10000"; wd <= X"000000FF"; we <= '1'; wait for clk_period/2;
     we <= '0';
@@ -80,6 +92,10 @@ begin
     rt <= "10000"; cached_rdt <= X"00000005"; wait for 1 ns; assert rds = X"00000005";
 
     rs <= "10000"; rt <= "10000"; wait for 1 ns; assert is_equal = '1';
+
+    -- for J-type instructions
+    target <= b"00" & X"000005"; wait for clk_period;
+    assert ja = X"0000014";
 
     stop <= TRUE;
     -- success message

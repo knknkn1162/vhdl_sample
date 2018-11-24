@@ -61,11 +61,11 @@ memrw: mem shift_register2
 	make all F=memrw
 decode: flopr_en
 	make all F=decode
-regrw: reg sgnext
+regrw: reg sgnext slt2
 	make all F=regrw
 regw_cache: shift_register2_load
 	make all F=regw_cache
-calc: flopr_en alu mux2 slt2
+calc: flopr_en alu mux2
 	make all F=calc
 memadr: flopr_en mux4
 	make all F=memadr

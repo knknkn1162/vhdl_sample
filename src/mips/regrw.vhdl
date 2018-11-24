@@ -7,6 +7,7 @@ entity regrw is
     clk, rst, load : in std_logic;
     rs, rt : in std_logic_vector(4 downto 0);
     imm : in std_logic_vector(15 downto 0);
+    target : in std_logic_vector(25 downto 0); -- J-type
 
     -- from controller
     wa : in std_logic_vector(4 downto 0);
@@ -15,7 +16,9 @@ entity regrw is
     cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
     is_equal : out std_logic;
 
-    rds, rdt, immext : out std_logic_vector(31 downto 0)
+    rds, rdt, immext : out std_logic_vector(31 downto 0);
+    brplus : out std_logic_vector(31 downto 0);
+    ja : out std_logic_vector(27 downto 0)
   );
 end entity;
 
@@ -44,8 +47,20 @@ architecture behavior of regrw is
         );
   end component;
 
+  component slt2
+    generic (N: natural);
+    port (
+      a : in std_logic_vector(N-1 downto 0);
+      y : out std_logic_vector(N-1 downto 0)
+    );
+  end component;
+
   signal rd1, rd2 : std_logic_vector(31 downto 0);
   signal rds0, rdt0 : std_logic_vector(31 downto 0);
+
+  signal immext0 : std_logic_vector(31 downto 0);
+  signal ja0 : std_logic_vector(27 downto 0);
+  signal target28 : std_logic_vector(27 downto 0);
   constant zero : std_logic_vector(31 downto 0) := (others => '0');
 
 begin
@@ -89,6 +104,21 @@ begin
 
   sgnext0 : sgnext port map (
     a => imm,
-    y => immext
+    y => immext0
   );
+  immext <= immext0;
+
+  immext_slt2 : slt2 generic map(N=>32)
+  port map (
+    a => immext0,
+    y => brplus
+  );
+
+  target28 <= b"00" & target;
+  target_slt2 : slt2 generic map (N=>28)
+  port map (
+    a => target28,
+    y => ja0
+  );
+  ja <= ja0;
 end architecture;
