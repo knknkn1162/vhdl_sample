@@ -44,6 +44,7 @@ architecture behavior of mips is
       is_equal : out std_logic;
       -- for writeback
       instr_en : in std_logic;
+      instr_clr : in std_logic;
       reg_wa : in std_logic_vector(4 downto 0);
       reg_wd : in std_logic_vector(31 downto 0);
       reg_we : in std_logic;
@@ -81,6 +82,7 @@ architecture behavior of mips is
       mem_we: out std_logic;
       -- for writeback
       instr_en : out std_logic;
+      instr_clr : out std_logic;
       reg_wa : out std_logic_vector(4 downto 0);
       reg_wd : out std_logic_vector(31 downto 0);
       reg_we : out std_logic;
@@ -106,6 +108,7 @@ architecture behavior of mips is
   signal is_equal : std_logic;
   -- for writeback
   signal instr_en : std_logic;
+  signal instr_clr : std_logic;
   signal reg_wa0 : std_logic_vector(4 downto 0);
   signal reg_we0 : std_logic;
   signal reg_wd0 : std_logic_vector(31 downto 0);
@@ -139,7 +142,7 @@ begin
     cached_rds => cached_rds, cached_rdt => cached_rdt,
     is_equal => is_equal,
     -- for writeback
-    instr_en => instr_en,
+    instr_en => instr_en, instr_clr => instr_clr,
     reg_wa => reg_wa0, reg_wd => reg_wd0, reg_we => reg_we0,
     -- for calc
     alucont => alucont,
@@ -170,7 +173,7 @@ begin
     mem_we => mem_we,
     -- for decode
     -- for writeback
-    instr_en => instr_en,
+    instr_en => instr_en, instr_clr => instr_clr,
     reg_wa => reg_wa0, reg_wd => reg_wd0, reg_we => reg_we0,
     -- forwarding
     cached_rds => cached_rds, cached_rdt => cached_rdt,

@@ -22,7 +22,7 @@ entity controller is
     -- for memwrite
     mem_we: out std_logic;
     -- for writeback
-    instr_en : out std_logic;
+    instr_en, instr_clr : out std_logic;
     reg_wa : out std_logic_vector(4 downto 0);
     reg_wd : out std_logic_vector(31 downto 0);
     reg_we : out std_logic;
@@ -253,7 +253,6 @@ begin
 
   process(stateA, stateB, stateC, ena, enb)
     variable pc_enA, pc_enB, pc_enC : std_logic;
-    variable instr_enA, instr_enB, instr_enC : std_logic;
   begin
     -- for memadr
     pc_enA := get_pc_en(stateA); pc_enB := get_pc_en(stateB); pc_enC := get_pc_en(stateC);
@@ -262,12 +261,14 @@ begin
     -- for calc
     calc_en <= ena and enb;
     rw_en <= enb;
+  end process;
 
+  process(stateA, stateB, stateC, ena, enb, is_branch)
+    variable instr_enA, instr_enB, instr_enC : std_logic;
+  begin
     -- for writeback
-    instr_enA := get_instr_en(stateA);
-    instr_enB := get_instr_en(stateB);
-    instr_enC := get_instr_en(stateC);
-    instr_en <= (instr_enA or instr_enB or instr_enC) and ena and enb;
+    instr_en <= get_instr_en(stateA, stateB, stateC) and ena and enb;
+    instr_clr <= get_instr_clr(stateA, stateB, stateC, is_branch);
   end process;
 
   process(stateA, stateB, stateC)
@@ -314,12 +315,12 @@ begin
   end process;
 
   -- depend on is_equal (Judge @ DecodeS)
-  process(stateA, stateB, stateC, is_equal)
+  process(stateA, stateB, stateC, is_branch, opcode)
     variable pc4_br4_ja_sA, pc4_br4_ja_sB, pc4_br4_ja_sC : std_logic_vector(1 downto 0);
   begin
-    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, opcode, is_equal);
-    pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, opcode, is_equal);
-    pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, opcode, is_equal);
+    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, opcode, is_branch);
+    pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, opcode, is_branch);
+    pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, opcode, is_branch);
     pc4_br4_ja_s <= pc4_br4_ja_sA or pc4_br4_ja_sB or pc4_br4_ja_sC;
   end process;
 
