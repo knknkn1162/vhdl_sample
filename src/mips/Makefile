@@ -67,7 +67,7 @@ regw_cache: shift_register2_load
 	make all F=regw_cache
 calc: flopr_en alu mux2
 	make all F=calc
-memadr: flopr_en mux4
+memadr: flopr_en mux4 mux2 shift_register2
 	make all F=memadr
 instr_shift_register: shift_register2
 	make all F=instr_shift_register

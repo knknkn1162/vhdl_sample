@@ -14,6 +14,7 @@ entity memadr is
     pc_aluout_s : in std_logic;
     pc4_br4_ja_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
+    instr_en : in std_logic;
     rw_en : in std_logic;
     -- scan
     pc : out std_logic_vector(31 downto 0);
@@ -53,14 +54,29 @@ architecture behavior of memadr is
     );
   end component;
 
-  signal pc0, pcnext0, aluout : std_logic_vector(31 downto 0);
+  component shift_register2
+    generic(N: natural);
+    port (
+      clk, rst : in std_logic;
+      en : in std_logic_vector(1 downto 0);
+      a0 : in std_logic_vector(N-1 downto 0);
+      a1 : out std_logic_vector(N-1 downto 0);
+      a2 : out std_logic_vector(N-1 downto 0)
+    );
+  end component;
+
+  signal pc0, pcprev0, pcnext0, aluout : std_logic_vector(31 downto 0);
   signal pc4plus, br4plus, ja32 : std_logic_vector(31 downto 0);
+  signal en : std_logic_vector(1 downto 0);
 begin
 
-  flopr_pc : flopr_en port map (
-    clk => clk, rst => rst, en => pc_en,
-    a => pcnext0,
-    y => pc0
+  en <= instr_en & pc_en;
+  shift_register2_pc : shift_register2 generic map (N=>32)
+  port map (
+    clk => clk, rst => rst, en => en,
+    a0 => pcnext0,
+    a1 => pc0,
+    a2 => pcprev0
   );
   pc <= pc0;
 
@@ -70,9 +86,9 @@ begin
   );
   reg_aluout <= aluout;
 
-  br4plus <= std_logic_vector(unsigned(brplus) + unsigned(pc0) + 4);
+  br4plus <= std_logic_vector(unsigned(brplus) + unsigned(pcprev0) + 4);
   pc4plus <= std_logic_vector(unsigned(pc0) + 4);
-  ja32 <= pc0(31 downto 28) & ja;
+  ja32 <= pcprev0(31 downto 28) & ja;
 
   pc4_br_mux4 : mux4 generic map (N=>32)
   port map (
