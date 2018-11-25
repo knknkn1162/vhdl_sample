@@ -153,15 +153,17 @@ package body controller_pkg is
     return nextstate;
   end function;
 
-  function get_pc_en(state: statetype) return std_logic is
+  function get_pc_en(state : statetype) return std_logic is
     variable ret : std_logic;
   begin
     case state is
       -- when initialization
-      when InitS | LoadS | WaitS | Wait2S | Wait3S | Wait4S =>
+      when InitS | LoadS | Wait2S | Wait3S | Wait4S =>
         ret := '0';
-      when others =>
+      when AddiCalcS | RtypeCalcS | MemReadS | MemWriteBackS | WaitS =>
         ret := '1';
+      when others =>
+        ret := '0';
     end case;
     return ret;
   end function;
@@ -171,6 +173,8 @@ package body controller_pkg is
   begin
     if stateA = FetchS or stateB = FetchS or stateC = FetchS then
       ret := is_branch;
+    else
+      ret := '0';
     end if;
     return ret;
   end function;

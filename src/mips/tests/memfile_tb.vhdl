@@ -254,18 +254,18 @@ begin
     assert rds = X"00000000"; assert immext = X"00000050";
     wait for clk_period;
 
-    -- (DecodeS, FetchS, CalcS)
-    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
+    -- (DecodeS, MemWriteBackS, CalcS)
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_MEMWBS; assert dec_sc = CONST_CALCS;
+    assert pc = X"0000003C"; assert pcnext = X"00000044";
     -- Decode : 3c 08000011 : j    end            # should be taken
-    assert ja = X"00000044";
-    -- FetchS : 40 20020001 : addi $2, $0, 1 # shouldn't happen
-    assert pc = X"00000040"; assert pcnext = X"00000044";
-    assert mem_rd = X"08000011";
+    assert ja = X"0000044";
+    -- MemWriteBackS : 34 ac670044 : sw   $7, 68($3)     # [80] = 7
+    assert addr = X"00000050"; assert mem_wd = X"00000007";
     -- CalcS : 38 8c020050 : lw   $2, 80($0)     # $2 = [80] = 7
     assert alures = X"00000050";
     wait for clk_period;
 
-    -- (WaitS[CalcS], WaitS[FlashS], FetchS)
+    -- (WaitS[CalcS], FetchS, MemReadS)
     assert dec_sa = CONST_WAITS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_FETCHS;
     -- WaitS
     -- WaitS[FlashS]

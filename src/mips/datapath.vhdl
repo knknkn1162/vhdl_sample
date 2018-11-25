@@ -172,6 +172,7 @@ begin
     brplus => brplus0,
     ja => ja0
   );
+  ja <= ja0;
 
   rds <= rds0; rdt <= rdt0; immext <= immext0;
 
