@@ -35,7 +35,6 @@ package controller_pkg is
 
   function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic; is_branch : std_logic) return statetype;
   function get_pc_en(state: statetype) return std_logic;
-  function get_instr_en(stateA: statetype; stateB: statetype; stateC: statetype) return std_logic;
   function get_instr_clr(stateA: statetype; stateB: statetype; stateC: statetype; is_branch : std_logic) return std_logic;
   function get_pc4_br4_ja_s(state : statetype; opcode : std_logic_vector(5 downto 0); is_branch : std_logic) return std_logic_vector;
   function get_mem_we(state : statetype) return std_logic;
@@ -164,15 +163,6 @@ package body controller_pkg is
       when others =>
         ret := '1';
     end case;
-    return ret;
-  end function;
-
-  function get_instr_en(stateA: statetype; stateB: statetype; stateC: statetype) return std_logic is
-    variable ret : std_logic;
-  begin
-    if stateA = FetchS or stateB = FetchS or stateC = FetchS then
-      ret := '1';
-    end if;
     return ret;
   end function;
 
