@@ -11,15 +11,14 @@ entity decode is
     target : out std_logic_vector(25 downto 0);
     -- controller
     opcode, funct : out std_logic_vector(5 downto 0);
-    instr_en : in std_logic;
     instr_clr : in std_logic
   );
 end entity;
 
 architecture behavior of decode is
-  component flopr_en_clr
+  component flopr_clr
     port (
-      clk, rst, en, clr: in std_logic;
+      clk, rst, clr: in std_logic;
       a : in std_logic_vector(31 downto 0);
       y : out std_logic_vector(31 downto 0)
         );
@@ -27,8 +26,8 @@ architecture behavior of decode is
 
   signal instr0 : std_logic_vector(31 downto 0);
 begin
-  reg_instr : flopr_en_clr port map (
-    clk => clk, rst => rst, en => instr_en, clr => instr_clr,
+  reg_instr : flopr_clr port map (
+    clk => clk, rst => rst, clr => instr_clr,
     a => mem_rd,
     y => instr0
   );

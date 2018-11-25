@@ -14,7 +14,7 @@ architecture testbench of decode_tb is
       target : out std_logic_vector(25 downto 0);
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
-      instr_en : in std_logic
+      instr_clr : in std_logic
     );
   end component;
 
@@ -24,7 +24,7 @@ architecture testbench of decode_tb is
   signal imm : std_logic_vector(15 downto 0);
   signal target : std_logic_vector(25 downto 0);
   signal opcode, funct : std_logic_vector(5 downto 0);
-  signal instr_en : std_logic;
+  signal instr_clr : std_logic;
   -- controller
   constant clk_period : time := 10 ns;
   signal stop : boolean;
@@ -38,7 +38,7 @@ begin
     target => target,
     -- controller
     opcode => opcode, funct => funct,
-    instr_en => instr_en
+    instr_clr => instr_clr
   );
 
   clk_process: process
@@ -57,17 +57,20 @@ begin
     -- X"8C1003FC";
     rst <= '1'; wait for 1 ns; rst <= '0';
     -- read
-    mem_rd <= X"8C1003FC"; instr_en <= '1'; wait for clk_period/2;
+    mem_rd <= X"8C1003FC"; wait for clk_period/2;
     assert rs = "00000"; assert imm = X"03FC"; assert opcode = "100011";
     
     -- j read 0x02
-    mem_rd <= X"08000011"; instr_en <= '1'; wait for clk_period;
+    mem_rd <= X"08000011"; wait for clk_period;
     assert target = b"00" & X"000011";
 
     -- sll $t2, $s0, 4  0000/00 00/000 1/0000/ 0101/0 001/00 00/0000
     -- X"00105100"
-    mem_rd <= X"00105100"; instr_en <= '1'; wait for clk_period;
+    mem_rd <= X"00105100"; wait for clk_period;
     assert rs = "00000"; assert rt = "10000"; assert rd = "01010"; assert shamt = "00100"; assert opcode = "000000";
+
+    mem_rd <= X"00105101"; instr_clr <= '1'; wait for clk_period;
+    assert rs = "00000"; assert rt = "00000"; assert rd = "00000"; assert shamt = "00000"; assert opcode = "000000";
 
     -- skip
     stop <= TRUE;
