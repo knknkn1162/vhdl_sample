@@ -90,7 +90,6 @@ begin
     assert pc = X"00000000"; assert pcnext = X"00000004";
     assert mem_rd = X"20020005";
     -- InitS : (not yet)
-    assert rds = X"00000000"; assert immext = X"00000000";
     wait for clk_period;
 
     -- (DecodeS, FetchS, InitS)

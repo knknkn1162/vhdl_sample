@@ -21,7 +21,6 @@ entity datapath is
     cached_rds, cached_rdt : in std_logic_vector(31 downto 0);
     is_equal : out std_logic;
     -- for writeback
-    instr_en : in std_logic;
     instr_clr : in std_logic;
     reg_wa : in std_logic_vector(4 downto 0);
     reg_wd : in std_logic_vector(31 downto 0);
@@ -66,7 +65,6 @@ architecture behavior of datapath is
       target : out std_logic_vector(25 downto 0);
       -- controller
       opcode, funct : out std_logic_vector(5 downto 0);
-      instr_en : in std_logic;
       instr_clr : in std_logic
     );
   end component;
@@ -116,7 +114,7 @@ architecture behavior of datapath is
       pc_aluout_s : in std_logic;
       pc4_br4_ja_s : in std_logic_vector(1 downto 0);
       pc_en : in std_logic;
-      instr_en : in std_logic;
+      instr_clr : in std_logic;
       rw_en : in std_logic;
       -- scan
       pc : out std_logic_vector(31 downto 0);
@@ -156,7 +154,6 @@ begin
     target => target0,
     -- controller
     opcode => opcode, funct => funct,
-    instr_en => instr_en,
     instr_clr => instr_clr
   );
   rs <= rs0; rt <= rt0; rd <= rd0;
@@ -199,7 +196,7 @@ begin
     -- controller
     pc_aluout_s => pc_aluout_s, pc4_br4_ja_s => pc4_br4_ja_s,
     pc_en => pc_en,
-    instr_en => instr_en,
+    instr_clr => instr_clr,
     rw_en => rw_en,
     -- scan
     pc => pc, pcnext => pcnext
