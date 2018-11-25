@@ -36,7 +36,7 @@ package controller_pkg is
   function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic; is_branch : std_logic) return statetype;
   function get_pc_en(state : statetype) return std_logic;
   function get_instr_clr(stateA: statetype; stateB: statetype; stateC: statetype; is_branch : std_logic) return std_logic;
-  function get_pc4_br4_ja_s(state : statetype; opcode : std_logic_vector(5 downto 0); is_branch : std_logic) return std_logic_vector;
+  function get_pc4_br4_ja_s(state : statetype; opcode : std_logic_vector(5 downto 0); is_branch : std_logic; is_stall : std_logic) return std_logic_vector;
   function get_mem_we(state : statetype) return std_logic;
   function get_alucont(state : statetype; funct : std_logic_vector(5 downto 0)) return std_logic_vector;
   function get_pc_aluout_s(state: statetype) return std_logic;
@@ -193,13 +193,15 @@ package body controller_pkg is
     return ret;
   end function;
 
-  function get_pc4_br4_ja_s(state : statetype; opcode : std_logic_vector(5 downto 0); is_branch : std_logic) return std_logic_vector is
+  function get_pc4_br4_ja_s(state : statetype; opcode : std_logic_vector(5 downto 0); is_branch : std_logic; is_stall : std_logic) return std_logic_vector is
     variable ret : std_logic_vector(1 downto 0);
   begin
     case state is
       when DecodeS =>
         -- "01" : should be taken "00" : shouldnt be taken
-        if opcode = OP_BEQ or opcode = OP_BNE then
+        if is_stall = '1' then
+          ret := "00";
+        elsif opcode = OP_BEQ or opcode = OP_BNE then
           ret := "0" & is_branch;
         elsif opcode = OP_J then
           ret := "10";

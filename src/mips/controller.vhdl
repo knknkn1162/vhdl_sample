@@ -56,6 +56,8 @@ architecture behavior of controller is
   signal calcs_rt_rd_s, memrds_load_s : std_logic;
   signal alures_we, memrd_we : std_logic;
   signal load0 : std_logic;
+  signal en_all : std_logic;
+  signal is_stall : std_logic;
 
   component instr_shift_register is
     port (
@@ -102,6 +104,15 @@ architecture behavior of controller is
       s : in std_logic;
       y : out std_logic_vector(N-1 downto 0)
         );
+  end component;
+
+  component flopr_en
+    generic(N : natural := 32);
+    port (
+      clk, rst, en: in std_logic;
+      a : in std_logic_vector(N-1 downto 0);
+      y : out std_logic_vector(N-1 downto 0)
+    );
   end component;
 
 begin
@@ -242,6 +253,15 @@ begin
     ena <= enaA and enaB and enaC;
   end process;
 
+  -- save stall or not
+  process(clk, rst) begin
+    if rst = '1' then
+      is_stall <= '0';
+    elsif rising_edge(clk) then
+      is_stall <= ena nand enb;
+    end if;
+  end process;
+
   -- Judge whether the 2-states collide
   process(stateA, stateB, stateC, enb, calcs_opcode)
     variable enbAB, enbBC, enbCA : std_logic;
@@ -318,9 +338,9 @@ begin
   process(stateA, stateB, stateC, is_branch, opcode)
     variable pc4_br4_ja_sA, pc4_br4_ja_sB, pc4_br4_ja_sC : std_logic_vector(1 downto 0);
   begin
-    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, opcode, is_branch);
-    pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, opcode, is_branch);
-    pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, opcode, is_branch);
+    pc4_br4_ja_sA := get_pc4_br4_ja_s(stateA, opcode, is_branch, is_stall);
+    pc4_br4_ja_sB := get_pc4_br4_ja_s(stateB, opcode, is_branch, is_stall);
+    pc4_br4_ja_sC := get_pc4_br4_ja_s(stateC, opcode, is_branch, is_stall);
     pc4_br4_ja_s <= pc4_br4_ja_sA or pc4_br4_ja_sB or pc4_br4_ja_sC;
   end process;
 

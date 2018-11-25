@@ -270,7 +270,7 @@ begin
     -- Decode : 3c 08000011 : j    end            # should be taken
     assert ja = X"0000044";
     -- FetchS : 44 ac020054 : end:    sw   $2, 84($0)     # write adr 84 = 7
-    assert pc = X"00000044"; -- assert pcnext = X"00000048";
+    assert pc = X"00000044"; assert pcnext = X"00000048";
     assert mem_rd = X"AC020054";
     -- CalcS : 38 8c020050 : lw   $2, 80($0)     # $2 = [80] = 7
     assert alures = X"00000050";
