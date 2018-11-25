@@ -59,7 +59,7 @@ state_pkg:
 	ghdl -a state_pkg.vhdl
 memrw: mem shift_register2
 	make all F=memrw
-decode: flopr_clr
+decode: flopr_en_clr
 	make all F=decode
 regrw: reg sgnext slt2
 	make all F=regrw
