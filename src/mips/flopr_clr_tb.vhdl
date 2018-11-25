@@ -40,7 +40,7 @@ begin
   begin
     wait for clk_period;
     rst <= '1'; wait for 1 ns; rst <= '0'; assert y = X"00000000";
-    a <= X"00000001"; wait for clk_period/2; assert y = X"00000000";
+    a <= X"00000001"; wait for clk_period/2; assert y = X"00000001";
 
     a <= X"00000005"; clr <= '1'; wait for clk_period; assert y <= X"00000000";
     -- skip

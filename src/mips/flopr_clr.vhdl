@@ -19,6 +19,8 @@ begin
     elsif rising_edge(clk) then
       if clr = '1' then
         y <= (others => '0');
+      else
+        y <= a;
       end if;
     end if;
   end process;
