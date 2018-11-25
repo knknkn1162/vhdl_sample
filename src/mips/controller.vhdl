@@ -22,6 +22,7 @@ entity controller is
     -- for memwrite
     mem_we: out std_logic;
     -- for writeback
+    instr_en : out std_logic;
     instr_clr : out std_logic;
     reg_wa : out std_logic_vector(4 downto 0);
     reg_wd : out std_logic_vector(31 downto 0);
@@ -266,7 +267,8 @@ begin
   process(stateA, stateB, stateC, ena, enb, is_branch)
   begin
     -- for writeback
-    instr_clr <= get_instr_clr(stateA, stateB, stateC, is_branch);
+    instr_clr <= get_instr_clr(stateA, stateB, stateC, is_branch) and ena and enb;
+    instr_en <= ena and enb;
   end process;
 
   process(stateA, stateB, stateC)
