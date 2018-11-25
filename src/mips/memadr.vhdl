@@ -14,7 +14,7 @@ entity memadr is
     pc_aluout_s : in std_logic;
     pc4_br4_ja_s : in std_logic_vector(1 downto 0);
     pc_en : in std_logic;
-    instr_en : in std_logic;
+    instr_clr : in std_logic;
     rw_en : in std_logic;
     -- scan
     pc : out std_logic_vector(31 downto 0);
@@ -70,7 +70,7 @@ architecture behavior of memadr is
   signal en : std_logic_vector(1 downto 0);
 begin
 
-  en <= instr_en & pc_en;
+  en <= (not instr_clr) & pc_en;
   shift_register2_pc : shift_register2 generic map (N=>32)
   port map (
     clk => clk, rst => rst, en => en,
