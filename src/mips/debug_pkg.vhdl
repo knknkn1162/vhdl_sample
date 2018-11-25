@@ -12,6 +12,7 @@ package debug_pkg is
   constant CONST_DECODES : state_vector_type := "00001000";
   constant CONST_CALCS : state_vector_type := "00010000";
   constant CONST_MEMRWS : state_vector_type := "00100000";
+  constant CONST_MEMWBS : state_vector_type := "01000000";
   constant CONST_UNKNOWNS : state_vector_type := "11111111";
 end package;
 
