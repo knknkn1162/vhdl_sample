@@ -246,13 +246,45 @@ begin
     -- -- (FetchS, CalcS, DecodeS)
     assert dec_sa = CONST_FETCHS; assert dec_sb = CONST_CALCS; assert dec_sc = CONST_DECODES;
     -- FetchS : 3c 08000011 : j    end            # should be taken
+    assert pc = X"0000003c"; assert pcnext = X"00000040";
+    assert mem_rd = X"08000011";
     -- CalcS : : 34 ac670044 : sw   $7, 68($3)     # [80] = 7
     assert alures = X"00000050"; -- addr
     -- DecodeS: 38 8c020050 : lw   $2, 80($0)     # $2 = [80] = 7
     assert rds = X"00000000"; assert immext = X"00000050";
     wait for clk_period;
 
-    -- TODO : The program has not been finished yet.
+    -- (DecodeS, FetchS, CalcS)
+    assert dec_sa = CONST_DECODES; assert dec_sb = CONST_FETCHS; assert dec_sc = CONST_CALCS;
+    -- Decode : 3c 08000011 : j    end            # should be taken
+    assert ja = X"00000044";
+    -- FetchS : 40 20020001 : addi $2, $0, 1 # shouldn't happen
+    assert pc = X"00000040"; assert pcnext = X"00000044";
+    assert mem_rd = X"08000011";
+    -- CalcS : 38 8c020050 : lw   $2, 80($0)     # $2 = [80] = 7
+    assert alures = X"00000050";
+    wait for clk_period;
+
+    -- (WaitS[CalcS], WaitS[FlashS], FetchS)
+    assert dec_sa = CONST_WAITS; assert dec_sb = CONST_WAITS; assert dec_sc = CONST_FETCHS;
+    -- WaitS
+    -- WaitS[FlashS]
+    -- FetchS : 44 ac020054 : end:    sw   $2, 84($0)     # write adr 84 = 7
+    assert pc = X"00000044"; assert pc = X"00000048";
+    assert mem_rd = X"AC020054";
+    wait for clk_period;
+
+    -- (-, WaitS[FlashS], DecodeS)
+    -- -
+    -- WaitS[FlashS]
+    -- DecodeS : 44 ac020054 : end:    sw   $2, 84($0)     # write adr 84 = 7
+    assert rds = X"00000000"; assert immext = X"00000054";
+    wait for clk_period;
+
+    -- (-, -, CalcS)
+    assert alures = X"00000054";
+    wait for clk_period*2;
+
 
     assert false report "end of test" severity note;
     stop <= TRUE;
