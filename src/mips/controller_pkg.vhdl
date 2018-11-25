@@ -34,7 +34,7 @@ package controller_pkg is
   constant FUNCT_SUBU : functtype := "100011"; -- 0x23
 
   function get_nextstate(state: statetype; decs_op: std_logic_vector(5 downto 0); calcs_op: std_logic_vector(5 downto 0); load : std_logic; ena : std_logic; enb : std_logic; is_branch : std_logic) return statetype;
-  function get_pc_en(state: statetype) return std_logic;
+  function get_pc_en(state : statetype) return std_logic;
   function get_instr_clr(stateA: statetype; stateB: statetype; stateC: statetype; is_branch : std_logic) return std_logic;
   function get_pc4_br4_ja_s(state : statetype; opcode : std_logic_vector(5 downto 0); is_branch : std_logic) return std_logic_vector;
   function get_mem_we(state : statetype) return std_logic;
@@ -42,7 +42,7 @@ package controller_pkg is
   function get_pc_aluout_s(state: statetype) return std_logic;
   function get_rdt_immext_s(state : statetype) return std_logic;
   function get_ena(state: statetype; calcs_opcode : std_logic_vector(5 downto 0); rs : std_logic_vector(4 downto 0); rt: std_logic_vector(4 downto 0); calcs_rt : std_logic_vector(4 downto 0)) return std_logic;
-  function get_enb(state1: statetype; state2: statetype) return std_logic;
+  function get_enb(state1: statetype; state2 : statetype; calcs_opcode : std_logic_vector(5 downto 0)) return std_logic;
   function get_branch_flag(is_equal : std_logic; opcode : std_logic_vector(5 downto 0)) return std_logic;
 end package;
 
@@ -60,13 +60,13 @@ package body controller_pkg is
     return is_branch;
   end function;
 
-  function get_enb(state1: statetype; state2 : statetype) return std_logic is
+  function get_enb(state1: statetype; state2 : statetype; calcs_opcode : std_logic_vector(5 downto 0)) return std_logic is
     variable enb : std_logic;
   begin
     enb := '1';
     if state1 = MemReadS or state1 = MemWriteBackS then
       -- AdrCalcS is not the end of the state, so the condition `state = AdrCalcS` must not be added
-      if state2 = RtypeCalcS or state2 = AddiCalcS then
+      if state2 = RtypeCalcS or state2 = AddiCalcS or (state2 = AdrCalcS or calcs_opcode = OP_LW) then
         enb := '0';
       end if;
     end if;
@@ -94,11 +94,21 @@ package body controller_pkg is
       when Wait3S =>
         nextState := Wait2S;
       when Wait2S =>
-        nextstate := WaitS;
+        if ena = '0' or enb = '0' then
+          nextState := state;
+        else
+          nextstate := WaitS;
+        end if;
       when InitS =>
           nextstate := LoadS;
-      when WaitS | LoadS =>
+      when LoadS =>
         nextState := FetchS;
+      when WaitS =>
+        if enb = '0' then
+          nextState := state;
+        else
+          nextState := FetchS;
+        end if;
       when FetchS =>
         if is_branch = '1' then
           nextstate := Wait2S;
@@ -129,14 +139,18 @@ package body controller_pkg is
           nextState := DecodeS;
         end if;
       when AdrCalcS =>
-        case calcs_op is
-          when OP_LW =>
-            nextState := MemReadS;
-          when OP_SW =>
-            nextState := MemWriteBackS;
-          when others =>
-            nextState := UnknownS;
-        end case;
+        if enb = '1' then
+          case calcs_op is
+            when OP_LW =>
+              nextState := MemReadS;
+            when OP_SW =>
+              nextState := MemWriteBackS;
+            when others =>
+              nextState := UnknownS;
+          end case;
+        else
+          nextState := state;
+        end if;
       -- when final state
       when AddiCalcS | RtypeCalcS =>
         if enb = '1' then

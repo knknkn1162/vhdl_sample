@@ -242,12 +242,12 @@ begin
   end process;
 
   -- Judge whether the 2-states collide
-  process(stateA, stateB, stateC, enb)
+  process(stateA, stateB, stateC, enb, calcs_opcode)
     variable enbAB, enbBC, enbCA : std_logic;
   begin
-    enbAB := get_enb(stateA, stateB);
-    enbBC := get_enb(stateB, stateC);
-    enbCA := get_enb(stateC, stateA);
+    enbAB := get_enb(stateA, stateB, calcs_opcode);
+    enbBC := get_enb(stateB, stateC, calcs_opcode);
+    enbCA := get_enb(stateC, stateA, calcs_opcode);
     enb <= enbAB and enbBC and enbCA;
   end process;
 
