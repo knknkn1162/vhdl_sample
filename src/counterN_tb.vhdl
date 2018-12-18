@@ -40,24 +40,24 @@ begin
   stim_proc : process
   begin
     wait for PERIOD;
-    -- s_rst <= '1'; wait for 1 ns; s_rst <= '0'; wait for 1 ns;
-    -- assert s_cnt = "000";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "001";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "010";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "011";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "100";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "101";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "110";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "111";
-    -- wait until rising_edge(clk); wait for 1 ns;
-    -- assert s_cnt = "000";
+    s_rst <= '1'; wait for 1 ns; s_rst <= '0'; wait for 1 ns;
+    assert s_cnt = "000";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "001";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "010";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "011";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "100";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "101";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "110";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "111";
+    wait until rising_edge(clk); wait for 1 ns;
+    assert s_cnt = "000";
     -- skip
     stop <= TRUE;
     -- success message
