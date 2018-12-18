@@ -10,8 +10,8 @@ r:
 a:
 	make clean
 	ghdl -a ${F}.${VHDL}
-all:
-	make a
-	ghdl -a ${F}_tb.$(VHDL)
+test:
+	make clean
+	ghdl -a ${F}.$(VHDL) ${F}_tb.$(VHDL)
 	ghdl -e ${F}_tb
 	ghdl -r ${F}_tb --vcd=out.vcd

@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
-entity counterN is
+entity countern is
   generic(N: natural);
   port (
     clk : in std_logic;
@@ -11,9 +11,9 @@ entity counterN is
   );
 end entity;
 
-architecture behavior of counterN is
+architecture behavior of countern is
 begin
-  process
+  process(clk, i_rst)
     variable v_q : natural range 0 to 2**N-1;
   begin
     if i_rst = '1' then
