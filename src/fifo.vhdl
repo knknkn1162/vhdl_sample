@@ -12,7 +12,7 @@ entity fifo is
     o_rdata : out std_logic_vector(31 downto 0);
     o_full : out std_logic;
     o_empty : out std_logic;
-    o_err : out std_logic
+    o_stop : out std_logic
   );
 end entity;
 
@@ -70,7 +70,7 @@ begin
   begin
     if rising_edge(clk) then
       if (s_full and i_wen) = '1' or (s_empty and i_ren) = '1' then
-        o_err <= '1';
+        o_stop <= '1';
       end if;
     end if;
   end process;
